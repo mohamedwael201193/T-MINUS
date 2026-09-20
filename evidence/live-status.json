@@ -1,6 +1,6 @@
 {
   "label": "LIVE_STATUS",
-  "at": "2026-09-20T23:47:45.355Z",
+  "at": "2026-09-20T23:52:22.938Z",
   "program": {
     "id": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
     "mainnet": {
@@ -36,14 +36,14 @@
       "body": {
         "ok": true,
         "service": "tminus-api",
-        "uptime_ms": 275363
+        "uptime_ms": 24512
       }
     },
     "/ready": {
       "status": 200,
       "body": {
         "ok": true,
-        "slot": 448884186,
+        "slot": 448885227,
         "db": true
       }
     },
@@ -53,16 +53,17 @@
         "health": {
           "payload": {
             "halted": false,
-            "lastPoll": "2026-09-20T23:47:38.490Z",
+            "lastPoll": "2026-09-20T23:52:16.647Z",
             "haltReason": null,
-            "lastFeedAt": "2026-09-20T23:43:08.121Z",
+            "lastFeeBps": 100,
+            "lastFeedAt": "2026-09-20T23:51:56.102Z",
             "composition": "atomic_swap_then_fill",
             "lastFillSig": null,
-            "lastFeedHash": "da85e1941234f2a9649fcc189c40167af9b34a2e44133c1dbe652ca2b46be442",
+            "lastFeedHash": "57493181efa29eed497faad7d65e2f09e8dd9fe9b9f04cf5826301cd75ce78de",
             "lastRpcError": null,
             "lastJupiterError": null
           },
-          "updated_at": "2026-09-20T23:47:38.852Z"
+          "updated_at": "2026-09-20T23:52:17.106Z"
         }
       }
     },

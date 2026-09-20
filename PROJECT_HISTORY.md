@@ -162,3 +162,17 @@ Append-only execution ledger. No secrets.
 - **next step:** wait for faucet/mainnet SOL
 
 ---
+
+## 2026-09-20T23:53Z — PHASE 3 — localnet 7/7 after dst mint writable + adversarial cases
+
+- **action:** Mark Fill `dst_mint` mutable; add identical-mint and non-owner cancel tests; attempt devnet deploy
+- **command:** `scripts/wsl-deploy-devnet.sh`; `scripts/wsl-anchor-test.sh`
+- **result:** localnet PASS 7/7; devnet deploy FAIL (0 SOL, faucet rate-limited)
+- **evidence:** mocha 7 passing (8s); concurrent lease PASS; Render live on `e039646` with `lastFeeBps=100`
+- **test:** place/cancel/fill/expire/failsafe/zero/identical-mints/non-owner-cancel
+- **decision:** Keep program off-chain until wallets are funded
+- **files changed:** `programs/tminus/src/lib.rs`, `tests/tminus.ts`, `scripts/wsl-deploy-devnet.sh`
+- **known risks:** still no on-chain program account
+- **next step:** SOL for `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj`
+
+---

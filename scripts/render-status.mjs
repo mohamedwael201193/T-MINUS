@@ -22,7 +22,6 @@ function loadEnv(path) {
 
 loadEnv(resolve(process.cwd(), ".env"));
 const key = process.env.RENDER_API_KEY;
-const OWNER = "tea-da7j3urm6pss73ftp830";
 
 async function rnd(method, path, body) {
   const res = await fetch(`https://api.render.com/v1${path}`, {
@@ -44,7 +43,20 @@ async function rnd(method, path, body) {
   return { status: res.status, body: parsed };
 }
 
-const list = await rnd("GET", `/services?ownerId=${OWNER}&limit=50`);
+const owners = await rnd("GET", "/owners?limit=20");
+const ownerList = Array.isArray(owners.body) ? owners.body : [];
+const ownerId = (ownerList[0]?.owner ?? ownerList[0])?.id;
+if (!ownerId) {
+  console.error("no_owner", owners.status);
+  process.exit(1);
+}
+console.log("owner", { id: ownerId, name: (ownerList[0]?.owner ?? ownerList[0])?.name });
+
+const list = await rnd("GET", `/services?ownerId=${ownerId}&limit=50`);
+if (!Array.isArray(list.body)) {
+  console.error("list_fail", list.status);
+  process.exit(1);
+}
 for (const row of list.body) {
   const s = row.service ?? row;
   if (!String(s.name).startsWith("tminus")) continue;

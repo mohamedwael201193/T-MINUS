@@ -565,6 +565,7 @@ pub struct Fill<'info> {
     pub order: Account<'info, Order>,
     #[account(mut)]
     pub src_mint: InterfaceAccount<'info, Mint>,
+    #[account(mut)]
     pub dst_mint: InterfaceAccount<'info, Mint>,
     #[account(mut)]
     pub escrow_ata: InterfaceAccount<'info, TokenAccount>,

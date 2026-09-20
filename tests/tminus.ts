@@ -376,7 +376,7 @@ describe("tminus", () => {
       .rpc();
   });
 
-  it("rejects zero amount and identical mints", async () => {
+  it("rejects zero amount", async () => {
     const nonce = 6n;
     const pda = orderPda(nonce);
     const escrow = ata(srcMint.publicKey, pda);
@@ -397,5 +397,80 @@ describe("tminus", () => {
         .signers([owner])
         .rpc();
     });
+  });
+
+  it("rejects identical source and destination mints", async () => {
+    const nonce = 7n;
+    const n = u64buf(nonce);
+    const pda = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("order"),
+        owner.publicKey.toBuffer(),
+        srcMint.publicKey.toBuffer(),
+        srcMint.publicKey.toBuffer(),
+        n,
+      ],
+      program.programId
+    )[0];
+    const escrow = ata(srcMint.publicKey, pda);
+    const now = Math.floor(Date.now() / 1000);
+    await assert.rejects(async () => {
+      await program.methods
+        .place(
+          new anchor.BN(nonce.toString()),
+          new anchor.BN(1_000_000),
+          new anchor.BN(1_000_000_000),
+          new anchor.BN(1_000_000_000),
+          new anchor.BN(now + 10),
+          new anchor.BN(now + 20),
+          new anchor.BN(1),
+          new anchor.BN(5_000_000_000)
+        )
+        .accounts({
+          ...placeAccounts(pda, escrow),
+          dstMint: srcMint.publicKey,
+        })
+        .signers([owner])
+        .rpc();
+    });
+  });
+
+  it("rejects cancel from a non-owner", async () => {
+    const nonce = 8n;
+    const pda = orderPda(nonce);
+    const escrow = ata(srcMint.publicKey, pda);
+    const now = Math.floor(Date.now() / 1000);
+    await program.methods
+      .place(
+        new anchor.BN(nonce.toString()),
+        new anchor.BN(1_000_000),
+        new anchor.BN(1_000_000_000),
+        new anchor.BN(700_000_000),
+        new anchor.BN(now + 3600),
+        new anchor.BN(now + 7200),
+        new anchor.BN(1),
+        new anchor.BN(5_000_000_000)
+      )
+      .accounts(placeAccounts(pda, escrow))
+      .signers([owner])
+      .rpc();
+    await assert.rejects(async () => {
+      await program.methods.cancel().accounts({
+        owner: filler.publicKey,
+        order: pda,
+        srcMint: srcMint.publicKey,
+        ownerSrcAta: ata(srcMint.publicKey, filler.publicKey),
+        escrowAta: escrow,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+      }).signers([filler]).rpc();
+    });
+    await program.methods.cancel().accounts({
+      owner: owner.publicKey,
+      order: pda,
+      srcMint: srcMint.publicKey,
+      ownerSrcAta: ata(srcMint.publicKey, owner.publicKey),
+      escrowAta: escrow,
+      tokenProgram: TOKEN_2022_PROGRAM_ID,
+    }).signers([owner]).rpc();
   });
 });

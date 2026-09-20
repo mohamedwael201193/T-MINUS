@@ -8,5 +8,5 @@ export ANCHOR_PROVIDER_URL=http://127.0.0.1:8899
 solana-test-validator --version
 pkill -f solana-test-validator || true
 sleep 2
-anchor test --skip-build --validator legacy
+anchor test --validator legacy
 echo ANCHOR_TEST_DONE

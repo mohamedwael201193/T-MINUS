@@ -14,7 +14,9 @@ Do not put secret values in this file, in git, or in chat.
 | `SOLANA_RPC_URL` | JSON-RPC | Yes | Public default until a paid RPC is provided | `.env` | Render |
 | `SOLANA_WS_URL` | Optional logs subscribe | Optional | Same provider | `.env` | Render |
 | `PROGRAM_ID` | Deployed program | After Phase 2 deploy | `solana program show` | `.env` | Render |
-| `ANCHOR_WALLET` / `KEEPER_KEYPAIR_PATH` | Filesystem path to a keypair JSON | For deploy/keeper signing | Operator-generated locally | path only, never the JSON in git | Render secret file or `KEEPER_KEYPAIR_JSON` if added later |
+| `KEEPER_KEYPAIR_PATH` | Filesystem path to keeper keypair JSON | Local keeper | Operator-generated | path only | Prefer `KEEPER_KEYPAIR_JSON` on Render |
+| `KEEPER_KEYPAIR_JSON` | Raw keypair byte array as JSON | Render keeper | Operator-generated | never | Render secret |
+| `ANCHOR_WALLET` | Deployer keypair path | Deploy only | Operator-generated | path only | never |
 | `JUPITER_API_BASE` | Swap V2 | Yes | `https://api.jup.ag` | `.env` | Render |
 | `JUPITER_LITE_API_BASE` | Quote / Trigger V1 probes | Yes | `https://lite-api.jup.ag` | `.env` | Render |
 | `JUPITER_API_KEY` | Raises rate limit | Optional | Jupiter portal | `.env` | Render |

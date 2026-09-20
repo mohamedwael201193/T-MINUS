@@ -50,13 +50,13 @@ importers:
       postgres:
         specifier: ^3.4.7
         version: 3.4.9
+      tsx:
+        specifier: ^4.20.5
+        version: 4.23.15
     devDependencies:
       '@types/node':
         specifier: ^24.5.2
         version: 24.13.6
-      tsx:
-        specifier: ^4.20.5
-        version: 4.23.15
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
@@ -81,13 +81,13 @@ importers:
       postgres:
         specifier: ^3.4.7
         version: 3.4.9
+      tsx:
+        specifier: ^4.20.5
+        version: 4.23.15
     devDependencies:
       '@types/node':
         specifier: ^24.5.2
         version: 24.13.6
-      tsx:
-        specifier: ^4.20.5
-        version: 4.23.15
       typescript:
         specifier: ^5.9.2
         version: 5.9.3

@@ -17,11 +17,11 @@
     "@solana/web3.js": "^1.98.2",
     "@tminus/sdk": "workspace:*",
     "dotenv": "^16.6.1",
-    "postgres": "^3.4.7"
+    "postgres": "^3.4.7",
+    "tsx": "^4.20.5"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",
-    "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
 }

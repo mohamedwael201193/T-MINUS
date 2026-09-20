@@ -29,4 +29,6 @@ jobs:
       - run: pnpm --filter @tminus/api test
       - run: pnpm --filter @tminus/keeper test
       - run: pnpm --filter @tminus/sdk typecheck
+      - run: pnpm --filter @tminus/api typecheck
+      - run: pnpm --filter @tminus/keeper typecheck
       - run: node scripts/secret-scan.mjs

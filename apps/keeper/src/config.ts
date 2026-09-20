@@ -18,6 +18,22 @@ export function loadKeypair(path: string): Keypair {
   return Keypair.fromSecretKey(Uint8Array.from(raw));
 }
 
+function loadKeeperKeypair(): Keypair {
+  const json = process.env.KEEPER_KEYPAIR_JSON?.trim();
+  if (json) {
+    const raw = JSON.parse(json) as number[];
+    if (!Array.isArray(raw) || raw.length < 32) {
+      throw new Error("invalid KEEPER_KEYPAIR_JSON");
+    }
+    return Keypair.fromSecretKey(Uint8Array.from(raw));
+  }
+  const path = process.env.KEEPER_KEYPAIR_PATH;
+  if (path && path !== "/dev/null") {
+    return loadKeypair(path);
+  }
+  throw new Error("missing KEEPER_KEYPAIR_JSON or KEEPER_KEYPAIR_PATH");
+}
+
 export const env = {
   root,
   databaseUrl: required("DATABASE_URL"),
@@ -36,8 +52,8 @@ export const env = {
   pollMs: Number(process.env.KEEPER_POLL_MS ?? 5000),
   spendCapRaw: BigInt(required("KEEPER_SPEND_CAP_RAW")),
   sendEnabled: process.env.KEEPER_SEND_ENABLED === "true",
-  keypairPath: required("KEEPER_KEYPAIR_PATH"),
+  keypairPath: process.env.KEEPER_KEYPAIR_PATH ?? "",
   workerId: process.env.KEEPER_WORKER_ID ?? "tminus-keeper-1",
 };
 
-export const keeperKeypair = loadKeypair(env.keypairPath);
+export const keeperKeypair = loadKeeperKeypair();

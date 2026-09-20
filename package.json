@@ -2,10 +2,13 @@
   "name": "tminus",
   "private": true,
   "packageManager": "pnpm@10.34.5",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "anchor build",
     "test:program": "anchor test",
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p apps/api/tsconfig.json --noEmit && tsc -p apps/keeper/tsconfig.json --noEmit && tsc -p packages/sdk/tsconfig.json --noEmit",
+    "typecheck": "tsc -p apps/api/tsconfig.json --noEmit && tsc -p apps/keeper/tsconfig.json --noEmit && tsc -p packages/sdk/tsconfig.json --noEmit",
     "lint": "node scripts/secret-scan.mjs",
     "test": "pnpm --filter @tminus/sdk test && pnpm --filter @tminus/api test && pnpm --filter @tminus/keeper test",
     "secret-scan": "node scripts/secret-scan.mjs",

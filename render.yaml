@@ -3,22 +3,27 @@ services:
     name: tminus-api
     runtime: node
     plan: starter
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @tminus/api typecheck
+    region: oregon
+    buildCommand: npm install -g pnpm@10.34.5 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @tminus/api typecheck
     startCommand: pnpm --filter @tminus/api start
+    preDeployCommand: pnpm --filter @tminus/api migrate
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
-        value: "24"
+        value: "22"
       - key: PORT
         value: "3000"
+      - key: KEEPER_SEND_ENABLED
+        value: "false"
   - type: worker
     name: tminus-keeper
     runtime: node
     plan: starter
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @tminus/keeper typecheck
+    region: oregon
+    buildCommand: npm install -g pnpm@10.34.5 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @tminus/keeper typecheck
     startCommand: pnpm --filter @tminus/keeper start
     envVars:
       - key: NODE_VERSION
-        value: "24"
+        value: "22"
       - key: KEEPER_SEND_ENABLED
         value: "false"

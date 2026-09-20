@@ -2,12 +2,18 @@ import { createHash } from "node:crypto";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { env } from "./config.ts";
 import { sql } from "./db.ts";
+import {
+  parseEventType,
+  parseLockup,
+  parsePageDeadlineIso,
+  pickMetricsToken,
+} from "./feed-parse.ts";
 
 export type FeedRecord = {
   token: string;
   destination: string;
   ratio: string | null;
-  deadline: string;
+  deadline: string | null;
   event_type: string;
   lockup: string | null;
   issuer_powers: Record<string, unknown>;
@@ -40,33 +46,41 @@ export async function refreshFeed(): Promise<FeedRecord> {
   if (!metricsRes.ok) {
     throw new Error(`metrics HTTP ${metricsRes.status}`);
   }
-  const metrics = JSON.parse(metricsText) as Record<string, unknown>;
+  const metrics = JSON.parse(metricsText) as { metrics?: unknown[] };
   const parsed = mint.data;
   if (!("parsed" in parsed)) throw new Error("mint not jsonParsed");
   const extensions = (parsed.parsed as { info?: { extensions?: unknown[] } }).info
     ?.extensions;
+  const tokenMetrics = pickMetricsToken(metrics, env.spacexMint);
+  const deadline = parsePageDeadlineIso(pageText);
+  const eventType = parseEventType(pageText);
+  const lockup = parseLockup(pageText);
   const sourceMaterial = JSON.stringify({
     metrics,
     mintOwner: mint.owner.toBase58(),
     extensions,
+    pageDeadline: deadline,
   });
   const sourceHash = sha256(sourceMaterial);
   const pageHash = sha256(pageText);
-  const verification =
-    metricsRes.ok && pageRes.ok ? "verified" : "unverified";
+  const verification: FeedRecord["verification_state"] =
+    metricsRes.ok && pageRes.ok && deadline ? "verified" : "unverified";
   const payload: FeedRecord = {
     token: env.spacexMint,
     destination: env.spcxxMint,
-    ratio: null,
-    deadline: "2027-03-12T23:59:00.000Z",
-    event_type: "prestock_lifecycle",
-    lockup: null,
+    ratio: tokenMetrics?.tokenPrice != null ? String(tokenMetrics.tokenPrice) : null,
+    deadline,
+    event_type: eventType,
+    lockup,
     issuer_powers: {
       mint_owner: mint.owner.toBase58(),
       extensions,
       page_sha256: pageHash,
       metrics_http: metricsRes.status,
       page_http: pageRes.status,
+      page_url: "https://prestocks.com/spacex",
+      token_metrics: tokenMetrics,
+      deadline_extracted: Boolean(deadline),
     },
     source_url: env.prestocksMetricsUrl,
     source_hash: sourceHash,

@@ -1,0 +1,50 @@
+{
+  "label": "SIMULATION",
+  "network": "MAINNET",
+  "taker": "FbsV4KELsCki2ZujWfRPvu4kpWHDdr1bxAvGNhU13hPf",
+  "quote": {
+    "inAmount": "200000000",
+    "outAmount": "76706836",
+    "otherAmountThreshold": "76323302",
+    "swapUsdValue": "119.68338611908540"
+  },
+  "build": {
+    "inAmount": "200000000",
+    "outAmount": "76706836",
+    "slippageBps": 50,
+    "setupCount": 1,
+    "computeBudgetCount": 1,
+    "hasCleanup": false,
+    "otherCount": 0,
+    "alts": [
+      "8CoUnad218pEqxme5jnn9CNu4BmaRAkP7Af8uT9ZBg29"
+    ],
+    "routePlan": [
+      {
+        "percent": 100,
+        "bps": 10000,
+        "swapInfo": {
+          "ammKey": "9RExWJFGfAviKHCSCQ59CqA6e7eZgmnfKuABqHn1jKG4",
+          "label": "Meteora DLMM",
+          "inputMint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
+          "outputMint": "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8",
+          "inAmount": "200000000",
+          "outAmount": "76706836"
+        }
+      }
+    ]
+  },
+  "tx": {
+    "serializedBytes": 565,
+    "version0Limit": 1232,
+    "underLimit": true,
+    "altCount": 1,
+    "ixCount": 4
+  },
+  "simulation": {
+    "err": "AccountNotFound",
+    "unitsConsumed": 0,
+    "logs": []
+  },
+  "decision": "ATOMIC_COMPOSITION_SERIALIZES; simulation_err_present_likely_missing_inventory; keep atomic path if err is funds/token, else two-tx"
+}

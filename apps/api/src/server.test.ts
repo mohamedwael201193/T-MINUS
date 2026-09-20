@@ -1,0 +1,27 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import http from "node:http";
+import { createServer } from "./server.ts";
+
+test("health endpoint", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const addr = server.address();
+  assert.ok(addr && typeof addr === "object");
+  const res = await fetch(`http://127.0.0.1:${addr.port}/health`);
+  const body = (await res.json()) as { ok: boolean; service: string };
+  assert.equal(res.status, 200);
+  assert.equal(body.ok, true);
+  assert.equal(body.service, "tminus-api");
+  server.close();
+});
+
+test("rejects non-GET", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const addr = server.address();
+  assert.ok(addr && typeof addr === "object");
+  const res = await fetch(`http://127.0.0.1:${addr.port}/health`, { method: "POST" });
+  assert.equal(res.status, 405);
+  server.close();
+});

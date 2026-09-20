@@ -1,0 +1,9 @@
+{
+  "label": "BUILD",
+  "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+  "soSha256": "34ce9c9cc0ae4c8fe288409121e3fe8d40e1fb0447e6bdc5f808ab19365baaf5",
+  "anchor": "1.2.0",
+  "solanaCli": "4.1.2",
+  "rustUnitTests": { "passed": 3, "failed": 0 },
+  "anchorIntegration": { "passed": 5, "failed": 0, "label": "LOCALNET" }
+}

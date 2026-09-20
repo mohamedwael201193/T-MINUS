@@ -1,0 +1,11 @@
+{
+  "label": "LOCAL",
+  "health": 200,
+  "ready": 200,
+  "feed": 200,
+  "quote": 200,
+  "receipts": 200,
+  "keeper": 200,
+  "quoteOutAmount": "76706836",
+  "db": true
+}

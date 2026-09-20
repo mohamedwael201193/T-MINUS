@@ -1,0 +1,795 @@
+{
+  "address": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+  "metadata": {
+    "name": "tminus",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "T-MINUS conditional conversion orders for Token-2022 PreStocks"
+  },
+  "instructions": [
+    {
+      "name": "cancel",
+      "discriminator": [
+        232,
+        219,
+        223,
+        41,
+        219,
+        236,
+        220,
+        190
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "order"
+          ]
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "src_mint"
+              },
+              {
+                "kind": "account",
+                "path": "order.dst_mint",
+                "account": "Order"
+              },
+              {
+                "kind": "account",
+                "path": "order.nonce",
+                "account": "Order"
+              }
+            ]
+          }
+        },
+        {
+          "name": "src_mint",
+          "writable": true,
+          "relations": [
+            "order"
+          ]
+        },
+        {
+          "name": "owner_src_ata",
+          "writable": true
+        },
+        {
+          "name": "escrow_ata",
+          "writable": true,
+          "relations": [
+            "order"
+          ]
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "expire",
+      "discriminator": [
+        243,
+        83,
+        205,
+        58,
+        57,
+        201,
+        247,
+        146
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true
+        },
+        {
+          "name": "crank",
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "order.owner",
+                "account": "Order"
+              },
+              {
+                "kind": "account",
+                "path": "src_mint"
+              },
+              {
+                "kind": "account",
+                "path": "order.dst_mint",
+                "account": "Order"
+              },
+              {
+                "kind": "account",
+                "path": "order.nonce",
+                "account": "Order"
+              }
+            ]
+          }
+        },
+        {
+          "name": "src_mint",
+          "writable": true,
+          "relations": [
+            "order"
+          ]
+        },
+        {
+          "name": "owner_src_ata",
+          "writable": true
+        },
+        {
+          "name": "escrow_ata",
+          "writable": true,
+          "relations": [
+            "order"
+          ]
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "fill",
+      "discriminator": [
+        168,
+        96,
+        183,
+        163,
+        92,
+        10,
+        40,
+        160
+      ],
+      "accounts": [
+        {
+          "name": "filler",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "owner",
+          "writable": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "order.owner",
+                "account": "Order"
+              },
+              {
+                "kind": "account",
+                "path": "src_mint"
+              },
+              {
+                "kind": "account",
+                "path": "dst_mint"
+              },
+              {
+                "kind": "account",
+                "path": "order.nonce",
+                "account": "Order"
+              }
+            ]
+          }
+        },
+        {
+          "name": "src_mint",
+          "writable": true,
+          "relations": [
+            "order"
+          ]
+        },
+        {
+          "name": "dst_mint",
+          "relations": [
+            "order"
+          ]
+        },
+        {
+          "name": "escrow_ata",
+          "writable": true,
+          "relations": [
+            "order"
+          ]
+        },
+        {
+          "name": "owner_dst_ata",
+          "writable": true
+        },
+        {
+          "name": "filler_src_ata",
+          "writable": true
+        },
+        {
+          "name": "filler_dst_ata",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "dst_token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "fill_src_raw",
+          "type": "u64"
+        },
+        {
+          "name": "dst_raw",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "place",
+      "discriminator": [
+        143,
+        53,
+        56,
+        40,
+        41,
+        16,
+        5,
+        75
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "order",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  111,
+                  114,
+                  100,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              },
+              {
+                "kind": "account",
+                "path": "src_mint"
+              },
+              {
+                "kind": "account",
+                "path": "dst_mint"
+              },
+              {
+                "kind": "arg",
+                "path": "nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "src_mint"
+        },
+        {
+          "name": "dst_mint"
+        },
+        {
+          "name": "owner_src_ata",
+          "writable": true
+        },
+        {
+          "name": "escrow_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "order"
+              },
+              {
+                "kind": "account",
+                "path": "token_program"
+              },
+              {
+                "kind": "account",
+                "path": "src_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u64"
+        },
+        {
+          "name": "amount_raw",
+          "type": "u64"
+        },
+        {
+          "name": "min_ratio_e9",
+          "type": "u64"
+        },
+        {
+          "name": "failsafe_floor_e9",
+          "type": "u64"
+        },
+        {
+          "name": "failsafe_ts",
+          "type": "i64"
+        },
+        {
+          "name": "hard_expiry_ts",
+          "type": "i64"
+        },
+        {
+          "name": "min_fill_raw",
+          "type": "u64"
+        },
+        {
+          "name": "src_multiplier_e9",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Order",
+      "discriminator": [
+        134,
+        173,
+        223,
+        185,
+        77,
+        86,
+        28,
+        51
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "OrderCancelled",
+      "discriminator": [
+        108,
+        56,
+        128,
+        68,
+        168,
+        113,
+        168,
+        239
+      ]
+    },
+    {
+      "name": "OrderExpired",
+      "discriminator": [
+        241,
+        55,
+        48,
+        196,
+        160,
+        51,
+        40,
+        213
+      ]
+    },
+    {
+      "name": "OrderFilled",
+      "discriminator": [
+        120,
+        124,
+        109,
+        66,
+        249,
+        116,
+        174,
+        30
+      ]
+    },
+    {
+      "name": "OrderPlaced",
+      "discriminator": [
+        96,
+        130,
+        204,
+        234,
+        169,
+        219,
+        216,
+        227
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Paused",
+      "msg": "Paused mint"
+    },
+    {
+      "code": 6001,
+      "name": "HookAttached",
+      "msg": "Transfer hook is attached"
+    },
+    {
+      "code": 6002,
+      "name": "FeeUnaccounted",
+      "msg": "Post-fee amount mismatch"
+    },
+    {
+      "code": 6003,
+      "name": "UnderDelivery",
+      "msg": "Fill under-delivers destination tokens"
+    },
+    {
+      "code": 6004,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6005,
+      "name": "StatusClosed",
+      "msg": "Order is closed"
+    },
+    {
+      "code": 6006,
+      "name": "TooEarlyExpire",
+      "msg": "Too early to expire"
+    },
+    {
+      "code": 6007,
+      "name": "FillTooSmall",
+      "msg": "Fill below minimum"
+    },
+    {
+      "code": 6008,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6009,
+      "name": "ZeroAmount",
+      "msg": "Zero amount"
+    },
+    {
+      "code": 6010,
+      "name": "InvalidRatio",
+      "msg": "Invalid ratio"
+    },
+    {
+      "code": 6011,
+      "name": "InvalidTimestamps",
+      "msg": "Invalid timestamps"
+    },
+    {
+      "code": 6012,
+      "name": "MintsMustDiffer",
+      "msg": "Source and destination mints must differ"
+    },
+    {
+      "code": 6013,
+      "name": "WrongTokenProgram",
+      "msg": "Wrong token program"
+    },
+    {
+      "code": 6014,
+      "name": "InvalidMint",
+      "msg": "Invalid mint account"
+    },
+    {
+      "code": 6015,
+      "name": "InsufficientEscrow",
+      "msg": "Insufficient escrow"
+    },
+    {
+      "code": 6016,
+      "name": "HardExpired",
+      "msg": "Past hard expiry; use expire"
+    },
+    {
+      "code": 6017,
+      "name": "StaleMultiplier",
+      "msg": "Place-time multiplier disagrees with live mint; v1 pins at place"
+    }
+  ],
+  "types": [
+    {
+      "name": "Order",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "src_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "dst_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "escrow_ata",
+            "type": "pubkey"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          },
+          {
+            "name": "src_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "dst_decimals",
+            "type": "u8"
+          },
+          {
+            "name": "src_multiplier_e9",
+            "type": "u64"
+          },
+          {
+            "name": "escrowed_raw",
+            "type": "u64"
+          },
+          {
+            "name": "filled_raw",
+            "type": "u64"
+          },
+          {
+            "name": "min_ratio_e9",
+            "type": "u64"
+          },
+          {
+            "name": "failsafe_floor_e9",
+            "type": "u64"
+          },
+          {
+            "name": "failsafe_ts",
+            "type": "i64"
+          },
+          {
+            "name": "hard_expiry_ts",
+            "type": "i64"
+          },
+          {
+            "name": "min_fill_raw",
+            "type": "u64"
+          },
+          {
+            "name": "status",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderExpired",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderFilled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order",
+            "type": "pubkey"
+          },
+          {
+            "name": "filler",
+            "type": "pubkey"
+          },
+          {
+            "name": "src_delta",
+            "type": "u64"
+          },
+          {
+            "name": "dst_delta",
+            "type": "u64"
+          },
+          {
+            "name": "ratio_e9",
+            "type": "u64"
+          },
+          {
+            "name": "failsafe_used",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OrderPlaced",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "order",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "src_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "dst_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "escrowed_raw",
+            "type": "u64"
+          },
+          {
+            "name": "min_ratio_e9",
+            "type": "u64"
+          },
+          {
+            "name": "failsafe_floor_e9",
+            "type": "u64"
+          },
+          {
+            "name": "failsafe_ts",
+            "type": "i64"
+          },
+          {
+            "name": "hard_expiry_ts",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+.env
+.env.*
+!.env.example
+.tminus/
+keys/
+
+# keys and wallets
+id.json
+keypair.json
+deploy-keypair.json
+*-keypair.json
+target/
+.surfpool/
+test-ledger/
+.anchor/
+node_modules/
+dist/
+coverage/
+*.pem
+*.key
+id.json
+keypair.json
+deploy-keypair.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log

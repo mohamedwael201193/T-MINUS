@@ -177,7 +177,7 @@ const api = await createOrReuse(
   "web_service",
   {
     runtime: "node",
-    plan: "free",
+    plan: "starter",
     region: "oregon",
     healthCheckPath: "/health",
     preDeployCommand: "pnpm --filter @tminus/api migrate",

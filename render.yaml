@@ -2,9 +2,9 @@ services:
   - type: web
     name: tminus-api
     runtime: node
-    plan: starter
+    plan: free
     region: oregon
-    buildCommand: npm install -g pnpm@10.34.5 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @tminus/api typecheck
+    buildCommand: npm install -g pnpm@10.34.5 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @tminus/api typecheck && pnpm --filter @tminus/keeper typecheck
     startCommand: pnpm --filter @tminus/api start
     preDeployCommand: pnpm --filter @tminus/api migrate
     healthCheckPath: /health
@@ -12,18 +12,8 @@ services:
       - key: NODE_VERSION
         value: "22"
       - key: PORT
-        value: "3000"
+        value: "10000"
       - key: KEEPER_SEND_ENABLED
         value: "false"
-  - type: worker
-    name: tminus-keeper
-    runtime: node
-    plan: starter
-    region: oregon
-    buildCommand: npm install -g pnpm@10.34.5 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @tminus/keeper typecheck
-    startCommand: pnpm --filter @tminus/keeper start
-    envVars:
-      - key: NODE_VERSION
-        value: "22"
-      - key: KEEPER_SEND_ENABLED
-        value: "false"
+      - key: KEEPER_EMBEDDED
+        value: "true"

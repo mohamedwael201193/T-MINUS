@@ -14,3 +14,8 @@ const server = createServer();
 server.listen(env.port, () => {
   console.log(JSON.stringify({ msg: "api_listen", port: env.port }));
 });
+
+if (process.env.KEEPER_EMBEDDED === "true") {
+  const { startKeeper } = await import("@tminus/keeper/run");
+  startKeeper();
+}

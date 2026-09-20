@@ -148,3 +148,17 @@ Append-only execution ledger. No secrets.
 - **next step:** keep building; do not claim a clean audit
 
 ---
+
+## 2026-09-20T23:49Z — PHASE 3/5 — keeper pair filter + rust ratio tests
+
+- **action:** Skip non-SPACEX/SPCXx orders; halt on transfer-fee bps change; add spend-cap helper tests; rust overflow tests
+- **command:** `pnpm test`; `pnpm typecheck`; `scripts/wsl-cargo-test.sh`; `node scripts/live-status.mjs`
+- **result:** PASS
+- **evidence:** cargo `5 passed; 0 failed`; node tests sdk 4 / api 5 / keeper 7; `evidence/live-status.json` — program account **absent** on mainnet and devnet; wallets 0 SOL; Render `/health` 200 `/ready` db true
+- **test:** ceil_ratio overflow, halt pause/hook/fee-change, spend cap, bounty-pair filter, invalid PDA
+- **decision:** Do not deploy until SOL exists. Keep `KEEPER_SEND_ENABLED=false`.
+- **files changed:** `apps/keeper/src/policy.ts`, `apps/keeper/src/loop.ts`, `programs/tminus/src/lib.rs`
+- **known risks:** program ID is declared but not an on-chain executable yet
+- **next step:** wait for faucet/mainnet SOL
+
+---

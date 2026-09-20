@@ -11,8 +11,8 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 | Anchor program `place` / `cancel` / `fill` / `expire` | Built and tested on **LOCALNET** | `evidence/program-build.json`, `anchor test --validator legacy` 5/5 |
 | Token-2022 post-fee escrow + harvest-before-close | **LOCALNET** PASS | 100 bps fee mint fixture (not SPACEX) |
 | Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — 565 bytes, ALT present, `err=AccountNotFound` because keeper has 0 SOL |
-| API `/health` `/ready` `/v1/feed` `/v1/quote` | **LOCAL** against mainnet RPC + Supabase | `evidence/api-smoke.json` |
-| Keeper worker | Implemented, **send disabled** by default | `KEEPER_SEND_ENABLED=false` |
+| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — `evidence/render-free-health.json` |
+| Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
 | Devnet deploy | Not yet | Needs faucet SOL |
 | Mainnet program deploy / fills | Not yet | Deploy and keeper wallets have **0 SOL**; spend cap 200_000_000 raw once funded |
 | Frontend | Not built | Awaiting `FRONTEND/` |
@@ -22,6 +22,13 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 - Program ID: `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL`
 - IDL: `idl/tminus.json`
 - Network for the ID: declared for localnet/devnet/mainnet; only localnet execution is proven so far
+
+## Live service (FREE Render)
+
+- API: `https://tminus-api-k2d2.onrender.com`
+- Dashboard: `https://dashboard.render.com/web/srv-dao6t2rtqb8s73e52mbg`
+- Plan: **free** web service. Keeper runs in-process (`KEEPER_EMBEDDED=true`). Render free instances spin down when idle.
+- Proven 2026-09-20T23:40Z from outside the process: `/health` 200, `/ready` db true, live Jupiter quote, live PreStocks feed (`verification_state=verified`, deadline extracted from prestocks.com/spacex), keeper poll writing health rows. Receipts empty because no fills have been sent.
 
 ## Setup
 

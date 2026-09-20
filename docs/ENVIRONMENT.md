@@ -27,6 +27,7 @@ Do not put secret values in this file, in git, or in chat.
 | `KEEPER_MAX_IN_FLIGHT` | Concurrent fill attempts | Yes | Default `1` | `.env` | Render |
 | `KEEPER_SPEND_CAP_RAW` | Max source raw per fill | Yes before mainnet fills | Operator | `.env` | Render |
 | `FEED_STALE_MS` | Halt if feed older than this | Yes | Default `300000` | `.env` | Render |
+| `KEEPER_EMBEDDED` | Run keeper inside the API process | Free Render | `true` on the free web service | `false` locally unless combining | `true` |
 | `LOG_LEVEL` / `PORT` | Process | Yes | Default `info` / `3000` | `.env` | Render |
 
 ## Safe handling

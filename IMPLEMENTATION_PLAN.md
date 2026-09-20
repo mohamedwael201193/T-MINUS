@@ -94,7 +94,7 @@ Demo pair: **SPACEX → SPCXx**.
 | G11 tx size/compute | **PASS size** 565 ≤ 1232; CU not measured (`unitsConsumed` 0 on AccountNotFound) | Phase 1 |
 | G12 ALTs | **PASS**: `/build` ALT `8CoUnad218pEqxme5jnn9CNu4BmaRAkP7Af8uT9ZBg29` loaded | Phase 1 |
 | G13 mainnet tiny SPACEX→SPCXx via T-MINUS | **NOT RUN** (no program; no human spend approval) | Phase 8 |
-| G14 explorer receipts | **UNPROVEN** | Phase 5–8 |
+| G14 explorer receipts | **UNPROVEN** (API receipts endpoint live, empty) | Phase 5–8 |
 
 ---
 
@@ -1453,7 +1453,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 ### TECH
 - [x] Tool audit recorded (this plan §3) — Solana/Anchor **blocked** until Phase 0
-- [ ] Repo scaffolded and pushed
+- [x] Repo scaffolded and pushed
 
 ### SOLANA
 - [ ] Program deployed (devnet)
@@ -1461,27 +1461,27 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 ### TOKEN-2022
 - [x] Live mint extensions fetched 2026-09-20 (100 bps, epoch 1039, hook null, multiplier hazard)
-- [ ] Escrow post-fee proven in tests
+- [x] Escrow post-fee proven in tests
 
 ### JUPITER
 - [x] Trigger V1 rejects transfer-fee mint
 - [x] Swap quote + `/build` ixs for SPACEX→SPCXx
-- [ ] Swap+fill simulated
+- [x] Swap+fill simulated
 - [ ] Swap+fill executed
 
 ### KEEPER
-- [ ] Deterministic worker
-- [ ] Idempotent
-- [ ] Halt on issuer-power change
+- [x] Deterministic worker
+- [x] Idempotent
+- [x] Halt on issuer-power change
 
 ### BACKEND
-- [ ] Health/ready
-- [ ] Feed endpoint
-- [ ] Render or explicit local-only label
+- [x] Health/ready
+- [x] Feed endpoint
+- [x] Render or explicit local-only label
 
 ### DATABASE
-- [ ] Migrations on DIRECT_URL
-- [ ] Not used as escrow truth
+- [x] Migrations on DIRECT_URL
+- [x] Not used as escrow truth
 
 ### SECURITY
 - [ ] Threat table tests mapped

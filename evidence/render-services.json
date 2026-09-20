@@ -1,0 +1,15 @@
+{
+  "ownerId": "tea-d6nhq1vtskes73em9p30",
+  "api": {
+    "id": "srv-dao6t2rtqb8s73e52mbg",
+    "name": "tminus-api",
+    "type": "web_service",
+    "slug": "tminus-api-k2d2",
+    "dashboardUrl": "https://dashboard.render.com/web/srv-dao6t2rtqb8s73e52mbg",
+    "url": "https://tminus-api-k2d2.onrender.com",
+    "plan": "free",
+    "runtime": "node"
+  },
+  "keeper": "embedded_in_api_free_tier",
+  "label": "FREE"
+}

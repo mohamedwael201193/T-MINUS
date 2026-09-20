@@ -1,0 +1,34 @@
+{
+  "deploy": {
+    "elapsed_s": 41,
+    "deployStatus": "live",
+    "commit": "985d4689468a5d80df7952fb1ffd8caf26a68f6a",
+    "finishedAt": "2026-09-20T23:39:46.244015Z"
+  },
+  "probes": {
+    "/health": {
+      "status": 200,
+      "body": "{\"ok\":true,\"service\":\"tminus-api\",\"uptime_ms\":20529}"
+    },
+    "/ready": {
+      "status": 200,
+      "body": "{\"ok\":true,\"slot\":448882473,\"db\":true}"
+    },
+    "/v1/feed": {
+      "status": 200,
+      "body": "{\"network\":\"MAINNET\",\"feed\":{\"ratio\":\"117.10349163540737\",\"token\":\"PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh\",\"lockup\":null,\"deadline\":\"2027-03-12T23:59:00.000Z\",\"event_type\":\"prestock_conversion_deadline\",\"fetched_at\":\"2026-09-20T23:39:40.229Z\",\"source_url\":\"https://prestocks.com/api/metrics\",\"destination\":\"Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8\",\"source_hash\":\"5ab469f837a39c464dbc4e5b29f2"
+    },
+    "/v1/quote": {
+      "status": 200,
+      "body": "{\"network\":\"MAINNET\",\"source\":\"jupiter_swap_v1_quote\",\"cache_ms\":0,\"quote\":{\"inputMint\":\"PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh\",\"inAmount\":\"200000000\",\"outputMint\":\"Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8\",\"outAmount\":\"76706836\",\"otherAmountThreshold\":\"76323302\",\"swapMode\":\"ExactIn\",\"slippageBps\":50,\"platformFee\":null,\"priceImpactPct\":\"0.0080349006400868063511796296\",\"routePlan\":[{\"swapI"
+    },
+    "/v1/keeper": {
+      "status": 200,
+      "body": "{\"health\":{\"payload\":{\"halted\":false,\"lastPoll\":\"2026-09-20T23:40:00.765Z\",\"haltReason\":null,\"lastFeedAt\":\"2026-09-20T23:39:40.229Z\",\"composition\":\"atomic_swap_then_fill\",\"lastFillSig\":null,\"lastFeedHash\":\"5ab469f837a39c464dbc4e5b29f2f4712d805f50472c1163521ab9c515225311\",\"lastRpcError\":null,\"lastJupiterError\":null},\"updated_at\":\"2026-09-20T23:40:01.099Z\"}}"
+    },
+    "/v1/receipts": {
+      "status": 200,
+      "body": "{\"receipts\":[]}"
+    }
+  }
+}

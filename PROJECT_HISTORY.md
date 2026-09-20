@@ -113,3 +113,38 @@ Append-only execution ledger. No secrets.
 - **next step:** Render deploy after secret scan + commit
 
 ---
+
+## 2026-09-20T23:40Z — PHASE 6/9 — free Render web service (My Workspace)
+
+- **action:** Deploy API+embedded keeper as one **free** Render web service after the operator switched Render API keys
+- **reason:** Background workers are not free; starter quota on the previous workspace required paid instances
+- **command:** `node scripts/render-free.mjs`; external GET probes; Chrome dashboard
+- **result:** PASS
+- **evidence:**
+  - service `srv-dao6t2rtqb8s73e52mbg` plan **free**
+  - URL `https://tminus-api-k2d2.onrender.com`
+  - commit `985d4689468a5d80df7952fb1ffd8caf26a68f6a`
+  - `/health` 200, `/ready` db true slot 448882554
+  - `/v1/feed` MAINNET `verification_state=verified` deadline extracted `2027-03-12T23:59:00.000Z`
+  - `/v1/quote` Jupiter outAmount 76706836
+  - `/v1/keeper` halted false, send still disabled
+  - `/v1/receipts` empty (honest; no fills sent)
+  - `evidence/render-services.json`, `evidence/render-free-health.json`
+- **test:** probes from this machine and Chrome `/health` + Render Live deploy
+- **decision:** One-process architecture on free tier. `KEEPER_SEND_ENABLED=false`. Do not claim mainnet fills.
+- **files changed:** `apps/api/src/index.ts`, `apps/keeper/src/run.ts`, `render.yaml`
+- **deployment URL:** `https://tminus-api-k2d2.onrender.com`
+- **known risks:** Free instances spin down when idle. Previous Ffcvv **starter** `tminus-api` / `tminus-keeper` could not be suspended from this key (404). Operator should confirm those paid services are stopped in the other workspace.
+- **next step:** Devnet program deploy still blocked on faucet SOL; mainnet proof still blocked on 0 SOL + send enable
+
+---
+
+## 2026-09-20T23:42Z — PHASE 9 — dependency audit
+
+- **action:** `pnpm audit --prod`
+- **result:** FAIL (recorded, not bypassed)
+- **evidence:** 3 high + 2 moderate, all transitive: `bigint-buffer` via `@solana/spl-token` (no patched release), `toml` via `@coral-xyz/anchor`, `uuid`/`stream-json` via `@solana/web3.js`
+- **decision:** Do not vendor-fork Solana SDK this phase. No direct dependency on the vulnerable packages. Re-audit when Anchor/web3.js ship updates.
+- **next step:** keep building; do not claim a clean audit
+
+---

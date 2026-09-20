@@ -16,6 +16,16 @@ test("health endpoint", async () => {
   server.close();
 });
 
+test("rejects invalid order pda", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const addr = server.address();
+  assert.ok(addr && typeof addr === "object");
+  const res = await fetch(`http://127.0.0.1:${addr.port}/v1/orders/not-a-pda`);
+  assert.equal(res.status, 400);
+  server.close();
+});
+
 test("rejects non-GET", async () => {
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, resolve));

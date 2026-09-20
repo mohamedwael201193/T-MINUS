@@ -721,4 +721,14 @@ mod unit_tests {
     fn ceil_ratio_rejects_zero_out() {
         assert!(ceil_ratio(1, 0).is_err());
     }
+
+    #[test]
+    fn ceil_ratio_overflow_inputs() {
+        assert!(ceil_ratio(u64::MAX, u64::MAX).is_err());
+    }
+
+    #[test]
+    fn ceil_ratio_tiny_ratio_still_positive() {
+        assert_eq!(ceil_ratio(2, 1).unwrap(), 1);
+    }
 }

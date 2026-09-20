@@ -20,7 +20,8 @@ import {
 } from "@tminus/sdk";
 import { env, keeperKeypair } from "./config.ts";
 import { sql } from "./db.ts";
-import { haltReason, logIssuer, readIssuer } from "./issuer.ts";
+import { logIssuer, readIssuer } from "./issuer.ts";
+import { fillSize, haltFromIssuer, isConfiguredPair } from "./policy.ts";
 import { buildSwap, loadLookupTables, quoteExactIn, toInstruction } from "./jupiter.ts";
 import { tryLease, releaseLease } from "./leases.ts";
 import { log } from "./log.ts";
@@ -40,6 +41,7 @@ export type KeeperState = {
   lastFeedHash: string | null;
   lastFeedAt: string | null;
   composition: "atomic_swap_then_fill" | "two_tx_inventory_fallback";
+  lastFeeBps: number | null;
 };
 
 export const state: KeeperState = {
@@ -52,6 +54,7 @@ export const state: KeeperState = {
   lastFeedHash: null,
   lastFeedAt: null,
   composition: "atomic_swap_then_fill",
+  lastFeeBps: null,
 };
 
 async function writeHealth(): Promise<void> {
@@ -76,7 +79,10 @@ export async function tick(connection: Connection): Promise<void> {
   try {
     const issuer = await readIssuer(connection, env.spacexMint);
     logIssuer(issuer);
-    const halt = haltReason(issuer);
+    const halt = haltFromIssuer(issuer, state.lastFeeBps);
+    if (issuer.transferFeeBps !== null && halt !== "issuer_fee_changed") {
+      state.lastFeeBps = issuer.transferFeeBps;
+    }
     const feed = await latestFeed();
     if (!feed) {
       state.halted = true;
@@ -109,6 +115,17 @@ export async function tick(connection: Connection): Promise<void> {
     const now = Math.floor(Date.now() / 1000);
 
     for (const item of orders) {
+      if (
+        !isConfiguredPair(
+          item.order.srcMint.toBase58(),
+          item.order.dstMint.toBase58(),
+          env.spacexMint,
+          env.spcxxMint
+        )
+      ) {
+        log("skip_non_bounty_pair", { pda: item.pda.toBase58() });
+        continue;
+      }
       const remaining = remainingRaw(item.order);
       if (remaining <= 0n) continue;
       if (now >= Number(item.order.hardExpiryTs)) continue;
@@ -118,8 +135,8 @@ export async function tick(connection: Connection): Promise<void> {
         item.order.minRatioE9,
         item.order.failsafeFloorE9
       );
-      const fillSrc = remaining > env.spendCapRaw ? env.spendCapRaw : remaining;
-      if (fillSrc < item.order.minFillRaw && fillSrc !== remaining) continue;
+      const fillSrc = fillSize(remaining, env.spendCapRaw, item.order.minFillRaw);
+      if (fillSrc === null) continue;
 
       let quote;
       try {

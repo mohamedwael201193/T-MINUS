@@ -1447,17 +1447,17 @@ Need DoraHacks/hackathon login in Chrome — use Jev only to **navigate**, human
 Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 ### PRODUCT
-- [ ] Conditional conversion only; no auction/vault/lending
-- [ ] Honest failsafe wording
-- [ ] PreStocks + SPCXx only on bounty path
+- [x] Conditional conversion only; no auction/vault/lending
+- [x] Honest failsafe wording
+- [x] PreStocks + SPCXx only on bounty path
 
 ### TECH
 - [x] Tool audit recorded (this plan §3) — Solana/Anchor **blocked** until Phase 0
 - [x] Repo scaffolded and pushed
 
 ### SOLANA
-- [ ] Program deployed (devnet)
-- [ ] Program deployed (mainnet) or labelled absent
+- [!] Program deployed (devnet) — **blocked**: deploy wallet 0 SOL, faucet rate-limited
+- [!] Program deployed (mainnet) — **absent**: account `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL` does not exist on mainnet (`evidence/live-status.json`)
 
 ### TOKEN-2022
 - [x] Live mint extensions fetched 2026-09-20 (100 bps, epoch 1039, hook null, multiplier hazard)
@@ -1484,16 +1484,16 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Not used as escrow truth
 
 ### SECURITY
-- [ ] Threat table tests mapped
-- [ ] Keys not in git
+- [x] Threat table tests mapped (halt/pause/hook/fee-change/spend-cap/non-bounty-pair)
+- [x] Keys not in git (`.env` ignored; secret-scan PASS)
 - [ ] Chat-pasted tokens rotated
 
 ### TESTING
-- [ ] `anchor test`
-- [ ] Failure-mode list in Phase 3–5
+- [x] `anchor test` LOCALNET 5/5 (`evidence/program-build.json`)
+- [x] Failure-mode list in Phase 3–5 (under-delivery, double-fill, expire, halt, spend cap)
 
 ### MAINNET
-- [ ] Tiny fill authorized and done — **or** blocked waiting human
+- [!] Tiny fill authorized and done — **blocked**: 0 SOL, program account absent, `KEEPER_SEND_ENABLED=false`
 
 ### RECEIPTS
 - [ ] Explorer-linked JSON
@@ -1503,7 +1503,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [ ] Mocks removed
 
 ### NO-MOCK GUARANTEE
-- [ ] Production path uses live RPC/Jupiter/chain
+- [x] Production path uses live RPC/Jupiter/chain (Render `/ready` `/v1/quote` `/v1/feed`)
 
 ### SUBMISSION
 - [ ] GitHub + demo + video
@@ -1512,6 +1512,9 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 ## Human blockers now
 
-None that stop **planning**. Implementation Phase 0 is blocked on **installing Solana CLI + Anchor** and **generating keypairs**. Phase 8 is blocked on **explicit spend approval**. Rotate GitHub/Render/Vercel/DB secrets that were pasted in chat.
+1. **Devnet/mainnet program deploy** needs SOL in `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` (currently 0 on both clusters; official faucet rate-limited).
+2. **Tiny mainnet fill** needs the program on-chain, keeper SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000`.
+3. **FRONTEND/** is intentionally not built.
+4. Rotate Render/GitHub/DB secrets that were pasted in chat.
 
-Do not start Phase 0+ until authorized.
+Do not enable keeper send until the program account exists on the target cluster and a tiny spend is explicitly authorized.

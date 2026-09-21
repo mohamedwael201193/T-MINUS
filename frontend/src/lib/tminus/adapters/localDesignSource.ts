@@ -100,6 +100,7 @@ export class LocalDesignSource implements TMinusSource {
   private orderSeq = 2482;
   private receiptSeq = 1043;
   private entropy = 987_654_321;
+  private selectedAssetId = "spacex";
 
   constructor() {
     this.market.set("spacex", {
@@ -135,6 +136,15 @@ export class LocalDesignSource implements TMinusSource {
       programMainnetExists: false,
       programDevnetExists: false,
     };
+  }
+
+  getSelectedAssetId(): string {
+    return this.selectedAssetId;
+  }
+
+  selectAsset(id: string): void {
+    this.selectedAssetId = id;
+    this.emit();
   }
 
   /* -------------------------------- market ------------------------------ */

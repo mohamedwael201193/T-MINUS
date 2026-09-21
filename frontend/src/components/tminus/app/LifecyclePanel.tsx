@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
 import { fmtCount, fmtDate, fmtRatio, fmtUsd } from "@/lib/tminus/utils";
 import { SPACEX_ASSET_ID } from "@/lib/tminus/data/lifecycleData";
@@ -19,7 +18,7 @@ export function LifecyclePanel() {
   useTMinusVersion();
   const src = useTMinus();
   const assets = src.listAssets();
-  const [assetId, setAssetId] = useState(SPACEX_ASSET_ID);
+  const assetId = src.getSelectedAssetId();
   const asset = src.getAsset(assetId) ?? src.getAsset(SPACEX_ASSET_ID) ?? assets[0];
   const market = src.getMarket(asset?.id ?? SPACEX_ASSET_ID);
 
@@ -49,7 +48,7 @@ export function LifecyclePanel() {
             <AssetTab
               key={a.id}
               active={asset.id === a.id}
-              onClick={() => setAssetId(a.id)}
+              onClick={() => src.selectAsset(a.id)}
               label={a.symbol}
               live={a.stage === "CONVERSION_WINDOW"}
             />

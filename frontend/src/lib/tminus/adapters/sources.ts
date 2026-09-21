@@ -76,6 +76,10 @@ export interface TMinusSource {
   /** honest MAINNET / DEVNET / SIMULATION labels — never implied */
   getEnvironment(): NetworkEnvironment;
 
+  /** currently inspected PreStock — ticket and lifecycle share this */
+  getSelectedAssetId(): string;
+  selectAsset(id: string): void;
+
   /* reactivity (stable function identities required) */
   readonly subscribe: (listener: () => void) => () => void;
   readonly getVersion: () => number;

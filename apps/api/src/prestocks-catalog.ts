@@ -181,8 +181,8 @@ export async function buildPrestocksCatalog(opts: {
     const deadline = feed?.deadline ?? pageDeadline;
     const eventType = feed?.event_type ?? pageEvent;
     const stage = classifyStage({ deadline, eventType, now });
-    const destinationMint = isSpacex ? (feed?.destination ?? SPCXX_MINT) : symbol === "XAI" ? SPACEX_MINT : null;
-    const destinationSymbol = isSpacex ? "SPCXx" : symbol === "XAI" ? "SPACEX" : null;
+    const destinationMint = isSpacex ? (feed?.destination ?? SPCXX_MINT) : null;
+    const destinationSymbol = isSpacex ? "SPCXx" : null;
     const hasQuote = isSpacex && feed?.ratio != null;
     const executionAvailability = classifyExecution(stage, Boolean(hasQuote));
     let verificationState: VerificationState = "unknown";

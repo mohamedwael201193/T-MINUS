@@ -18,6 +18,12 @@ dist/
 coverage/
 .next/
 .turbo/
+frontend/qa/
+frontend/.zscripts/
+frontend/download/
+frontend/upload/
+frontend/tool-results/
+frontend/research/
 *.pem
 *.key
 id.json

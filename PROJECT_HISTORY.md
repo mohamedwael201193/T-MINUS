@@ -369,5 +369,18 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T03:35Z — COMPILE FIX + SELECTED PRESTOCK + TRUSTED WALLET
+
+- **action:** Dev server crashed with `mapReceipt` defined twice after extracting `receiptMap.ts`. Removed the local duplicate. Shared selected PreStock between lifecycle panel and order ticket. Phantom `connect({ onlyIfTrusted: true })` restores a trusted session on reload. XAI SET ORDER is disabled (window closed). Stopped inventing an XAI→SPACEX destination. Added receipt mapping tests to `pnpm test`.
+- **reason:** Switching assets used to leave a SPACEX ticket in place; reload dropped a connected wallet; XAI destination was hardcoded, not verified.
+- **result:** After reload, Chrome shows **Wallet connected** and live **0.0091 SPACEX**. SET ORDER on SPACEX toasts **PLACE NOT SENT** (no mainnet program). XAI ticket reads **XAI CONVERSION IS HALTED**. Receipt tests 5/5.
+- **test:** `node --import tsx --test frontend/src/lib/tminus/adapters/receiptMap.test.ts` PASS 5; compile recovered (`GET / 200`)
+- **decision:** Still Option B. Do not spend 2.14859112 SOL.
+- **files changed:** `backendSource.ts`, `receiptMap.ts`, `receiptMap.test.ts`, `sources.ts`, `localDesignSource.ts`, `LifecyclePanel.tsx`, `OrderTicket.tsx`, `prestocks-catalog.ts`, `package.json`, `.gitignore`, PROJECT_HISTORY
+- **known risks:** Render still serves the old catalog until this commit deploys. MAINNET place/fill remain human-blocked.
+- **next step:** commit + push; keep goal open
+
+---
+
 
 

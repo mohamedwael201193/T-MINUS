@@ -8,6 +8,7 @@ import type {
   WalletState,
 } from "../domain/types";
 import type { CreateOrderInput, EngineNotice, TMinusSource } from "./sources";
+import { mapReceipt } from "./receiptMap";
 import {
   PROGRAM_ID,
   TMINUS_API,
@@ -111,53 +112,6 @@ function mapAssetFromFeed(res: FeedResponse): LifecycleAsset {
   };
 }
 
-function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
-  const payload = row.payload ?? {};
-  const network = (payload.network === "MAINNET" || payload.network === "DEVNET"
-    ? payload.network
-    : "DEVNET") as ExecutionReceipt["network"];
-  const srcRaw = Number(payload.sourceAmount ?? "0");
-  const dstRaw = Number(payload.destinationAmount ?? "0");
-  const ratioE9 = Number(payload.ratio ?? "0");
-  const composition =
-    typeof payload.route === "string" ? payload.route : payload.route?.composition ?? "unknown";
-  const kindRaw = typeof payload.kind === "string" ? payload.kind.toLowerCase() : "";
-  const eventKind: ExecutionReceipt["eventKind"] =
-    kindRaw === "fill" || kindRaw === "cancel" || kindRaw === "expire" || kindRaw === "place"
-      ? kindRaw
-      : dstRaw > 0
-        ? "fill"
-        : "place";
-  const isDevnet = network === "DEVNET";
-  return {
-    id: `R-${String(index + 1).padStart(4, "0")}`,
-    orderId: row.order_pda,
-    assetId: isDevnet ? "protocol-devnet" : "spacex",
-    path: payload.failsafeFlag ? "FAILSAFE" : "TARGET",
-    targetRatio: ratioE9 ? ratioE9 / 1e9 : 0,
-    floorRatio: ratioE9 ? ratioE9 / 1e9 : 0,
-    executedRatio: ratioE9 ? ratioE9 / 1e9 : 0,
-    size: srcRaw / 1e6,
-    filled: dstRaw / 1e6,
-    signature: row.sig,
-    slot: Number(row.slot ?? payload.slot ?? 0),
-    route: `${network} · ${eventKind} · ${composition}`,
-    feeBps: 0,
-    settledAt: payload.timestamp ?? row.created_at,
-    feedHash: payload.feedHash ?? "—",
-    network,
-    explorerUrl:
-      payload.explorer ??
-      (network === "DEVNET"
-        ? `https://explorer.solana.com/tx/${row.sig}?cluster=devnet`
-        : `https://explorer.solana.com/tx/${row.sig}`),
-    programId: payload.programId ?? PROGRAM_ID,
-    sourceSymbol: isDevnet ? "DEVNET-SRC" : "SPACEX",
-    destinationSymbol: isDevnet ? "DEVNET-DST" : "SPCXx",
-    eventKind,
-  };
-}
-
 export function createBackendSource(): TMinusSource & { start: () => void; stop: () => void } {
   return new BackendSource();
 }
@@ -172,6 +126,7 @@ class BackendSource implements TMinusSource {
   private receipts: ExecutionReceipt[] = [];
   private notices: EngineNotice[] = [];
   private historyT = 0;
+  private selectedAssetId = "spacex";
   private env: NetworkEnvironment = {
     dataCluster: "MAINNET",
     programCluster: "NONE",
@@ -242,6 +197,57 @@ class BackendSource implements TMinusSource {
     return this.env;
   }
 
+  getSelectedAssetId(): string {
+    return this.selectedAssetId;
+  }
+
+  selectAsset(id: string): void {
+    this.selectedAssetId = id;
+    this.emit();
+  }
+
+  private async applyConnectedWallet(providerId: string, address: string): Promise<void> {
+    let balances = { SPACEX: 0, SPCXx: 0, USDC: 0, SOL: 0 };
+    try {
+      const live = await apiGet<BalancesResponse>(`/v1/balances?owner=${address}`);
+      balances = {
+        SPACEX: live.SPACEX.displayUnits,
+        SPCXx: live.SPCXx.uiAmount ?? 0,
+        USDC: live.USDC,
+        SOL: live.sol,
+      };
+    } catch {
+      /* address is still real; balances stay 0 rather than invented */
+    }
+    this.walletState = {
+      connected: true,
+      connecting: false,
+      providerId,
+      address,
+      balances,
+    };
+    this.emit();
+  }
+
+  private async restoreTrustedWallet(): Promise<void> {
+    for (const id of ["phantom", "solflare", "backpack"] as const) {
+      const provider = injectedProvider(id);
+      if (!provider) continue;
+      try {
+        const res = await Promise.race([
+          provider.connect({ onlyIfTrusted: true }),
+          new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error("trusted-connect-timeout")), 2_500);
+          }),
+        ]);
+        await this.applyConnectedWallet(id, res.publicKey.toBase58());
+        return;
+      } catch {
+        /* not trusted, or user has not approved this origin */
+      }
+    }
+  }
+
   async connectWallet(providerId: string): Promise<void> {
     const provider = injectedProvider(providerId);
     if (!provider) {
@@ -257,26 +263,7 @@ class BackendSource implements TMinusSource {
         }),
       ]);
       const address = res.publicKey.toBase58();
-      let balances = { SPACEX: 0, SPCXx: 0, USDC: 0, SOL: 0 };
-      try {
-        const live = await apiGet<BalancesResponse>(`/v1/balances?owner=${address}`);
-        balances = {
-          SPACEX: live.SPACEX.displayUnits,
-          SPCXx: live.SPCXx.uiAmount ?? 0,
-          USDC: live.USDC,
-          SOL: live.sol,
-        };
-      } catch {
-        /* address is still real; balances stay 0 rather than invented */
-      }
-      this.walletState = {
-        connected: true,
-        connecting: false,
-        providerId,
-        address,
-        balances,
-      };
-      this.emit();
+      await this.applyConnectedWallet(providerId, address);
     } catch (err) {
       this.walletState = {
         connected: false,
@@ -315,6 +302,7 @@ class BackendSource implements TMinusSource {
 
   start() {
     if (this.timer) return;
+    void this.restoreTrustedWallet();
     void apiGet("/v1/feed/refresh")
       .catch(() => undefined)
       .finally(() => void this.refresh());

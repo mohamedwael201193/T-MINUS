@@ -14,14 +14,14 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 | Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — 565 bytes, ALT present, `err=AccountNotFound` because keeper has 0 SOL |
 | API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
-| Devnet deploy | **LIVE** | Program `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL` executable; place/cancel/fill/expire sigs in `evidence/devnet-e2e.json` |
+| Devnet deploy | **LIVE** | Program executable; on-chain IDL at `FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n`; sigs in `evidence/devnet-e2e.json` |
 | Mainnet program deploy / fills | Not yet | Deploy and keeper wallets have **0 SOL**; spend cap 200_000_000 raw once funded |
 | Frontend | Not built | Awaiting `FRONTEND/` |
 
 ## Program
 
 - Program ID: `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL`
-- IDL: `idl/tminus.json`
+- IDL: `idl/tminus.json` (also initialized on **devnet**: [`FMSPeg37…f2n`](https://explorer.solana.com/address/FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n?cluster=devnet))
 - Network for the ID: **DEVNET executable**; localnet tests also pass. Mainnet account still absent.
 - Upgrade authority (devnet): `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX`
 
@@ -39,7 +39,7 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 - API: `https://tminus-api-k2d2.onrender.com`
 - Dashboard: `https://dashboard.render.com/web/srv-dao6t2rtqb8s73e52mbg`
 - Plan: **free** web service. Keeper runs in-process (`KEEPER_EMBEDDED=true`). Render free instances spin down when idle.
-- Proven 2026-09-21T00:20Z: `/health` 200, `/ready` db true, `/v1/receipts` returns 4 **DEVNET** rows with explorer sigs. Keeper send remains off.
+- Proven 2026-09-21T00:20Z: `/health` 200, `/ready` db true, `/v1/receipts` returns 4 **DEVNET** rows with explorer sigs. `/v1/program` reports devnet executable, mainnet absent. Keeper send remains off.
 
 ## Setup
 

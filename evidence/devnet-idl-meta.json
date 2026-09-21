@@ -1,0 +1,8 @@
+{
+    "explorer":  "https://explorer.solana.com/address/FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n?cluster=devnet",
+    "label":  "DEVNET_IDL",
+    "bytes":  15645,
+    "sha256":  "7d8e8f08956825be23f49d2eb7fb4345309ec11d8f13696de5db20a7cb83d50c",
+    "metadata":  "FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n",
+    "programId":  "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL"
+}

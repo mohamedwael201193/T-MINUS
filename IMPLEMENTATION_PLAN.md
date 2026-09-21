@@ -1477,6 +1477,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 ### BACKEND
 - [x] Health/ready
 - [x] Feed endpoint
+- [x] `/v1/program` reports per-cluster executable (devnet true, mainnet false)
 - [x] Render or explicit local-only label
 
 ### DATABASE

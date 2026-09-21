@@ -4,6 +4,7 @@ import { PROGRAM_ID, decodeOrder } from "@tminus/sdk";
 import { env } from "./config.ts";
 import { sql } from "./db.ts";
 import { latestFeed, refreshFeed } from "./feed.ts";
+import { declaredProgramId, readProgramStatus, rpcForCluster, type ClusterName } from "./program-status.ts";
 
 const started = Date.now();
 
@@ -82,6 +83,20 @@ export function createServer() {
         send(res, 200, { ok: true, slot, db: db[0]?.ok === 1 });
         return;
       }
+      if (url.pathname === "/v1/program") {
+        const programId = declaredProgramId(env.programId);
+        const devnetRpc = process.env.DEVNET_RPC_URL ?? "https://api.devnet.solana.com";
+        const [mainnet, devnet] = await Promise.all([
+          readProgramStatus(env.solanaRpc, programId, "mainnet-beta"),
+          readProgramStatus(devnetRpc, programId, "devnet"),
+        ]);
+        send(res, 200, {
+          programId,
+          keeperSendEnabled: process.env.KEEPER_SEND_ENABLED === "true",
+          clusters: { mainnet, devnet },
+        });
+        return;
+      }
       if (url.pathname === "/v1/feed") {
         let feed = await latestFeed();
         if (!feed) feed = await refreshFeed();
@@ -99,7 +114,11 @@ export function createServer() {
           send(res, 400, { error: "invalid_pda" });
           return;
         }
-        const connection = new Connection(env.solanaRpc, "confirmed");
+        const clusterParam = url.searchParams.get("cluster");
+        const cluster: ClusterName =
+          clusterParam === "devnet" || clusterParam === "devnet-beta" ? "devnet" : "mainnet-beta";
+        const rpc = rpcForCluster(cluster, env.solanaRpc, process.env.DEVNET_RPC_URL);
+        const connection = new Connection(rpc, "confirmed");
         const info = await connection.getAccountInfo(new PublicKey(pda));
         if (!info) {
           send(res, 404, { error: "not_found" });
@@ -111,7 +130,7 @@ export function createServer() {
         }
         const order = decodeOrder(Buffer.from(info.data));
         send(res, 200, {
-          network: process.env.SOLANA_NETWORK ?? "mainnet-beta",
+          network: cluster,
           pda,
           lamports: info.lamports,
           order: {

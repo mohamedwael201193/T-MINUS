@@ -1492,7 +1492,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [ ] Chat-pasted tokens rotated
 
 ### TESTING
-- [x] `anchor test` LOCALNET 11/11 (`evidence/program-build.json`)
+- [x] `anchor test` LOCALNET 12/12 (airdrop payer first; includes drained-escrow second fill)
 - [x] Failure-mode list in Phase 3–5 (under-delivery, double-fill, expire, halt, spend cap, pause, hook, stale feed)
 
 ### MAINNET

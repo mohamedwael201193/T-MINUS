@@ -204,3 +204,17 @@ Append-only execution ledger. No secrets.
 - **next step:** mainnet SOL for G13, or keep demo labeled DEVNET
 
 ---
+
+## 2026-09-21T00:22Z — RECEIPTS — live API shows confirmed DEVNET explorer sigs
+
+- **action:** Fetch confirmed e2e txs; upsert `receipts` via DIRECT_URL; probe public `/v1/receipts`
+- **command:** `node --import tsx scripts/ingest-devnet-receipts.ts`; GET `https://tminus-api-k2d2.onrender.com/v1/receipts`
+- **result:** 4 rows labeled DEVNET (place/cancel/fill/expire); CI `f7de504` success
+- **evidence:** `evidence/devnet-receipts.json`
+- **test:** live GET matches explorer sigs
+- **decision:** On-chain IDL upload blocked (WSL `anchor idl` needs Node; not required for execution). Keep mainnet send off.
+- **files changed:** `scripts/ingest-devnet-receipts.ts`
+- **known risks:** receipts are DEVNET mock-mint, not SPACEX
+- **next step:** mainnet SOL for G13
+
+---

@@ -1,0 +1,29 @@
+{
+  "inserted": [
+    {
+      "kind": "place",
+      "sig": "4bQGKezkzwM7576eAnDtkDDPzQPff9qCB6nz8a4hDdVwCTfDqZqFQnLL8JeEzTQz8RrHcc6iirb88ygtM5M2eTPK",
+      "slot": 501637536,
+      "orderPda": "6V9vxrBA7UBKGcAW7NY9tN2k5QEFpywRcmsXMtwCRBjF"
+    },
+    {
+      "kind": "cancel",
+      "sig": "27RpwuFScXheLTScUEckuB8vgZKF7KCRSGC4E22BgWP1KRnfUirXJD5rJsGUCGq2ay3a8JbtKW9inVWnQFWyMTf6",
+      "slot": 501637562,
+      "orderPda": "CZ5LqSidUc1esgzWgK547ANDBydG4Bhn1LWMgaB9YG8L"
+    },
+    {
+      "kind": "fill",
+      "sig": "26YLJiQh51AeQH2XNXqGgruM3L5KthHNNk83z1iSsNL4WiLnDYbmPD4ffaZX997sibXvc8doRZZKDJSARcc9mv7x",
+      "slot": 501637575,
+      "orderPda": "6V9vxrBA7UBKGcAW7NY9tN2k5QEFpywRcmsXMtwCRBjF"
+    },
+    {
+      "kind": "expire",
+      "sig": "3H6f11sD5F3vzVgTD287CW4xcUWePNjkwCRiLdDJDEB251cyuD56Y2GPyzjLCWcTPePGVaJD8u7D8ZSJUBTRY8Zm",
+      "slot": 501637600,
+      "orderPda": "Cmq5rg7cE1yvzCtkRYRRua6aMs7o6ENqPetWTG7SPXn2"
+    }
+  ],
+  "receiptRows": 4
+}

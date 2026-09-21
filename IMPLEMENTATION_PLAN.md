@@ -1496,7 +1496,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [!] Tiny fill authorized and done — **blocked**: 0 SOL, program account absent, `KEEPER_SEND_ENABLED=false`
 
 ### RECEIPTS
-- [ ] Explorer-linked JSON
+- [x] Explorer-linked JSON — DEVNET place/cancel/fill/expire at `/v1/receipts` (`evidence/devnet-receipts.json`)
 
 ### FRONTEND INTEGRATION
 - [ ] FRONTEND/ delivered

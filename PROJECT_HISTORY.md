@@ -332,3 +332,16 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T02:10Z — COMMIT + PUSH — 48f272b on origin/main
+
+- **action:** API tests 16/16. Live catalog parse: official `/api/prestocks` is a root array with `contract_address`. SPACEX CONVERSION_WINDOW to 12 Mar 2027; XAI EXPIRED 12 Sep 2026. Committed frontend BackendSource + Option B decision. Pushed to GitHub so Render can pick up `/v1/prestocks` and `/v1/balances`.
+- **result:** `48f272b` on `main`. Secret-scan PASS. Did not commit wallet screenshots, nested frontend `.git`, or `.env`.
+- **evidence:** `evidence/prestocks-catalog-live.json`; `evidence/mainnet-architecture-decision.json`
+- **test:** `pnpm test` sdk 6 + api 16 + keeper 14
+- **decision:** Still Option B. Still do not spend 2.14859112 SOL.
+- **known risks:** Render free deploys lag; frontend `node_modules` not installed in this workspace yet; browser QA not closed
+- **next step:** wait for Render `/v1/prestocks`; install frontend deps; browser QA paths 1–7
+
+---
+
+

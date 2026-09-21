@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "**Screenshot 1 (Landing Hero):**\n*   **Clipped Element:** The bottom of the \"OPEN T-MINUS\" button is partially cut off by the red \"1 Issue\" notification badge.\n*   **Layout:** The main headline (\"YOUR TOKEN HAS A CLOCK\") and body text are readable. Touch targets (buttons) are sufficiently large.\n\n**Screenshot 2 (App Console):**\n*   **Clipped Element:** The bottom edge of the main content card (containing the SpaceX data) is cut off at the screen's bottom edge, hiding the lower portion of the order form/ticket area.\n*   **Touch Targets:** The bottom navigation bar (\"RECEIPTS\") and the \"CONNECT\" button are adequately sized.\n*   **Readability:** The dial renders correctly, the headline is clear, and data points are legible despite the bottom clipping.\n\n**Summary:**\n1.  **Button Clipping (Img 1):** The primary CTA button is obscured by the error toast.\n2.  **Content Cut-off (Img 2):** The main dashboard card extends beyond the viewport, making the full order ticket unusable without scrolling (and potentially hiding critical input fields).",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1789948866,
+  "id": "20260921080055db05f73104c84db1",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20260921080055db05f73104c84db1",
+  "usage": {
+    "completion_tokens": 248,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 865,
+    "prompt_tokens_details": {
+      "cached_tokens": 2
+    },
+    "total_tokens": 1113
+  }
+}

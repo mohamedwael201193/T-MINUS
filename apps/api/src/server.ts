@@ -5,6 +5,8 @@ import { env } from "./config.ts";
 import { sql } from "./db.ts";
 import { latestFeed, refreshFeed } from "./feed.ts";
 import { declaredProgramId, readProgramStatus, rpcForCluster, type ClusterName } from "./program-status.ts";
+import { buildPrestocksCatalog } from "./prestocks-catalog.ts";
+import { readOwnerBalances } from "./balances.ts";
 
 const started = Date.now();
 
@@ -169,6 +171,28 @@ export function createServer() {
       if (url.pathname === "/v1/keeper") {
         const rows = await sql`select payload, updated_at from keeper_health where id = 1`;
         send(res, 200, { health: rows[0] ?? null });
+        return;
+      }
+      if (url.pathname === "/v1/prestocks") {
+        const feed = await latestFeed();
+        const catalog = await buildPrestocksCatalog({ spacexFeed: feed });
+        send(res, 200, catalog, { "cache-control": "public, max-age=30" });
+        return;
+      }
+      if (url.pathname === "/v1/balances") {
+        const owner = url.searchParams.get("owner") ?? "";
+        if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(owner)) {
+          send(res, 400, { error: "invalid_owner" });
+          return;
+        }
+        try {
+          new PublicKey(owner);
+        } catch {
+          send(res, 400, { error: "invalid_owner" });
+          return;
+        }
+        const balances = await readOwnerBalances(env.solanaRpc, owner);
+        send(res, 200, balances, { "cache-control": "no-store" });
         return;
       }
       if (url.pathname === "/v1/quote") {

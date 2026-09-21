@@ -1,0 +1,17 @@
+{
+  "fetchedAt": "2026-09-21T01:55:00.000Z",
+  "officialApiShape": "root array with contract_address",
+  "officialApi": "https://prestocks.com/api/prestocks",
+  "assets": [
+    { "symbol": "SPACEX", "stage": "CONVERSION_WINDOW", "inOfficialCatalog": true, "deadline": "2027-03-12T23:59:00.000Z" },
+    { "symbol": "XAI", "stage": "EXPIRED", "inOfficialCatalog": false, "deadline": "2026-09-12T23:59:00.000Z", "note": "metrics-only Pre* mint; issuer page conversion closed" },
+    { "symbol": "ANDURIL", "stage": "TERMS_PENDING", "inOfficialCatalog": true },
+    { "symbol": "ANTHROPIC", "stage": "TERMS_PENDING", "inOfficialCatalog": true },
+    { "symbol": "FIGUREAI", "stage": "TERMS_PENDING", "inOfficialCatalog": true },
+    { "symbol": "KALSHI", "stage": "TERMS_PENDING", "inOfficialCatalog": true },
+    { "symbol": "NEURALINK", "stage": "TERMS_PENDING", "inOfficialCatalog": true },
+    { "symbol": "OPENAI", "stage": "TERMS_PENDING", "inOfficialCatalog": true },
+    { "symbol": "POLYMARKET", "stage": "TERMS_PENDING", "inOfficialCatalog": true }
+  ],
+  "eligibility": "Pre* mints only. No Tessera or other pre-IPO issuers."
+}

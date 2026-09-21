@@ -36,6 +36,16 @@ test("rejects non-GET", async () => {
   server.close();
 });
 
+test("rejects invalid balance owner", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const addr = server.address();
+  assert.ok(addr && typeof addr === "object");
+  const res = await fetch(`http://127.0.0.1:${addr.port}/v1/balances?owner=not-a-key`);
+  assert.equal(res.status, 400);
+  server.close();
+});
+
 test("program status names both clusters", async () => {
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, resolve));

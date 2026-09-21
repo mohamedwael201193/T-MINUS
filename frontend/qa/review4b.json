@@ -1,0 +1,28 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "**Q1:**\n*   **Target Ratio:** `0.820` (Clean)\n*   **Floor Ratio:** `0.700` (Clean)\n*   **Amount:** `1.00` (Clean)\n\n**Q2:**\n1.  **Text Clipping/Overflow:** In the \"WHAT THIS ORDER MEANS\" box, the text for the second rule is broken and overflows its container. The word \"arrives\" is cut off at the start of the line, and the date \"MAR 1\" overlaps with the text above it.\n2.  **Cramped Spacing:** The helper text below the \"FAILSAFE DATE\" input (\"ATTEMPT AT FLOOR...\") is extremely tight against the input border and lacks proper vertical padding.\n3.  **Alignment Issue:** In the \"SET YOUR RULE\" header, the dropdown badge (`SPACEX - SPCXX`) appears slightly misaligned vertically with the title text.\n\n**Q3:**\nYes, the round dial renders correctly. It displays the countdown (`T-173D`) and the deadline date (`MAR 12 2027`) clearly within the circular graphic without any clipping or distortion.",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1789948157,
+  "id": "20260921074912a85f09d873594d22",
+  "model": "glm-5v-turbo",
+  "object": "chat.completion",
+  "request_id": "20260921074912a85f09d873594d22",
+  "usage": {
+    "completion_tokens": 245,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "prompt_tokens": 1800,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "total_tokens": 2045
+  }
+}

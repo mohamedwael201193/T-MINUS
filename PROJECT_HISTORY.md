@@ -316,3 +316,19 @@ Append-only execution ledger. No secrets.
 - **next step:** mainnet deploy when the payer holds at least 2.14859112 SOL
 
 ---
+
+## 2026-09-21T01:55Z — PRESTOCKS-FIRST — Option B + live frontend adapter
+
+- **action:** Re-research live PreStocks (catalog, metrics, issuer pages, ecosystem, Stocklana). Choose architecture Option B. Add `/v1/prestocks` and `/v1/balances`. Wire `frontend/` `BackendSource` as the default production path (Phantom + live feed/quote/receipts). Refuse MAINNET place. Label DEVNET receipts as protocol proofs, not SPACEX fills. XAI classified EXPIRED (deadline 12 Sep 2026 passed). Eligibility: Pre* mints only.
+- **reason:** Strongest honest PreStocks submission is lifecycle intelligence + proven protocol, not a 2.14859112 SOL mainnet-program badge. Ecosystem (71 apps) has swap/wallets/analytics/bots, not Token-2022 conversion clocks.
+- **source used:** https://prestocks.com/api/prestocks ; /api/metrics ; /spacex ; /xai ; /openai ; /ecosystem ; hackathons.solana.com/stocklana ; live API https://tminus-api-k2d2.onrender.com
+- **result:** In progress — API catalog + frontend adapter written. Render does not serve `/v1/prestocks` until this commit deploys. MAINNET program still absent. Payer still ~0.032 SOL.
+- **evidence:** `evidence/mainnet-architecture-decision.json`
+- **test:** pending this turn (`lifecycle-classify` + API server tests)
+- **decision:** Do not spend 2.14859112 SOL. Do not fake MAINNET place. Keep `LocalDesignSource` behind `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
+- **files changed:** `apps/api/src/prestocks-catalog.ts`, `apps/api/src/lifecycle-classify.ts`, `apps/api/src/balances.ts`, `apps/api/src/server.ts`, `frontend/src/lib/tminus/adapters/backendSource.ts`, `frontend/src/lib/tminus/adapters/context.tsx`, lifecycle/order/receipt UI, README, IMPLEMENTATION_PLAN, FRONTEND_NOTES
+- **known risks:** frontend nested install is a heavy Next template; Render deploy lag; `/api/prestocks` is a root array with `contract_address` (not `{tokens:[].splMint}`)
+- **next step:** run API tests, browser QA against live Render after deploy, do not push secrets
+
+---
+

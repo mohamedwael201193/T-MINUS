@@ -1,30 +1,32 @@
 # T-MINUS — MASTER IMPLEMENTATION PLAN
 
-Single source of truth. Implementation is in progress. Frontend remains out of scope until `FRONTEND/` is delivered.
+Single source of truth. Verified-at **2026-09-21**. Live state wins over older rows.
 
-Verified-at (this document): **2026-09-21 00:00 UTC** unless a row says otherwise. Stale research from 20 Sep product docs is overridden by live rows in §3.
+**Current architecture decision (Option B):** full T-MINUS protocol on **DEVNET** + real PreStocks **MAINNET** lifecycle/market data + honest network labels. Do **not** spend **2.14859112 SOL** on a mainnet program until that spend is proven to add sponsor value. See `evidence/mainnet-architecture-decision.json`.
+
+Frontend exists at `frontend/` (Next.js). Production path is `BackendSource` against `https://tminus-api-k2d2.onrender.com`. `LocalDesignSource` is opt-in via `NEXT_PUBLIC_TMINUS_SOURCE=design` (tests/fixtures only).
 
 ---
 
 ## 0. Executive Summary
 
-T-MINUS is a **conditional conversion order** for PreStocks Token-2022 mints: escrow source tokens, fill when the **executable destination ratio** meets the user’s target, or after a user-set failsafe time at no worse than the user’s floor. Permissionless fillers. TypeScript keeper on Render. Off-chain lifecycle feed. External Vite/React frontend later in `FRONTEND/`.
+T-MINUS is a **conditional conversion order** for PreStocks Token-2022 mints: escrow source tokens, fill when the **executable destination ratio** meets the user’s target, or after a user-set failsafe time at no worse than the user’s floor. Permissionless fillers. TypeScript keeper on Render. Off-chain lifecycle feed. Frontend in `frontend/` wired to the live API.
 
 **Chosen architecture (one):** Anchor program with four instructions (`place`, `cancel`, `fill`, `expire`) using `token_interface::transfer_checked`; keeper obtains Jupiter **Swap API V2 `GET /swap/v2/build`** instructions and composes them with `fill` in one v0 transaction using returned ALTs. Recurring V1 is unmaintained; Trigger V1 still rejects transfer-fee mints; Trigger V2 docs exclude transfer-fee mints. Pyth is out of the money path.
 
-**Do not build FRONTEND/**. Toolchain: Solana CLI **4.1.2** and Anchor **1.2.0** in WSL (`devmo`). Native Windows has no `solana`/`anchor`.
+**Mainnet program:** not deployed. Toolchain: Solana CLI **4.1.2** and Anchor **1.2.0** in WSL (`devmo`). Native Windows has no `solana`/`anchor`.
 
 ---
 
 ## 1. Frozen Product Definition
 
-- One program, one keeper, one lifecycle feed, one frontend later (`FRONTEND/` from an external agent).
+- One program, one keeper, one lifecycle feed, one frontend (`frontend/`).
 - Core loop: connect → see lifecycle → place order → escrow PreStocks → filler/keeper → ratio or failsafe → destination delivered → receipt.
 - Instructions: `place`, `cancel`, `fill`, `expire`.
 - Real PreStocks Token-2022. Conditional conversion. Deadline failsafe. User floor. Permissionless fillers. Real receipts.
 - No pooled capital, auction, vault, lending, LLM in the money path, Tessera/Clawpump/Meteora bounty artifacts.
-- Frontend is not built here. Mocks in `FRONTEND/` are expected until Phase 10.
-- Honesty: failsafe does **not** guarantee conversion regardless of liquidity.
+- Frontend production path uses live API/RPC. Design simulation is opt-in only.
+- Honesty: failsafe does **not** guarantee conversion regardless of liquidity. MAINNET place is refused while the program is undeployed.
 
 Demo pair: **SPACEX → SPCXx**.
 
@@ -1502,7 +1504,13 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Explorer-linked JSON — DEVNET place/cancel/fill/expire plus keeper `fillIx` and failsafe-tick fills at `/v1/receipts`
 
 ### FRONTEND INTEGRATION
-- [ ] FRONTEND/ delivered
+- [x] `frontend/` delivered
+- [x] BackendSource is the default production path
+- [x] Live `/v1/prestocks` `/v1/feed` `/v1/quote` `/v1/receipts` `/v1/program` `/v1/balances`
+- [x] Phantom connect (injected); MAINNET balances via API
+- [x] Honest MAINNET / DEVNET labels; no fake place
+- [ ] MAINNET program place/cancel (blocked: Option B — 2.14859112 SOL not spent)
+- [ ] Browser QA paths 1–7 after Render catalog deploy
 - [ ] Mocks removed
 
 ### NO-MOCK GUARANTEE

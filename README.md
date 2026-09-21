@@ -2,7 +2,7 @@
 
 Conditional conversion orders for PreStocks Token-2022 mints: escrow source tokens, fill at an executable destination ratio or after a failsafe timestamp, expire leftover to the owner.
 
-Frontend is **not** built in this repository. It will arrive later in `FRONTEND/` from an external agent.
+Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS API (`BackendSource`). Design simulation is `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
 
 ## What is real
 
@@ -12,11 +12,11 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 | Token-2022 post-fee escrow + harvest-before-close | **LOCALNET** PASS | 100 bps fee mint fixture (not SPACEX) |
 | Pause / transfer-hook rejection | **UNIT + LOCALNET** | rust TLV tests; mocha paused/hook mint fixtures |
 | Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — **636** bytes with real `fill` ix, ALT present, `err=AccountNotFound` (no mainnet program / unfunded taker) |
-| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/program` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/orders?cluster=devnet` served open orders; `/v1/program` dual-cluster |
+| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/program` `/v1/prestocks` `/v1/balances` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/prestocks` is MAINNET PreStocks-only catalog; `/v1/program` dual-cluster |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
 | Devnet deploy | **LIVE** (254,768-byte ELF `978c80e5…`) | Program executable; IDL `FMSPeg37…`; sigs in `evidence/devnet-e2e.json`. Local optimized `.so` is now **209,256** bytes (`838ebc5c…`) — smaller than the already-deployed devnet ELF; behavior tests 12/12 |
 | Mainnet program deploy / fills | **NOT DEPLOYED** | Exact minimum safe balance **2.14859112 SOL** (`2,148,591,120` lamports). See `evidence/mainnet-deploy-rent.json` |
-| Frontend | Not built | Awaiting `FRONTEND/` |
+| Frontend | **WIRED to live API** (place refused on MAINNET until program exists) | `frontend/src/lib/tminus/adapters/backendSource.ts` |
 
 ## Program
 

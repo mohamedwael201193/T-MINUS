@@ -1,0 +1,44 @@
+{
+  "decidedAt": "2026-09-21T01:50:00.000Z",
+  "choice": "B",
+  "title": "DEVNET protocol + MAINNET PreStocks data + honest labels; do not spend 2.14859112 SOL on a mainnet program yet",
+  "options": {
+    "A": {
+      "name": "Full T-MINUS program on mainnet",
+      "exactCostSol": 2.14859112,
+      "lockedAfterDeploySol": 1.06473244,
+      "payerHaveSol": 0.032433259,
+      "security": "Highest: trustless escrow on the cluster where SPACEX lives",
+      "sponsorValue": "High if funded, but cost does not currently increase PreStocks demo quality versus live data + proven protocol",
+      "misleadingRisk": "None if deployed; high if claimed without deploy",
+      "worthDoingNow": false,
+      "blocker": "Payer holds 0.032 SOL. Do not request more SOL until this analysis is accepted. Size cut to 209256 bytes does not change the 2x rent peak."
+    },
+    "B": {
+      "name": "Full protocol on DEVNET + real PreStocks MAINNET market/lifecycle + honest UI + optional tiny mainnet Jupiter without custom program",
+      "exactCostSol": 0,
+      "security": "Program trustless on DEVNET; MAINNET data path is read-only APIs + RPC. Place is refused on MAINNET until the program exists.",
+      "sponsorValue": "Highest honest PreStocks story: SPACEX clock, destination SPCXx, XAI expired, catalog of Pre* mints only, Jupiter executable ratio, DEVNET fill receipts with explorer links",
+      "misleadingRisk": "Low if labels stay MAINNET/DEVNET/SIMULATION",
+      "worthDoingNow": true
+    },
+    "C": {
+      "name": "Bounded delegated mainnet Jupiter swap without custom program",
+      "exactCostSol": "swap size only",
+      "security": "Not trustless escrow. User wallet signs a Jupiter swap. Must not be called T-MINUS escrow.",
+      "sponsorValue": "Shows SPACEX→SPCXx is executable, but duplicates existing DEX/wallets in the 71-app ecosystem",
+      "misleadingRisk": "High if UI implies conditional escrow",
+      "worthDoingNow": false,
+      "note": "May add later as a clearly labeled 'spot conversion' secondary action, never as the T-MINUS order."
+    },
+    "D": {
+      "name": "Other cheaper architecture",
+      "exactCostSol": 0,
+      "note": "Memo-intent or off-chain draft orders would weaken the product promise. Rejected."
+    }
+  },
+  "prestocksWhy": "Ecosystem (71 apps) covers swap/wallets/analytics/bots. None is a Token-2022 lifecycle-aware conversion order with target/floor/failsafe/destination/proof. XAI conversion expired 12 Sep 2026; SPACEX remains open until 12 Mar 2027. That clock is the missing product surface.",
+  "eligibility": "Only Pre* mints from prestocks.com/api/prestocks plus metrics-only Pre* (XAI). No Tessera or other pre-IPO issuers.",
+  "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+  "api": "https://tminus-api-k2d2.onrender.com"
+}

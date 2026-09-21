@@ -728,4 +728,41 @@ describe("tminus", () => {
         .rpc();
     });
   });
+
+  it("rejects a second fill after escrow is drained and the order is closed", async () => {
+    const nonce = 13n;
+    const pda = orderPda(nonce);
+    const escrow = ata(srcMint.publicKey, pda);
+    const now = Math.floor(Date.now() / 1000);
+    await program.methods
+      .place(
+        new anchor.BN(nonce.toString()),
+        new anchor.BN(1_000_000),
+        new anchor.BN(100_000_000),
+        new anchor.BN(100_000_000),
+        new anchor.BN(now + 3600),
+        new anchor.BN(now + 7200),
+        new anchor.BN(1),
+        new anchor.BN(5_000_000_000)
+      )
+      .accounts(placeAccounts(pda, escrow))
+      .signers([owner])
+      .rpc();
+    const remaining = Number(
+      (await getAccount(connection, escrow, undefined, TOKEN_2022_PROGRAM_ID)).amount
+    );
+    const minDst = Math.ceil((remaining * 100_000_000) / 1_000_000_000);
+    await program.methods
+      .fill(new anchor.BN(remaining), new anchor.BN(minDst))
+      .accounts(fillAccounts(pda, escrow))
+      .signers([filler])
+      .rpc();
+    await assert.rejects(async () => {
+      await program.methods
+        .fill(new anchor.BN(1), new anchor.BN(1))
+        .accounts(fillAccounts(pda, escrow))
+        .signers([filler])
+        .rpc();
+    });
+  });
 });

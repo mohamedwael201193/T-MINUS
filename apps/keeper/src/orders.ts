@@ -7,8 +7,17 @@ export type OpenOrder = {
   order: DecodedOrder;
 };
 
+export function shouldScanProgramAccounts(info: { executable: boolean } | null): boolean {
+  return Boolean(info?.executable);
+}
+
 export async function loadOpenOrders(connection: Connection): Promise<OpenOrder[]> {
-  const accounts = await connection.getProgramAccounts(new PublicKey(env.programId), {
+  const program = new PublicKey(env.programId);
+  const info = await connection.getAccountInfo(program, "confirmed");
+  if (!shouldScanProgramAccounts(info)) {
+    return [];
+  }
+  const accounts = await connection.getProgramAccounts(program, {
     filters: [{ memcmp: { offset: ORDER_STATUS_OFFSET, bytes: OPEN_STATUS_MEMCMP_BYTES } }],
   });
   const open: OpenOrder[] = [];

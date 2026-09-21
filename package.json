@@ -17,6 +17,7 @@
     "e2e:devnet": "node --import tsx scripts/e2e-devnet.ts",
     "e2e:devnet-keeper": "node --import tsx scripts/e2e-devnet-keeper.ts",
     "e2e:devnet-failsafe": "node --import tsx scripts/e2e-devnet-failsafe-tick.ts",
+    "e2e:devnet-double-fill": "node --import tsx scripts/e2e-devnet-double-fill.ts",
     "receipts:ingest-devnet": "node --import tsx scripts/ingest-devnet-receipts.ts",
     "sim:compose": "pnpm --filter @tminus/keeper sim:compose",
     "migrate": "pnpm --filter @tminus/api migrate"

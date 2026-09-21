@@ -1,6 +1,6 @@
 {
   "label": "LIVE_STATUS",
-  "at": "2026-09-21T00:35:19.747Z",
+  "at": "2026-09-21T00:53:52.502Z",
   "program": {
     "id": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
     "mainnet": {
@@ -33,7 +33,7 @@
   "userFundWallet": {
     "pubkey": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
     "mainnetSol": 0,
-    "devnetSol": 3.500189854,
+    "devnetSol": 3.218674174,
     "mainnetTokens": {
       "nonZeroCount": 0,
       "spacex": null,
@@ -41,12 +41,18 @@
       "tokens": []
     },
     "devnetTokens": {
-      "nonZeroCount": 6,
+      "nonZeroCount": 11,
       "spacex": null,
       "spcxx": null,
       "tokens": [
         {
           "mint": "9JoZSwS5ixB4hgyLN7jPNNfyHpA2YpfekpaDKygAvsTZ",
+          "amount": "990000",
+          "ui": "0.0099",
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "mint": "EhYbzGEw7L16jqa6FtVHDcDUmbjtHXRtcNDPtbLCABFA",
           "amount": "990000",
           "ui": "0.0099",
           "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
@@ -59,14 +65,14 @@
         },
         {
           "mint": "CmJpndkw3PnreQwyH8Ter8BWsif4xyryRg75ESKuxFyM",
-          "amount": "4997980100",
-          "ui": "4.9979801",
+          "amount": "4998960200",
+          "ui": "4.9989602",
           "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
           "mint": "DRvo9oXim5qBKS2uhGKSPWC8Vd6qf5d5GGttqkZBjtRz",
-          "amount": "4998980100",
-          "ui": "4.9989801",
+          "amount": "4999960200",
+          "ui": "4.9999602",
           "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
@@ -80,6 +86,30 @@
           "amount": "5000000000",
           "ui": "50",
           "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "mint": "9bB2dzCyRg61QBsytMKHfTXVJKKqDy6eB2oWKf2sjKgH",
+          "amount": "4999960200",
+          "ui": "4.9999602",
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "mint": "B9k7g74jGD1FG69RdLCWLyHqEfFZZMMkuXB9Cn4WxkLf",
+          "amount": "4999000000",
+          "ui": "4.999",
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "mint": "ELwTSBpoeRxbB1nVeL3UxfrXy4gytHs3PveRAm2dMXvh",
+          "amount": "990000",
+          "ui": "0.0099",
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "mint": "8sCbt6mJzn66ZaMoefiwnGnNwkAwXfMvHLzJ2n7TLrWG",
+          "amount": "4998980100",
+          "ui": "4.9989801",
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         }
       ]
     }
@@ -90,14 +120,14 @@
       "body": {
         "ok": true,
         "service": "tminus-api",
-        "uptime_ms": 209523
+        "uptime_ms": 381131
       }
     },
     "/ready": {
       "status": 200,
       "body": {
         "ok": true,
-        "slot": 448894855,
+        "slot": 448899040,
         "db": true
       }
     },
@@ -107,17 +137,17 @@
         "health": {
           "payload": {
             "halted": false,
-            "lastPoll": "2026-09-21T00:35:13.529Z",
+            "lastPoll": "2026-09-21T00:53:49.595Z",
             "haltReason": null,
             "lastFeeBps": 100,
-            "lastFeedAt": "2026-09-21T00:31:47.886Z",
+            "lastFeedAt": "2026-09-21T00:51:20.525Z",
             "composition": "atomic_swap_then_fill",
             "lastFillSig": null,
-            "lastFeedHash": "bedd0f58c0d5601a32e3a3d834be5a2bcaac2bab2226ac6ededb4d364f102e4f",
-            "lastRpcError": null,
+            "lastFeedHash": "a0aada6a38d171a6820ef29ef5be654ab6647ad36516401eab27af48b4e897d8",
+            "lastRpcError": "413 Request Entity Too Large:  {\"jsonrpc\":\"2.0\",\"error\":{\"code\": 413, \"message\":\"You have used your data allowance\"}, \"id\": \"d0ec7019-fa1c-4561-bd32-71e6d3f28a6d\" } \r\n",
             "lastJupiterError": null
           },
-          "updated_at": "2026-09-21T00:35:14.005Z"
+          "updated_at": "2026-09-21T00:53:49.900Z"
         }
       }
     },
@@ -125,6 +155,105 @@
       "status": 200,
       "body": {
         "receipts": [
+          {
+            "order_pda": "5KQFNhjc96PhcAJAQGVue36J4wp87NSNT2UbzxdRXSk6",
+            "sig": "5cZurXQRKMZGWoLhpyamUjGQ9dZn61UgckDf7osoVwk34U6kVMNJ6XuAGiSH7GDoiWaTa2BKV9EXjFHHvVKAuwXw",
+            "slot": "501649888",
+            "payload": {
+              "sig": "5cZurXQRKMZGWoLhpyamUjGQ9dZn61UgckDf7osoVwk34U6kVMNJ6XuAGiSH7GDoiWaTa2BKV9EXjFHHvVKAuwXw",
+              "kind": "fill",
+              "slot": 501649888,
+              "ratio": "1000000000",
+              "route": {
+                "keeperTick": true,
+                "composition": "two_tx_inventory_fallback"
+              },
+              "network": "DEVNET",
+              "explorer": "https://explorer.solana.com/tx/5cZurXQRKMZGWoLhpyamUjGQ9dZn61UgckDf7osoVwk34U6kVMNJ6XuAGiSH7GDoiWaTa2BKV9EXjFHHvVKAuwXw?cluster=devnet",
+              "orderPda": "5KQFNhjc96PhcAJAQGVue36J4wp87NSNT2UbzxdRXSk6",
+              "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+              "timestamp": "2026-09-21T00:51:24.000Z",
+              "failsafeFlag": true,
+              "sourceAmount": "990000",
+              "destinationAmount": "990000"
+            },
+            "created_at": "2026-09-21T00:51:25.637Z"
+          },
+          {
+            "order_pda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+            "sig": "2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r",
+            "slot": "501647356",
+            "payload": {
+              "sig": "2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r",
+              "kind": "fill",
+              "slot": 501647356,
+              "ratio": "1000000000",
+              "route": {
+                "fillIxUsed": true,
+                "composition": "two_tx_inventory_fallback"
+              },
+              "network": "DEVNET",
+              "explorer": "https://explorer.solana.com/tx/2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r?cluster=devnet",
+              "feedHash": null,
+              "orderPda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+              "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+              "timestamp": "2026-09-21T00:44:26.000Z",
+              "failsafeFlag": false,
+              "sourceAmount": "590000",
+              "destinationAmount": "590000"
+            },
+            "created_at": "2026-09-21T00:44:33.792Z"
+          },
+          {
+            "order_pda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+            "sig": "3Hjih2B1D932mKZfBC2WTXM9feET7hjESDom3XoGWC2PFz1SgMBcygCWn6xjeRMexrrR71PJwmRc8JBpc6pSRDDq",
+            "slot": "501647340",
+            "payload": {
+              "sig": "3Hjih2B1D932mKZfBC2WTXM9feET7hjESDom3XoGWC2PFz1SgMBcygCWn6xjeRMexrrR71PJwmRc8JBpc6pSRDDq",
+              "kind": "fill",
+              "slot": 501647340,
+              "ratio": "1000000000",
+              "route": {
+                "fillIxUsed": true,
+                "composition": "two_tx_inventory_fallback"
+              },
+              "network": "DEVNET",
+              "explorer": "https://explorer.solana.com/tx/3Hjih2B1D932mKZfBC2WTXM9feET7hjESDom3XoGWC2PFz1SgMBcygCWn6xjeRMexrrR71PJwmRc8JBpc6pSRDDq?cluster=devnet",
+              "feedHash": null,
+              "orderPda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+              "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+              "timestamp": "2026-09-21T00:44:23.000Z",
+              "failsafeFlag": false,
+              "sourceAmount": "400000",
+              "destinationAmount": "400000"
+            },
+            "created_at": "2026-09-21T00:44:30.717Z"
+          },
+          {
+            "order_pda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+            "sig": "4wrp1oidRAhesZ5sVrDAHt1tM6dEs6TAyW9U9EcEb2cAHHyMpEQmcrs2wwbZbvB1XZrS6G4X4wTbrLSJDNw9D9Gf",
+            "slot": "501647321",
+            "payload": {
+              "sig": "4wrp1oidRAhesZ5sVrDAHt1tM6dEs6TAyW9U9EcEb2cAHHyMpEQmcrs2wwbZbvB1XZrS6G4X4wTbrLSJDNw9D9Gf",
+              "kind": "place",
+              "slot": 501647321,
+              "ratio": null,
+              "route": {
+                "fillIxUsed": true,
+                "composition": "two_tx_inventory_fallback"
+              },
+              "network": "DEVNET",
+              "explorer": "https://explorer.solana.com/tx/4wrp1oidRAhesZ5sVrDAHt1tM6dEs6TAyW9U9EcEb2cAHHyMpEQmcrs2wwbZbvB1XZrS6G4X4wTbrLSJDNw9D9Gf?cluster=devnet",
+              "feedHash": null,
+              "orderPda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+              "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+              "timestamp": "2026-09-21T00:44:20.000Z",
+              "failsafeFlag": false,
+              "sourceAmount": "990000",
+              "destinationAmount": "0"
+            },
+            "created_at": "2026-09-21T00:44:30.304Z"
+          },
           {
             "order_pda": "Cmq5rg7cE1yvzCtkRYRRua6aMs7o6ENqPetWTG7SPXn2",
             "sig": "3H6f11sD5F3vzVgTD287CW4xcUWePNjkwCRiLdDJDEB251cyuD56Y2GPyzjLCWcTPePGVaJD8u7D8ZSJUBTRY8Zm",

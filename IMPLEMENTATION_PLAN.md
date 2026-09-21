@@ -88,7 +88,7 @@ Demo pair: **SPACEX → SPCXx**.
 | G5 cancel recover | **PASS LOCALNET + DEVNET** after harvest-withheld-to-mint then close | Phase 3–4 |
 | G6 fill respects min_ratio | **PASS LOCALNET** under-delivery rejected; min dst accepted; **DEVNET** fill delivered 990_000 | Phase 3–4 |
 | G7 failsafe timestamp branch | **PASS LOCALNET + DEVNET expire + DEVNET keeper tick fill** after failsafe_ts; control order 1:1 fill rejected `UnderDelivery` 6003 | Phase 3–4 |
-| G8 partial fills safe | **PASS LOCALNET + DEVNET** two fills (400_000 then 590_000) on 990_000 escrow; harvest-before-close on final fill | Phase 3–4 |
+| G8 partial fills safe | **PASS LOCALNET + DEVNET** two fills (400_000 then 590_000) on 990_000 escrow; harvest-before-close on final fill. **DEVNET** concurrent/second fill: 1 win + reject (`evidence/devnet-double-fill.json`) | Phase 3–4 |
 | G9 Jupiter destination route | **PASS** at 1-display size, outAmount **76706836** 2026-09-21 00:31Z live `/v1/quote` | Re-quote every fill |
 | G10 compose swap+fill one tx | **ASSEMBLY PASS / SIM err AccountNotFound**: `/build` + **real `fill` ix** (not memo) serializes **636** bytes; mainnet program/taker missing | Atomic path kept; inventory fallback used on DEVNET |
 | G11 tx size/compute | **PASS size** 636 ≤ 1232; CU not measured (`unitsConsumed` 0 on AccountNotFound) | Phase 1 |
@@ -1474,6 +1474,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Idempotent
 - [x] Halt on issuer-power change
 - [x] DEVNET `tick()` sent an inventory fill (failsafe path); Render send remains **off**
+- [x] Skip `getProgramAccounts` when the program account is not executable (avoids public-RPC 413 on mainnet)
 
 ### BACKEND
 - [x] Health/ready

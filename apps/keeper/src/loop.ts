@@ -211,7 +211,7 @@ export async function tick(connection: Connection): Promise<void> {
       }
     }
   } catch (err) {
-    state.lastRpcError = err instanceof Error ? err.message : "tick_fail";
+    state.lastRpcError = (err instanceof Error ? err.message : "tick_fail").slice(0, 240);
     log("tick_fail", { error: state.lastRpcError });
   } finally {
     await writeHealth();

@@ -25,6 +25,15 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 - Network for the ID: **DEVNET executable**; localnet tests also pass. Mainnet account still absent.
 - Upgrade authority (devnet): `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX`
 
+## Devnet explorer
+
+- Program: https://explorer.solana.com/address/HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL?cluster=devnet
+- Place: https://explorer.solana.com/tx/4bQGKezkzwM7576eAnDtkDDPzQPff9qCB6nz8a4hDdVwCTfDqZqFQnLL8JeEzTQz8RrHcc6iirb88ygtM5M2eTPK?cluster=devnet
+- Cancel: https://explorer.solana.com/tx/27RpwuFScXheLTScUEckuB8vgZKF7KCRSGC4E22BgWP1KRnfUirXJD5rJsGUCGq2ay3a8JbtKW9inVWnQFWyMTf6?cluster=devnet
+- Fill: https://explorer.solana.com/tx/26YLJiQh51AeQH2XNXqGgruM3L5KthHNNk83z1iSsNL4WiLnDYbmPD4ffaZX997sibXvc8doRZZKDJSARcc9mv7x?cluster=devnet
+- Expire: https://explorer.solana.com/tx/3H6f11sD5F3vzVgTD287CW4xcUWePNjkwCRiLdDJDEB251cyuD56Y2GPyzjLCWcTPePGVaJD8u7D8ZSJUBTRY8Zm?cluster=devnet
+- Fixture mints are **not** SPACEX. Post-fee escrow was 990_000 raw on 1_000_000 in at 100 bps.
+
 ## Live service (FREE Render)
 
 - API: `https://tminus-api-k2d2.onrender.com`

@@ -232,3 +232,17 @@ Append-only execution ledger. No secrets.
 - **next step:** mainnet SOL for G13
 
 ---
+
+## 2026-09-21T00:33Z — LIVE VERIFY — Render /v1/program + matching program bytes
+
+- **action:** Wait for free Render deploy of `136ba97`; dump on-chain program; probe user-fund tokens on both clusters
+- **command:** `node scripts/render-wait-free.mjs`; `scripts/wsl-dump-program.sh`; `node scripts/live-status.mjs`
+- **result:** Render live, `/v1/program` 200 (devnet executable, mainnet absent). On-chain ELF 254768 bytes sha256 `978c80e5ce1f4a8328f885c89f35d0c9d3b1aa93031903d2b8ee9c22d1cffff6` **exact-match** `target/deploy/tminus.so`. User-fund `CpTxsg…` mainnet 0 SOL and 0 token accounts; devnet ~3.500189854 SOL plus leftover mock Token-2022 balances from e2e. CI `136ba97` success.
+- **evidence:** `evidence/render-free-health.json`; `evidence/devnet-program-bytes.json`; `evidence/live-status.json`
+- **test:** public GET `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/program` all 200
+- **decision:** Keep `KEEPER_SEND_ENABLED=false`. Do not treat the funded wallet as mainnet-capable. Do not mark G13. Rotate the chat-pasted recovery phrase.
+- **files changed:** `scripts/live-status.mjs`, `scripts/render-wait-free.mjs`, `scripts/wsl-dump-program.sh`
+- **known risks:** recovery phrase exposed in chat; mainnet still unfunded
+- **next step:** mainnet SOL + SPACEX inventory for G13, or keep demo labeled DEVNET
+
+---

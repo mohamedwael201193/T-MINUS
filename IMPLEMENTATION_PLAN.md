@@ -81,20 +81,20 @@ Demo pair: **SPACEX → SPCXx**.
 
 | Gate | Result | Consequence |
 |---|---|---|
-| G1 escrow Token-2022 into program ATA | **PASS LOCALNET** (100 bps mock fee mint, not SPACEX) | Phase 3 |
-| G2 `transfer_checked` + 100 bps fee | **PASS LOCALNET**; live mint fee **100 bps** epoch 1039 | Phase 3 |
-| G3 post-fee received recorded | **PASS LOCALNET** `escrowed_raw == ATA amount == 990_000` on 1_000_000 in | Phase 3 |
+| G1 escrow Token-2022 into program ATA | **PASS LOCALNET + DEVNET** (100 bps mock fee mint, not SPACEX) | Phase 3–4 |
+| G2 `transfer_checked` + 100 bps fee | **PASS LOCALNET + DEVNET**; live mint fee **100 bps** epoch 1039 | Phase 3–4 |
+| G3 post-fee received recorded | **PASS LOCALNET + DEVNET** `escrowed_raw == ATA amount == 990_000` on 1_000_000 in | Phase 3–4 |
 | G4 raw vs UI | **HAZARD PROVEN**: RPC multiplier 1 vs Jupiter 1 display = 2e8 raw | Program stores raw; pin effective multiplier 5 while timestamp ≤ now |
-| G5 cancel recover | **PASS LOCALNET** after harvest-withheld-to-mint then close | Phase 3 |
-| G6 fill respects min_ratio | **PASS LOCALNET** under-delivery rejected; min dst accepted | Phase 3 |
-| G7 failsafe timestamp branch | **PASS LOCALNET** | Phase 3 |
+| G5 cancel recover | **PASS LOCALNET + DEVNET** after harvest-withheld-to-mint then close | Phase 3–4 |
+| G6 fill respects min_ratio | **PASS LOCALNET** under-delivery rejected; min dst accepted; **DEVNET** fill delivered 990_000 | Phase 3–4 |
+| G7 failsafe timestamp branch | **PASS LOCALNET + DEVNET expire** | Phase 3–4 |
 | G8 partial fills safe | **KEEP**; remaining measured from ATA; harvest-before-close required | Phase 3 |
-| G9 Jupiter destination route | **PASS** at 1-display size, outAmount **76706836** 2026-09-20 22:50Z | Re-quote every fill |
+| G9 Jupiter destination route | **PASS** at 1-display size, outAmount **76706836** 2026-09-21 00:31Z live `/v1/quote` | Re-quote every fill |
 | G10 compose swap+fill one tx | **ASSEMBLY PASS / SIM err AccountNotFound**: `/build`+memo+ALT serializes 565 bytes; keeper has 0 SOL so taker account missing | Atomic path kept; two-tx inventory fallback remains |
 | G11 tx size/compute | **PASS size** 565 ≤ 1232; CU not measured (`unitsConsumed` 0 on AccountNotFound) | Phase 1 |
 | G12 ALTs | **PASS**: `/build` ALT `8CoUnad218pEqxme5jnn9CNu4BmaRAkP7Af8uT9ZBg29` loaded | Phase 1 |
-| G13 mainnet tiny SPACEX→SPCXx via T-MINUS | **NOT RUN** (no program; no human spend approval) | Phase 8 |
-| G14 explorer receipts | **UNPROVEN** (API receipts endpoint live, empty) | Phase 5–8 |
+| G13 mainnet tiny SPACEX→SPCXx via T-MINUS | **NOT RUN** — mainnet program absent; user-fund 0 SOL and 0 SPACEX/SPCXx; keeper send off | Phase 8 |
+| G14 explorer receipts | **PASS DEVNET** — 4 live `/v1/receipts` rows with explorer sigs; not SPACEX/mainnet | Phase 5–8 |
 
 ---
 

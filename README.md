@@ -12,10 +12,10 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 | Token-2022 post-fee escrow + harvest-before-close | **LOCALNET** PASS | 100 bps fee mint fixture (not SPACEX) |
 | Pause / transfer-hook rejection | **UNIT + LOCALNET** | rust TLV tests; mocha paused/hook mint fixtures |
 | Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — 565 bytes, ALT present, `err=AccountNotFound` because keeper has 0 SOL |
-| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON |
+| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/program` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/program` reports dual-cluster status |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
-| Devnet deploy | **LIVE** | Program executable; on-chain IDL at `FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n`; sigs in `evidence/devnet-e2e.json` |
-| Mainnet program deploy / fills | Not yet | Deploy and keeper wallets have **0 SOL**; spend cap 200_000_000 raw once funded |
+| Devnet deploy | **LIVE** | Program executable; on-chain bytes **exact-match** local `tminus.so` (`978c80e5…`); IDL `FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n`; sigs in `evidence/devnet-e2e.json` |
+| Mainnet program deploy / fills | Not yet | Program account absent. User-fund `CpTxsg…` has **0 SOL** and **0 SPACEX/SPCXx** on mainnet; ~3.5 SOL on **devnet** (already used for deploy + e2e). Spend cap 200_000_000 raw once funded |
 | Frontend | Not built | Awaiting `FRONTEND/` |
 
 ## Program
@@ -39,7 +39,7 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 - API: `https://tminus-api-k2d2.onrender.com`
 - Dashboard: `https://dashboard.render.com/web/srv-dao6t2rtqb8s73e52mbg`
 - Plan: **free** web service. Keeper runs in-process (`KEEPER_EMBEDDED=true`). Render free instances spin down when idle.
-- Proven 2026-09-21T00:20Z: `/health` 200, `/ready` db true, `/v1/receipts` returns 4 **DEVNET** rows with explorer sigs. `/v1/program` reports devnet executable, mainnet absent. Keeper send remains off.
+- Proven 2026-09-21T00:32Z on commit `136ba97`: `/health` 200, `/ready` db true, `/v1/receipts` returns 4 **DEVNET** rows with explorer sigs. `/v1/program` reports devnet executable, mainnet absent. Keeper send remains off.
 
 ## Setup
 
@@ -91,15 +91,16 @@ Tiny proof, if later authorized:
 | Expire | anyone after `hard_expiry` |
 | Keeper send | **off** until the program account exists and a tiny spend is authorized |
 | Spend cap | `KEEPER_SPEND_CAP_RAW=200000000` |
-| Deploy wallet | `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` |
-| Keeper wallet | `FbsV4KELsCki2ZujWfRPvu4kpWHDdr1bxAvGNhU13hPf` |
+| Deploy wallet | `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` (0 SOL both clusters) |
+| Keeper wallet | `FbsV4KELsCki2ZujWfRPvu4kpWHDdr1bxAvGNhU13hPf` (0 SOL both clusters) |
+| User-fund / upgrade authority | `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` (mainnet 0 SOL / 0 tokens; devnet ~3.5 SOL) |
 | Abort | issuer pause, attached transfer hook, or fee-bps change vs keeper baseline |
 
 Failsafe does **not** guarantee conversion regardless of liquidity.
 
 ## Known limitations
 
-- Mainnet keeper/deploy wallets are unfunded (0 SOL).
+- Mainnet keeper/deploy/user-fund wallets are unfunded (0 SOL). User-fund also holds 0 SPACEX and 0 SPCXx on mainnet, so G13 cannot run.
 - Phase 1 simulation did not return `err: null` because the taker account does not exist on mainnet.
 - FRONTEND/ is intentionally absent.
 - Public RPC + keyless Jupiter may 429.

@@ -58,7 +58,7 @@ while (Date.now() - started < 12 * 60 * 1000) {
 }
 
 const evidence = { deploy: last, probes: {} };
-for (const path of ["/health", "/ready", "/v1/feed", "/v1/quote", "/v1/keeper", "/v1/receipts"]) {
+for (const path of ["/health", "/ready", "/v1/feed", "/v1/quote", "/v1/keeper", "/v1/receipts", "/v1/program"]) {
   try {
     const res = await fetch(URL + path, { headers: { accept: "application/json" } });
     const text = await res.text();

@@ -1,0 +1,9 @@
+{
+  "label": "DEVNET_PROGRAM_BYTES",
+  "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+  "onchainBytes": 254768,
+  "onchainSha256": "978c80e5ce1f4a8328f885c89f35d0c9d3b1aa93031903d2b8ee9c22d1cffff6",
+  "localBytes": 254768,
+  "localSha256": "978c80e5ce1f4a8328f885c89f35d0c9d3b1aa93031903d2b8ee9c22d1cffff6",
+  "exactMatch": true
+}

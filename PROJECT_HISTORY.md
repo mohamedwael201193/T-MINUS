@@ -499,6 +499,21 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T23:58Z — PRODUCTION VERIFY — Render live on c17d706, Vercel aliased tminusapp
+
+- **phase:** 18 / 23 — git push, Render, Vercel, production Chrome
+- **objective:** Ship the corporate-action layer and prove production, not just local.
+- **action:** Pushed `c17d706` to `origin/main`. Render auto-deploy `dep-daos710473hc738ts94g` status **live** on that commit. Vercel is CLI-linked (not GitHub auto); deployed `dpl_5xLxK5oHgoRy5ZpoB3KSbgZrnmKG` READY and aliased **https://tminusapp.vercel.app**. Chrome production `#/app` SPACEX GOING_PUBLIC CAN SIGN TRADE; XAI EXPIRED WINDOW CLOSED stated 0.7165; `/v1/actions` 200 from Render. HTML meta is corporate-action copy.
+- **result:** Production frontend + API serve the new architecture. Mainnet program still absent. No fake receipts. No Mainnet SOL spent.
+- **evidence:** https://github.com/mohamedwael201193/T-MINUS/commit/c17d706507c1342ca401d517faf03285d7b0f018 ; Render https://tminus-api-k2d2.onrender.com/v1/actions/xai/status EXPIRED; Vercel inspect https://vercel.com/mohamedwael201193s-projects/t-minus/5xLxK5oHgoRy5ZpoB3KSbgZrnmKG ; app https://tminusapp.vercel.app
+- **tests:** production `/health` 200; `/v1/actions` 9 rows; `/v1/actions/xai/status` EXPIRED ACQUISITION; `/v1/actions/spacex/status` GOING_PUBLIC TRADE; Chrome production console `/v1/actions` 200; expected 404 on closed DEVNET PDA `F3zS71tw…`
+- **decision:** Goal complete on evidence. Do not spend 1.08473244 SOL. A live Mainnet Jupiter fill still requires the holder to approve Phantom on ~0.0091 SPACEX.
+- **known risks:** Vercel production deploys are CLI (`vercel --prod`), not GitHub auto; Render free cold start; expired XAI ticket still shows leftover DEVNET-order explainer copy under a disabled WINDOW CLOSED button
+- **next step:** none for this goal; optional later: connect Vercel Git, hide DEVNET-order copy on expired assets, complete a holder-approved Mainnet TRADE of dust size
+
+---
+
+
 
 
 

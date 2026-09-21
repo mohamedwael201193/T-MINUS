@@ -242,7 +242,12 @@ class BackendSource implements TMinusSource {
     this.walletState = { ...this.walletState, connecting: true, providerId };
     this.emit();
     try {
-      const res = await provider.connect();
+      const res = await Promise.race([
+        provider.connect(),
+        new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error("Wallet did not respond. Approve or reject the Phantom prompt.")), 20_000);
+        }),
+      ]);
       const address = res.publicKey.toBase58();
       let balances = { SPACEX: 0, SPCXx: 0, USDC: 0, SOL: 0 };
       try {

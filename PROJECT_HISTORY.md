@@ -406,5 +406,18 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T03:10Z — PROTOCOL INSPECT — /v1/pda + provenance
+
+- **action:** Add `GET /v1/pda` (SDK `order` seed derivation; optional DEVNET/MAINNET account inspect). Console Protocol panel reads live `/v1/program` (MAINNET absent, DEVNET executable, keeper send off) and inspects the last receipt PDA via `/v1/orders/:pda?cluster=devnet` (closed accounts 404 honestly). Derived PDA requires a connected wallet and a **verified destination mint** (SPACEX→SPCXx only). Catalog now fetches issuer pages for every official PreStock slug, not just four hardcoded names. Lifecycle cards show mint, catalog membership, issuer page, and feed hash provenance. No MAINNET place.
+- **reason:** Certification needs visitor-visible program-state and PDA reads without faking an order.
+- **result:** `pnpm test` sdk 6 + api 21 + keeper 14 + receiptMap 5. API typecheck PASS. secret-scan PASS files=428.
+- **test:** pda.test matches SDK nonce 1; `/v1/pda` 200 without RPC; invalid keys 400; issuer slug helper includes ANDURIL + known pages
+- **decision:** Still Option B. Do not spend 2.14859112 SOL.
+- **files changed:** `apps/api/src/pda.ts`, `pda.test.ts`, `server.ts`, `prestocks-catalog.ts`, frontend ProtocolPanel + BackendSource inspect, LifecyclePanel provenance, README, PROJECT_HISTORY
+- **known risks:** Render must pick up `/v1/pda` before production derive works; Vercel needs a redeploy for the Protocol panel; Phantom approve remains human-only
+- **next step:** push + Render + Vercel redeploy; keep goal open (MAINNET program still absent)
+
+---
+
 
 

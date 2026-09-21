@@ -15,6 +15,21 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
   return (await res.json()) as T;
 }
 
+export async function apiGetMaybe<T>(
+  path: string,
+  signal?: AbortSignal,
+): Promise<{ status: number; body: T | null }> {
+  const res = await fetch(`${TMINUS_API}${path}`, {
+    cache: "no-store",
+    headers: { accept: "application/json" },
+    signal,
+  });
+  if (!res.ok) {
+    return { status: res.status, body: null };
+  }
+  return { status: res.status, body: (await res.json()) as T };
+}
+
 export type FeedResponse = {
   network: string;
   feed: {
@@ -56,6 +71,9 @@ export type PrestocksCatalogResponse = {
     sourceUrl: string;
     issuerPageUrl: string | null;
     fetchedAt: string;
+    inOfficialCatalog?: boolean;
+    eventType?: string | null;
+    sourceHash?: string | null;
   }>;
 };
 
@@ -63,8 +81,35 @@ export type ProgramResponse = {
   programId: string;
   keeperSendEnabled: boolean;
   clusters: {
-    mainnet: { exists: boolean; executable: boolean; explorer: string };
-    devnet: { exists: boolean; executable: boolean; explorer: string };
+    mainnet: {
+      exists: boolean;
+      executable: boolean;
+      explorer: string;
+      dataLen?: number;
+      owner?: string | null;
+      lamports?: number;
+    };
+    devnet: {
+      exists: boolean;
+      executable: boolean;
+      explorer: string;
+      dataLen?: number;
+      owner?: string | null;
+      lamports?: number;
+    };
+  };
+};
+
+export type PdaResponse = {
+  pda: string;
+  bump: number;
+  nonce: string;
+  explorer?: string;
+  cluster?: string;
+  account: null | {
+    exists: boolean;
+    status: "open" | "closed" | "wrong_owner" | null;
+    owner: string | null;
   };
 };
 

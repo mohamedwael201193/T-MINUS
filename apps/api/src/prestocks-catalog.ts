@@ -12,7 +12,7 @@ import type { FeedRecord } from "./feed.ts";
 
 const PRESTOCKS_API = "https://prestocks.com/api/prestocks";
 const PRESTOCKS_METRICS = "https://prestocks.com/api/metrics";
-const ISSUER_PAGES = ["spacex", "xai", "openai", "anthropic"] as const;
+const KNOWN_ISSUER_PAGES = ["spacex", "xai", "openai", "anthropic"] as const;
 const CACHE_MS = 120_000;
 
 const SPCXX_MINT = "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8";
@@ -37,6 +37,7 @@ export type CatalogAsset = {
   verificationState: VerificationState;
   executionAvailability: ExecutionAvailability;
   sourceUrl: string;
+  sourceHash: string | null;
   issuerPageUrl: string | null;
   fetchedAt: string;
   inOfficialCatalog: boolean;
@@ -72,6 +73,14 @@ export function asTokenList(json: unknown): PrestocksToken[] {
 
 export function mintOf(token: PrestocksToken): string | undefined {
   return token.splMint ?? token.contract_address;
+}
+
+export function issuerSlugsFromTokens(tokens: PrestocksToken[]): string[] {
+  const slugs = new Set<string>(KNOWN_ISSUER_PAGES);
+  for (const token of tokens) {
+    if (token.symbol) slugs.add(assetIdFromSymbol(token.symbol));
+  }
+  return [...slugs].filter(Boolean).slice(0, 16);
 }
 
 function pickMetrics(metrics: unknown, mint: string, symbol: string): MetricsToken | null {
@@ -116,10 +125,9 @@ export async function buildPrestocksCatalog(opts: {
     return cache.body;
   }
 
-  const [catalogRes, metricsRes, ...pages] = await Promise.all([
+  const [catalogRes, metricsRes] = await Promise.all([
     fetchText(PRESTOCKS_API),
     fetchText(PRESTOCKS_METRICS),
-    ...ISSUER_PAGES.map((slug) => fetchText(`https://prestocks.com/${slug}`)),
   ]);
 
   const catalogJson = (() => {
@@ -136,11 +144,6 @@ export async function buildPrestocksCatalog(opts: {
       return { metrics: [] };
     }
   })();
-
-  const pageBySlug: Record<string, string> = {};
-  ISSUER_PAGES.forEach((slug, i) => {
-    pageBySlug[slug] = pages[i]?.text ?? "";
-  });
 
   const tokens: PrestocksToken[] = asTokenList(catalogJson);
   const officialMints = new Set(tokens.map((t) => mintOf(t)).filter((m): m is string => Boolean(m)));
@@ -160,6 +163,15 @@ export async function buildPrestocksCatalog(opts: {
     });
   }
 
+  const slugs = issuerSlugsFromTokens(tokens);
+  const pages = await Promise.all(slugs.map((slug) => fetchText(`https://prestocks.com/${slug}`)));
+  const pageBySlug: Record<string, string> = {};
+  const pageOk = new Set<string>();
+  slugs.forEach((slug, i) => {
+    pageBySlug[slug] = pages[i]?.text ?? "";
+    if (pages[i]?.ok) pageOk.add(slug);
+  });
+
   const assets: CatalogAsset[] = [];
   const fetchedAt = now.toISOString();
 
@@ -170,7 +182,7 @@ export async function buildPrestocksCatalog(opts: {
     const id = assetIdFromSymbol(symbol);
     const slug = id;
     const issuerPage = pageBySlug[slug] ?? "";
-    const issuerPageUrl = ISSUER_PAGES.includes(slug as (typeof ISSUER_PAGES)[number])
+    const issuerPageUrl = pageOk.has(slug)
       ? `https://prestocks.com/${slug}`
       : `https://prestocks.com/products`;
     const pageDeadline = issuerPage ? parsePageDeadlineIso(issuerPage) : null;
@@ -218,6 +230,7 @@ export async function buildPrestocksCatalog(opts: {
       verificationState,
       executionAvailability,
       sourceUrl: isSpacex ? (feed?.source_url ?? PRESTOCKS_METRICS) : PRESTOCKS_API,
+      sourceHash: isSpacex ? (feed?.source_hash ?? null) : null,
       issuerPageUrl,
       fetchedAt: feed?.fetched_at ?? fetchedAt,
       inOfficialCatalog: officialMints.has(mint),

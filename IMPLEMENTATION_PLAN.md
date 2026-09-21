@@ -1527,7 +1527,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 1. **Mainnet program deploy** exact minimum safe balance is **2.14859112 SOL** (`2,148,591,120` lamports) for the optimized 209,256-byte ELF: buffer 1.06385868 + programdata 1.06389932 + program 0.00083312 + 0.02 fee buffer. After success, buffer rent is refunded and **1.06473244 SOL** stays locked. Measured from mainnet `SysvarRent` (5080 lamports/byte-year, 1-year exemption) via `getMinimumBalanceForRentExemption`. Evidence: `evidence/mainnet-deploy-rent.json`.
 2. **Tiny mainnet fill** will use the dust SPACEX already held (not 1 display / ~$117). Needs the program on mainnet, leftover fee SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000` only after deploy.
-3. **Frontend** is live at https://tminusapp.vercel.app and wired to the live API. Phantom **approve** is a human-only Chrome extension step. MAINNET place remains refused under Option B.
+3. **Frontend** is live at https://tminusapp.vercel.app and wired to the live API. Console Protocol panel inspects `/v1/program` + `/v1/pda` + last proof PDA. Phantom **approve** is a human-only Chrome extension step. MAINNET place remains refused under Option B.
 4. Rotate Render/GitHub/DB secrets that were pasted in chat. The recovery phrase pasted in chat should be treated as **exposed** — do not keep large mainnet funds on that wallet.
 
 Do not enable keeper send on mainnet until the program account exists there and a tiny spend is explicitly authorized.

@@ -29,7 +29,11 @@ function createSource(): TMinusSource {
 }
 
 function isCurrentAdapter(source: TMinusSource): boolean {
-  return typeof source.getSelectedAssetId === "function" && typeof source.selectAsset === "function";
+  return (
+    typeof source.getSelectedAssetId === "function" &&
+    typeof source.selectAsset === "function" &&
+    typeof source.getProtocolInspect === "function"
+  );
 }
 
 export function TMinusProvider({ children }: { children: ReactNode }) {

@@ -5,6 +5,7 @@ import type {
   MarketSnapshot,
   NetworkEnvironment,
   OrderStatus,
+  ProtocolInspect,
   WalletState,
 } from "../domain/types";
 import { LIFECYCLE_ASSETS } from "../data/lifecycleData";
@@ -135,6 +136,34 @@ export class LocalDesignSource implements TMinusSource {
       apiBase: "",
       programMainnetExists: false,
       programDevnetExists: false,
+    };
+  }
+
+  getProtocolInspect(): ProtocolInspect {
+    const programId = "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL";
+    return {
+      keeperSendEnabled: false,
+      mainnet: {
+        exists: false,
+        executable: false,
+        explorer: `https://explorer.solana.com/address/${programId}`,
+        dataLen: 0,
+        owner: null,
+        lamports: 0,
+      },
+      devnet: {
+        exists: false,
+        executable: false,
+        explorer: `https://explorer.solana.com/address/${programId}?cluster=devnet`,
+        dataLen: 0,
+        owner: null,
+        lamports: 0,
+      },
+      derivedPda: {
+        ready: false,
+        reason: "SIMULATION — PDA inspect is live-API only.",
+      },
+      lastProofPda: null,
     };
   }
 

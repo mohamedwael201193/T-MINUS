@@ -62,6 +62,9 @@ export interface LifecycleAsset {
   sourceUrl?: string;
   issuerPageUrl?: string;
   fetchedAt?: string;
+  inOfficialCatalog?: boolean;
+  eventType?: string | null;
+  sourceHash?: string | null;
 }
 
 /* -------------------------------- market -------------------------------- */
@@ -169,6 +172,40 @@ export interface NetworkEnvironment {
   apiBase: string;
   programMainnetExists: boolean;
   programDevnetExists: boolean;
+}
+
+export type PdaAccountState = "absent" | "open" | "closed" | "wrong_owner" | "unchecked";
+
+export interface ClusterProgramStatus {
+  exists: boolean;
+  executable: boolean;
+  explorer: string;
+  dataLen: number;
+  owner: string | null;
+  lamports: number;
+}
+
+export interface ProtocolInspect {
+  keeperSendEnabled: boolean;
+  mainnet: ClusterProgramStatus;
+  devnet: ClusterProgramStatus;
+  derivedPda: {
+    ready: boolean;
+    reason: string;
+    pda?: string;
+    bump?: number;
+    nonce?: string;
+    cluster?: "devnet";
+    account?: PdaAccountState;
+    explorer?: string;
+  };
+  lastProofPda: {
+    pda: string;
+    cluster: "devnet";
+    account: PdaAccountState;
+    explorer: string;
+    note: string;
+  } | null;
 }
 
 export interface WalletBalance {

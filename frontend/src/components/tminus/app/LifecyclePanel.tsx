@@ -1,7 +1,7 @@
 "use client";
 
 import { useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
-import { fmtCount, fmtDate, fmtRatio, fmtUsd } from "@/lib/tminus/utils";
+import { fmtCount, fmtDate, fmtRatio, fmtUsd, truncMid } from "@/lib/tminus/utils";
 import { SPACEX_ASSET_ID } from "@/lib/tminus/data/lifecycleData";
 import { Label, Panel, Stat } from "@/components/tminus/system/primitives";
 import { Countdown, useElapsedFraction } from "@/components/tminus/system/Countdown";
@@ -94,6 +94,11 @@ export function LifecyclePanel() {
             sourceUrl={asset.sourceUrl}
             fetchedAt={asset.fetchedAt}
             executionAvailability={asset.executionAvailability}
+            mint={asset.mint}
+            destinationMint={asset.destinationMint}
+            issuerPageUrl={asset.issuerPageUrl}
+            inOfficialCatalog={asset.inOfficialCatalog}
+            sourceHash={asset.sourceHash}
           />
         ) : asset.stage === "EXPIRED" ? (
           <ExpiredLifecycle
@@ -104,6 +109,9 @@ export function LifecyclePanel() {
             note={asset.stageNote}
             deadline={asset.windowClosesAt}
             sourceUrl={asset.sourceUrl}
+            mint={asset.mint}
+            issuerPageUrl={asset.issuerPageUrl}
+            inOfficialCatalog={asset.inOfficialCatalog}
           />
         ) : (
           <OpenaiLifecycle
@@ -113,6 +121,9 @@ export function LifecyclePanel() {
             markPrice={asset.markPrice}
             holders={asset.holders}
             note={asset.stageNote}
+            mint={asset.mint}
+            issuerPageUrl={asset.issuerPageUrl}
+            inOfficialCatalog={asset.inOfficialCatalog}
           />
         )}
       </div>
@@ -137,6 +148,11 @@ function SpacexLifecycle(props: {
   sourceUrl?: string;
   fetchedAt?: string;
   executionAvailability?: string;
+  mint?: string;
+  destinationMint?: string;
+  issuerPageUrl?: string;
+  inOfficialCatalog?: boolean;
+  sourceHash?: string | null;
 }) {
   const elapsed = useElapsedFraction(props.windowOpenedAt, props.windowClosesAt);
   const ratio = props.market.executableRatio;
@@ -156,8 +172,15 @@ function SpacexLifecycle(props: {
             </span>
           </div>
           <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.12em] text-fog">
-            SpaceX PreStock · issuer-prescribed destination · {fmtCount(props.holders)} holders
+            {props.symbol} PreStock · issuer-prescribed destination · {fmtCount(props.holders)} holders
+            {props.inOfficialCatalog === false ? " · metrics-only" : ""}
           </p>
+          {props.mint ? (
+            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.1em] text-fog-2">
+              Mint {truncMid(props.mint, 6, 4)}
+              {props.destinationMint ? ` · dst ${truncMid(props.destinationMint, 6, 4)}` : ""}
+            </p>
+          ) : null}
         </div>
         <Dial
           elapsed={elapsed}
@@ -232,8 +255,21 @@ function SpacexLifecycle(props: {
       <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 rounded-xl border-2 border-ink/15 bg-bone/40 px-4 py-3 sm:grid-cols-4">
         <Stat label="Lifecycle" value={props.verificationState?.toUpperCase() ?? "UNKNOWN"} />
         <Stat label="Execution" value={props.executionAvailability ?? "UNKNOWN"} />
-        <Stat label="Source" value={props.sourceUrl ? "PreStocks" : "—"} />
-        <Stat label="Last verified" value={props.fetchedAt ? fmtDate(props.fetchedAt) : "—"} />
+        <Stat
+          label="Source"
+          value={
+            props.issuerPageUrl
+              ? "Issuer page"
+              : props.sourceUrl
+                ? "PreStocks"
+                : "—"
+          }
+        />
+        <Stat
+          label="Last verified"
+          value={props.fetchedAt ? fmtDate(props.fetchedAt) : "—"}
+          sub={props.sourceHash ? truncMid(props.sourceHash, 6, 4) : undefined}
+        />
       </div>
 
       {/* sparkline */}
@@ -283,6 +319,9 @@ function OpenaiLifecycle(props: {
   markPrice: number;
   holders: number;
   note: string;
+  mint?: string;
+  issuerPageUrl?: string;
+  inOfficialCatalog?: boolean;
 }) {
   return (
     <div>
@@ -302,6 +341,9 @@ function OpenaiLifecycle(props: {
         <Stat label="PreStock price" value={fmtUsd(props.price)} />
         <Stat label="Issuer mark" value={props.markPrice > 0 ? fmtUsd(props.markPrice) : "UNKNOWN"} />
         <Stat label="Holders" value={fmtCount(props.holders)} />
+        <Stat label="Mint" value={props.mint ? truncMid(props.mint, 6, 4) : "—"} />
+        <Stat label="Catalog" value={props.inOfficialCatalog === false ? "Metrics-only" : "Official"} />
+        <Stat label="Issuer page" value={props.issuerPageUrl ? "Linked" : "Unknown"} />
       </div>
 
       {/* watch rail */}
@@ -339,6 +381,9 @@ function ExpiredLifecycle(props: {
   note: string;
   deadline: string | null;
   sourceUrl?: string;
+  mint?: string;
+  issuerPageUrl?: string;
+  inOfficialCatalog?: boolean;
 }) {
   return (
     <div>
@@ -355,9 +400,12 @@ function ExpiredLifecycle(props: {
         <Stat label="PreStock price" value={props.price > 0 ? fmtUsd(props.price) : "—"} />
         <Stat label="Holders" value={fmtCount(props.holders)} />
         <Stat label="Deadline" value={props.deadline ? fmtDate(props.deadline) : "—"} />
+        <Stat label="Mint" value={props.mint ? truncMid(props.mint, 6, 4) : "—"} />
+        <Stat label="Catalog" value={props.inOfficialCatalog === false ? "Metrics-only" : "Official"} />
+        <Stat label="Issuer page" value={props.issuerPageUrl ? "Linked" : "Unknown"} />
       </div>
       <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-fog">
-        Execution halted · {props.sourceUrl ?? "PreStocks issuer page"}
+        Execution halted · {props.issuerPageUrl ?? props.sourceUrl ?? "PreStocks issuer page"}
       </p>
     </div>
   );

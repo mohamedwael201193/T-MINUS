@@ -5,6 +5,7 @@ import { navigate } from "@/lib/tminus/router";
 import { LifecyclePanel } from "./LifecyclePanel";
 import { OrderTicket } from "./OrderTicket";
 import { MyOrders } from "./MyOrders";
+import { ProtocolPanel } from "./ProtocolPanel";
 import { Label } from "@/components/tminus/system/primitives";
 import { ReceiptCard } from "@/components/tminus/system/ReceiptCard";
 
@@ -24,6 +25,7 @@ export function ConsoleView() {
         {/* left column */}
         <div className="lg:col-span-7">
           <LifecyclePanel />
+          <ProtocolPanel />
           <MyOrders />
         </div>
 

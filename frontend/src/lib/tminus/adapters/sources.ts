@@ -4,6 +4,7 @@ import type {
   LifecycleAsset,
   MarketSnapshot,
   NetworkEnvironment,
+  ProtocolInspect,
   WalletState,
 } from "../domain/types";
 
@@ -75,6 +76,9 @@ export interface TMinusSource {
 
   /** honest MAINNET / DEVNET / SIMULATION labels — never implied */
   getEnvironment(): NetworkEnvironment;
+
+  /** live program + PDA inspect — never a place */
+  getProtocolInspect(): ProtocolInspect;
 
   /** currently inspected PreStock — ticket and lifecycle share this */
   getSelectedAssetId(): string;

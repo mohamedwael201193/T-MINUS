@@ -4,9 +4,10 @@ import { PROGRAM_ID, decodeOrder } from "@tminus/sdk";
 import { env } from "./config.ts";
 import { sql } from "./db.ts";
 import { latestFeed, refreshFeed } from "./feed.ts";
-import { declaredProgramId, readProgramStatus, rpcForCluster, type ClusterName } from "./program-status.ts";
+import { declaredProgramId, explorerAddress, readProgramStatus, rpcForCluster, type ClusterName } from "./program-status.ts";
 import { buildPrestocksCatalog } from "./prestocks-catalog.ts";
 import { readOwnerBalances } from "./balances.ts";
+import { deriveOrderPda } from "./pda.ts";
 
 const started = Date.now();
 
@@ -108,6 +109,56 @@ export function createServer() {
       if (url.pathname === "/v1/feed/refresh") {
         const feed = await refreshFeed();
         send(res, 200, { network: "MAINNET", feed });
+        return;
+      }
+      if (url.pathname === "/v1/pda") {
+        const derived = deriveOrderPda({
+          owner: url.searchParams.get("owner") ?? "",
+          src: url.searchParams.get("src") ?? "",
+          dst: url.searchParams.get("dst") ?? "",
+          nonce: url.searchParams.get("nonce") ?? "",
+          programId: env.programId,
+        });
+        if ("error" in derived) {
+          send(res, 400, derived);
+          return;
+        }
+        const clusterParam = url.searchParams.get("cluster");
+        const inspect = clusterParam === "devnet" || clusterParam === "mainnet-beta";
+        if (!inspect) {
+          send(res, 200, { ...derived, account: null });
+          return;
+        }
+        const cluster: ClusterName = clusterParam === "devnet" ? "devnet" : "mainnet-beta";
+        const rpc = rpcForCluster(cluster, env.solanaRpc, process.env.DEVNET_RPC_URL);
+        const connection = new Connection(rpc, "confirmed");
+        const info = await connection.getAccountInfo(new PublicKey(derived.pda));
+        if (!info) {
+          send(res, 200, {
+            ...derived,
+            cluster,
+            explorer: explorerAddress(cluster, derived.pda),
+            account: { exists: false, status: null, owner: null },
+          });
+          return;
+        }
+        const owner = info.owner.toBase58();
+        const programOwned = owner === PROGRAM_ID || owner === env.programId;
+        send(res, 200, {
+          ...derived,
+          cluster,
+          explorer: explorerAddress(cluster, derived.pda),
+          account: {
+            exists: true,
+            owner,
+            lamports: info.lamports,
+            status: programOwned
+              ? decodeOrder(Buffer.from(info.data)).status === 0
+                ? "open"
+                : "closed"
+              : "wrong_owner",
+          },
+        });
         return;
       }
       if (url.pathname.startsWith("/v1/orders/")) {

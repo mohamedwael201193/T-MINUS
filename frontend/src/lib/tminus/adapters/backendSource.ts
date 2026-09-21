@@ -4,6 +4,7 @@ import type {
   LifecycleAsset,
   MarketSnapshot,
   NetworkEnvironment,
+  ProtocolInspect,
   RatioPoint,
   WalletState,
 } from "../domain/types";
@@ -13,8 +14,10 @@ import {
   PROGRAM_ID,
   TMINUS_API,
   apiGet,
+  apiGetMaybe,
   type BalancesResponse,
   type FeedResponse,
+  type PdaResponse,
   type PrestocksCatalogResponse,
   type ProgramResponse,
   type QuoteResponse,
@@ -39,6 +42,34 @@ function injectedProvider(id: string): PhantomLike | null {
   if (id === "solflare") return w.solflare ?? null;
   if (id === "backpack") return w.backpack?.solana ?? null;
   return w.solana ?? null;
+}
+
+function emptyCluster(cluster: "mainnet" | "devnet"): ProtocolInspect["mainnet"] {
+  const programId = PROGRAM_ID;
+  return {
+    exists: false,
+    executable: false,
+    explorer:
+      cluster === "devnet"
+        ? `https://explorer.solana.com/address/${programId}?cluster=devnet`
+        : `https://explorer.solana.com/address/${programId}`,
+    dataLen: 0,
+    owner: null,
+    lamports: 0,
+  };
+}
+
+function emptyInspect(): ProtocolInspect {
+  return {
+    keeperSendEnabled: false,
+    mainnet: emptyCluster("mainnet"),
+    devnet: emptyCluster("devnet"),
+    derivedPda: {
+      ready: false,
+      reason: "Connect a wallet to derive the order PDA for this pair.",
+    },
+    lastProofPda: null,
+  };
 }
 
 function emptyMarket(assetId: string): MarketSnapshot {
@@ -74,6 +105,9 @@ function mapAsset(row: PrestocksCatalogResponse["assets"][number]): LifecycleAss
     sourceUrl: row.sourceUrl,
     issuerPageUrl: row.issuerPageUrl ?? undefined,
     fetchedAt: row.fetchedAt,
+    inOfficialCatalog: row.inOfficialCatalog,
+    eventType: row.eventType,
+    sourceHash: row.sourceHash,
   };
 }
 
@@ -142,6 +176,8 @@ class BackendSource implements TMinusSource {
     address: null,
     balances: null,
   };
+  private inspect: ProtocolInspect = emptyInspect();
+  private inspectGen = 0;
 
   listAssets(): LifecycleAsset[] {
     return this.assets;
@@ -197,6 +233,10 @@ class BackendSource implements TMinusSource {
     return this.env;
   }
 
+  getProtocolInspect(): ProtocolInspect {
+    return this.inspect;
+  }
+
   getSelectedAssetId(): string {
     return this.selectedAssetId;
   }
@@ -204,6 +244,7 @@ class BackendSource implements TMinusSource {
   selectAsset(id: string): void {
     this.selectedAssetId = id;
     this.emit();
+    void this.inspectChainState();
   }
 
   private async applyConnectedWallet(providerId: string, address: string): Promise<void> {
@@ -227,6 +268,7 @@ class BackendSource implements TMinusSource {
       balances,
     };
     this.emit();
+    void this.inspectChainState();
   }
 
   private async restoreTrustedWallet(): Promise<void> {
@@ -291,6 +333,13 @@ class BackendSource implements TMinusSource {
       address: null,
       balances: null,
     };
+    this.inspect = {
+      ...this.inspect,
+      derivedPda: {
+        ready: false,
+        reason: "Connect a wallet to derive the order PDA for this pair.",
+      },
+    };
     this.emit();
   }
 
@@ -329,6 +378,97 @@ class BackendSource implements TMinusSource {
 
   readonly getVersion = () => this.version;
 
+  private async inspectChainState() {
+    const gen = ++this.inspectGen;
+    const proofPda = this.receipts.find((r) => r.orderId)?.orderId;
+    let lastProofPda = this.inspect.lastProofPda;
+    if (proofPda) {
+      const looked = await apiGetMaybe<{
+        order?: { status?: string };
+      }>(`/v1/orders/${proofPda}?cluster=devnet`);
+      if (gen !== this.inspectGen) return;
+      lastProofPda = {
+        pda: proofPda,
+        cluster: "devnet",
+        account:
+          looked.status === 404
+            ? "absent"
+            : looked.body?.order?.status === "open"
+              ? "open"
+              : looked.body?.order?.status === "closed"
+                ? "closed"
+                : "unchecked",
+        explorer: `https://explorer.solana.com/address/${proofPda}?cluster=devnet`,
+        note:
+          looked.status === 404
+            ? "closed after fill/expire — account gone"
+            : looked.body?.order?.status === "open"
+              ? "open on DEVNET"
+              : "lookup returned",
+      };
+    }
+
+    const owner = this.walletState.address;
+    const asset = this.getAsset(this.selectedAssetId) ?? this.assets[0];
+    let derivedPda = this.inspect.derivedPda;
+    if (!owner) {
+      derivedPda = {
+        ready: false,
+        reason: "Connect a wallet to derive the order PDA for this pair.",
+      };
+    } else if (!asset?.mint || !asset.destinationMint) {
+      derivedPda = {
+        ready: false,
+        reason: "Destination mint is not verified for this PreStock — PDA not derived.",
+      };
+    } else {
+      const q = new URLSearchParams({
+        owner,
+        src: asset.mint,
+        dst: asset.destinationMint,
+        nonce: "0",
+        cluster: "devnet",
+      });
+      const pda = await apiGetMaybe<PdaResponse>(`/v1/pda?${q}`);
+      if (gen !== this.inspectGen) return;
+      if (pda.status === 404 || !pda.body?.pda) {
+        derivedPda = {
+          ready: false,
+          reason:
+            pda.status === 404
+              ? "PDA endpoint not live yet — Render will pick up /v1/pda after deploy."
+              : `PDA derive HTTP ${pda.status}`,
+        };
+      } else {
+        const acct = pda.body.account;
+        derivedPda = {
+          ready: true,
+          reason: "Deterministic PDA for owner × src × dst × nonce 0 — inspect only.",
+          pda: pda.body.pda,
+          bump: pda.body.bump,
+          nonce: pda.body.nonce,
+          cluster: "devnet",
+          account: !acct
+            ? "unchecked"
+            : !acct.exists
+              ? "absent"
+              : acct.status === "open" || acct.status === "closed" || acct.status === "wrong_owner"
+                ? acct.status
+                : "unchecked",
+          explorer: pda.body.explorer ?? `https://explorer.solana.com/address/${pda.body.pda}?cluster=devnet`,
+        };
+      }
+    }
+
+    if (gen !== this.inspectGen) return;
+    this.inspect = {
+      ...this.inspect,
+      derivedPda,
+      lastProofPda,
+    };
+    this.emit();
+  }
+
   private async refresh() {
     this.abort?.abort();
     const abort = new AbortController();
@@ -360,6 +500,30 @@ class BackendSource implements TMinusSource {
         apiBase: TMINUS_API,
         programMainnetExists: Boolean(program?.clusters.mainnet.executable),
         programDevnetExists: Boolean(program?.clusters.devnet.executable),
+      };
+      this.inspect = {
+        ...this.inspect,
+        keeperSendEnabled: Boolean(program?.keeperSendEnabled),
+        mainnet: {
+          exists: Boolean(program?.clusters.mainnet.exists),
+          executable: Boolean(program?.clusters.mainnet.executable),
+          explorer:
+            program?.clusters.mainnet.explorer ??
+            `https://explorer.solana.com/address/${program?.programId ?? PROGRAM_ID}`,
+          dataLen: program?.clusters.mainnet.dataLen ?? 0,
+          owner: program?.clusters.mainnet.owner ?? null,
+          lamports: program?.clusters.mainnet.lamports ?? 0,
+        },
+        devnet: {
+          exists: Boolean(program?.clusters.devnet.exists),
+          executable: Boolean(program?.clusters.devnet.executable),
+          explorer:
+            program?.clusters.devnet.explorer ??
+            `https://explorer.solana.com/address/${program?.programId ?? PROGRAM_ID}?cluster=devnet`,
+          dataLen: program?.clusters.devnet.dataLen ?? 0,
+          owner: program?.clusters.devnet.owner ?? null,
+          lamports: program?.clusters.devnet.lamports ?? 0,
+        },
       };
 
       const spacex = this.assets.find((a) => a.id === "spacex");
@@ -409,6 +573,7 @@ class BackendSource implements TMinusSource {
       }
 
       this.emit();
+      void this.inspectChainState();
     } catch (err) {
       if (abort.signal.aborted) return;
       this.notices.push({

@@ -382,5 +382,15 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T03:48Z — HMR GUARD — getSelectedAssetId crash
+
+- **action:** Fast Refresh kept a pre-revision BackendSource in `useState`, so `LifecyclePanel` called `getSelectedAssetId` on an object that lacked it. Recreate the adapter when those methods are missing; ticket/panel fall back to `spacex`.
+- **result:** Console reloads clean — no error messages. SPACEX window + 0.7671 still live. Wallet trusted session still connected.
+- **test:** Chrome `#/app` after reload; list_console_messages errors empty
+- **decision:** Still Option B.
+- **next step:** push this guard
+
+---
+
 
 

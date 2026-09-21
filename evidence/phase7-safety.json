@@ -1,0 +1,39 @@
+{
+  "label": "PHASE7_SAFETY",
+  "network": "MAINNET",
+  "sent": false,
+  "at": "2026-09-21T00:04:47.610Z",
+  "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
+  "epoch": 1039,
+  "slot": 448888024,
+  "feeBps": 100,
+  "feeEpoch": 1039,
+  "hookProgramId": null,
+  "paused": false,
+  "multiplier": "1",
+  "newMultiplier": "5",
+  "newMultiplierEffectiveTimestamp": 1781065800,
+  "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+  "mintAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+  "freezeAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+  "quote": {
+    "inAmount": "200000000",
+    "outAmount": "76706836",
+    "swapUsdValue": "120.68699538063480"
+  },
+  "triggerV1": {
+    "status": 500,
+    "bodyPreview": "{\"error\":\"unable to validate create order request: Mint PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh has transfer fee\",\"code\":2}"
+  },
+  "programAccountExists": false,
+  "simulatePlace": {
+    "err": "AccountNotFound",
+    "unitsConsumed": 0,
+    "logsPreview": []
+  },
+  "spendCapRaw": "200000000",
+  "keeperSendEnabled": false,
+  "abortIfHook": false,
+  "abortIfPaused": false,
+  "mintSha256": "384d65883703201a39a6a7d90ace1dde7f0b42d0cc81090c2320208b8cfc8d43"
+}

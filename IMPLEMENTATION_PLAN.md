@@ -2,7 +2,7 @@
 
 Single source of truth. Implementation is in progress. Frontend remains out of scope until `FRONTEND/` is delivered.
 
-Verified-at (this document): **2026-09-20 23:15 UTC** unless a row says otherwise. Stale research from 20 Sep product docs is overridden by live rows in §3.
+Verified-at (this document): **2026-09-21 00:00 UTC** unless a row says otherwise. Stale research from 20 Sep product docs is overridden by live rows in §3.
 
 ---
 
@@ -1423,8 +1423,8 @@ Need DoraHacks/hackathon login in Chrome — use Jev only to **navigate**, human
 | Threat | Impact | Mitigation | Test |
 |---|---|---|---|
 | Issuer permanentDelegate | Escrow drained | Disclose; same as wallet; halt on authority change | Feed snapshot mismatch → halt |
-| Freeze/pause | Fills fail | Halt; cancel when possible | Devnet pause fixture |
-| Transfer hook attached | Unexpected CPI | `place`/`fill` reject Some(programId) | Test hook mint |
+| Freeze/pause | Fills fail | Halt; cancel when possible | LOCALNET paused mint + keeper `issuer_paused` |
+| Transfer hook attached | Unexpected CPI | `place`/`fill` reject Some(programId) | LOCALNET hook mint + rust TLV |
 | Fee change 50→100 already live | Misprice | Always measure ATA delta | 100 bps fixture |
 | Multiplier 1 vs 5 | 5× misprice | Pin `src_multiplier_e9` at place; UI shows raw+display | Unit test 2e8 = 1 display |
 | Filler underpay | Theft | On-chain ceil ratio | Under-delivery tx fails |
@@ -1489,8 +1489,8 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [ ] Chat-pasted tokens rotated
 
 ### TESTING
-- [x] `anchor test` LOCALNET 7/7 (`evidence/program-build.json`)
-- [x] Failure-mode list in Phase 3–5 (under-delivery, double-fill, expire, halt, spend cap)
+- [x] `anchor test` LOCALNET 11/11 (`evidence/program-build.json`)
+- [x] Failure-mode list in Phase 3–5 (under-delivery, double-fill, expire, halt, spend cap, pause, hook, stale feed)
 
 ### MAINNET
 - [!] Tiny fill authorized and done — **blocked**: 0 SOL, program account absent, `KEEPER_SEND_ENABLED=false`

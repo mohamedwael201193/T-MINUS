@@ -176,3 +176,17 @@ Append-only execution ledger. No secrets.
 - **next step:** SOL for `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj`
 
 ---
+
+## 2026-09-21T00:00Z — PHASE 7/9 — safety card, pause/hook tests, free Render live on 275eee9
+
+- **action:** Extract mint TLV pause/hook checks; add feed-stale halt helper; Phase 7 live simulate-place (no send); CI rust+mock-guard
+- **command:** `pnpm test`; `pnpm phase7`; `scripts/wsl-anchor-test.sh`; `node scripts/render-status.mjs`
+- **result:** Render `tminus-api-k2d2` live on `275eee9`, plan free, `/ready` db true, keeper `lastFeeBps=100` send off; program still absent; wallets 0 SOL
+- **evidence:** `evidence/live-status.json`; `evidence/phase7-safety.json`
+- **test:** rust TLV pause/hook; mocha pause/hook/min-fill/invalid-ratio; keeper feed-stale
+- **decision:** Do not enable `KEEPER_SEND_ENABLED`. Do not mark G13.
+- **files changed:** `programs/tminus/src/lib.rs`, `tests/tminus.ts`, `apps/keeper/src/policy.ts`, `apps/keeper/src/loop.ts`, `.github/workflows/ci.yml`
+- **known risks:** still no on-chain program account
+- **next step:** SOL for deploy wallet; human authorize tiny mainnet spend after program exists
+
+---

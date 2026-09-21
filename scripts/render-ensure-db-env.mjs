@@ -41,7 +41,9 @@ const rows = Array.isArray(ev.body) ? ev.body.map((r) => r.envVar ?? r) : [];
 const keys = new Set(rows.map((e) => e.key));
 console.log("has_DATABASE_URL", keys.has("DATABASE_URL"));
 console.log("has_DIRECT_URL", keys.has("DIRECT_URL"));
-for (const name of ["DATABASE_URL", "DIRECT_URL"]) {
+console.log("has_SOLANA_RPC_URL", keys.has("SOLANA_RPC_URL"));
+console.log("has_KEEPER_SEND_ENABLED", keys.has("KEEPER_SEND_ENABLED"));
+for (const name of ["DATABASE_URL", "DIRECT_URL", "SOLANA_RPC_URL", "SOLANA_NETWORK"]) {
   if (keys.has(name)) continue;
   if (!process.env[name]) {
     console.error("missing local", name);
@@ -51,4 +53,11 @@ for (const name of ["DATABASE_URL", "DIRECT_URL"]) {
     value: process.env[name],
   });
   console.log("put", name, put.status);
+}
+const send = rows.find((e) => e.key === "KEEPER_SEND_ENABLED");
+if (!send || send.value !== "false") {
+  const put = await rnd("PUT", `/services/${ID}/env-vars/KEEPER_SEND_ENABLED`, {
+    value: "false",
+  });
+  console.log("forced_send_disabled", put.status);
 }

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { haltFromIssuer, fillSize, isConfiguredPair } from "./policy.ts";
+import { haltFromIssuer, haltFromFeed, fillSize, isConfiguredPair } from "./policy.ts";
 import type { IssuerSnapshot } from "./issuer.ts";
 
 function snap(over: Partial<IssuerSnapshot> = {}): IssuerSnapshot {
@@ -36,6 +36,12 @@ test("spend cap never exceeds remaining and skips illegal partials", () => {
   assert.equal(fillSize(50n, 200n, 1n), 50n);
   assert.equal(fillSize(30n, 20n, 50n), null);
   assert.equal(fillSize(30n, 200n, 50n), 30n);
+});
+
+test("halts on missing or stale feed", () => {
+  assert.equal(haltFromFeed(null, 1_000, 300), "feed_missing");
+  assert.equal(haltFromFeed(0, 400, 300), "feed_stale");
+  assert.equal(haltFromFeed(200, 400, 300), null);
 });
 
 test("ignores orders that are not the configured SPACEX/SPCXx pair", () => {

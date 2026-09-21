@@ -286,20 +286,24 @@ fn harvest_withheld_to_mint<'info>(
     Ok(())
 }
 
-fn assert_src_mint_allowed(mint_info: &AccountInfo) -> Result<()> {
-    require_keys_eq!(*mint_info.owner, TOKEN_2022_ID, TminusError::WrongTokenProgram);
-    let data = mint_info.try_borrow_data()?;
+fn inspect_mint_extensions(data: &[u8]) -> Result<()> {
     require!(data.len() >= MINT_BASE_LEN, TminusError::InvalidMint);
-    if let Some(paused) = tlv_extension(&data, EXT_PAUSABLE_CONFIG) {
+    if let Some(paused) = tlv_extension(data, EXT_PAUSABLE_CONFIG) {
         require!(paused.len() >= 33, TminusError::InvalidMint);
         require!(paused[32] == 0, TminusError::Paused);
     }
-    if let Some(hook) = tlv_extension(&data, EXT_TRANSFER_HOOK) {
+    if let Some(hook) = tlv_extension(data, EXT_TRANSFER_HOOK) {
         require!(hook.len() >= 64, TminusError::InvalidMint);
         let pid = &hook[32..64];
         require!(pid.iter().all(|b| *b == 0), TminusError::HookAttached);
     }
     Ok(())
+}
+
+fn assert_src_mint_allowed(mint_info: &AccountInfo) -> Result<()> {
+    require_keys_eq!(*mint_info.owner, TOKEN_2022_ID, TminusError::WrongTokenProgram);
+    let data = mint_info.try_borrow_data()?;
+    inspect_mint_extensions(&data)
 }
 
 fn return_remaining_and_close(accounts: &mut Cancel<'_>) -> Result<()> {
@@ -731,5 +735,50 @@ mod unit_tests {
     #[test]
     fn ceil_ratio_tiny_ratio_still_positive() {
         assert_eq!(ceil_ratio(2, 1).unwrap(), 1);
+    }
+
+    fn mint_tlv(entries: &[(u16, Vec<u8>)]) -> Vec<u8> {
+        let mut data = vec![0u8; MINT_BASE_LEN];
+        data.push(1);
+        for (ty, payload) in entries {
+            data.extend_from_slice(&ty.to_le_bytes());
+            data.extend_from_slice(&(payload.len() as u16).to_le_bytes());
+            data.extend_from_slice(payload);
+        }
+        data
+    }
+
+    #[test]
+    fn mint_without_pause_or_hook_is_allowed() {
+        let data = mint_tlv(&[]);
+        assert!(inspect_mint_extensions(&data).is_ok());
+    }
+
+    #[test]
+    fn mint_paused_is_rejected() {
+        let mut payload = vec![0u8; 33];
+        payload[32] = 1;
+        let data = mint_tlv(&[(EXT_PAUSABLE_CONFIG, payload)]);
+        assert!(inspect_mint_extensions(&data).is_err());
+    }
+
+    #[test]
+    fn mint_unpaused_is_allowed() {
+        let data = mint_tlv(&[(EXT_PAUSABLE_CONFIG, vec![0u8; 33])]);
+        assert!(inspect_mint_extensions(&data).is_ok());
+    }
+
+    #[test]
+    fn mint_with_transfer_hook_program_is_rejected() {
+        let mut payload = vec![0u8; 64];
+        payload[32] = 1;
+        let data = mint_tlv(&[(EXT_TRANSFER_HOOK, payload)]);
+        assert!(inspect_mint_extensions(&data).is_err());
+    }
+
+    #[test]
+    fn mint_with_null_hook_program_is_allowed() {
+        let data = mint_tlv(&[(EXT_TRANSFER_HOOK, vec![0u8; 64])]);
+        assert!(inspect_mint_extensions(&data).is_ok());
     }
 }

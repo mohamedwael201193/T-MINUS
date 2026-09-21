@@ -6,11 +6,15 @@ import {
   createAssociatedTokenAccountInstruction,
   createInitializeMintInstruction,
   createInitializeTransferFeeConfigInstruction,
+  createInitializePausableConfigInstruction,
+  createInitializeTransferHookInstruction,
+  createPauseInstruction,
   createMintToInstruction,
   getAssociatedTokenAddressSync,
   getMintLen,
   ExtensionType,
   getAccount,
+  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import {
   Keypair,
@@ -104,6 +108,87 @@ async function createPlainMint(
 
 function ata(mint: PublicKey, owner: PublicKey) {
   return getAssociatedTokenAddressSync(mint, owner, true, TOKEN_2022_PROGRAM_ID);
+}
+
+async function createPausedFeeMint(
+  connection: anchor.web3.Connection,
+  payer: Keypair,
+  decimals: number,
+  feeBps: number
+): Promise<Keypair> {
+  const mint = Keypair.generate();
+  const mintLen = getMintLen([ExtensionType.TransferFeeConfig, ExtensionType.PausableConfig]);
+  const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+  const tx = new Transaction().add(
+    SystemProgram.createAccount({
+      fromPubkey: payer.publicKey,
+      newAccountPubkey: mint.publicKey,
+      space: mintLen,
+      lamports,
+      programId: TOKEN_2022_PROGRAM_ID,
+    }),
+    createInitializeTransferFeeConfigInstruction(
+      mint.publicKey,
+      payer.publicKey,
+      payer.publicKey,
+      feeBps,
+      BigInt("18446744073709551615"),
+      TOKEN_2022_PROGRAM_ID
+    ),
+    createInitializePausableConfigInstruction(mint.publicKey, payer.publicKey, TOKEN_2022_PROGRAM_ID),
+    createInitializeMintInstruction(
+      mint.publicKey,
+      decimals,
+      payer.publicKey,
+      null,
+      TOKEN_2022_PROGRAM_ID
+    )
+  );
+  await sendAndConfirmTransaction(connection, tx, [payer, mint]);
+  return mint;
+}
+
+async function createHookFeeMint(
+  connection: anchor.web3.Connection,
+  payer: Keypair,
+  decimals: number,
+  feeBps: number
+): Promise<Keypair> {
+  const mint = Keypair.generate();
+  const mintLen = getMintLen([ExtensionType.TransferFeeConfig, ExtensionType.TransferHook]);
+  const lamports = await connection.getMinimumBalanceForRentExemption(mintLen);
+  const tx = new Transaction().add(
+    SystemProgram.createAccount({
+      fromPubkey: payer.publicKey,
+      newAccountPubkey: mint.publicKey,
+      space: mintLen,
+      lamports,
+      programId: TOKEN_2022_PROGRAM_ID,
+    }),
+    createInitializeTransferFeeConfigInstruction(
+      mint.publicKey,
+      payer.publicKey,
+      payer.publicKey,
+      feeBps,
+      BigInt("18446744073709551615"),
+      TOKEN_2022_PROGRAM_ID
+    ),
+    createInitializeTransferHookInstruction(
+      mint.publicKey,
+      payer.publicKey,
+      TOKEN_PROGRAM_ID,
+      TOKEN_2022_PROGRAM_ID
+    ),
+    createInitializeMintInstruction(
+      mint.publicKey,
+      decimals,
+      payer.publicKey,
+      null,
+      TOKEN_2022_PROGRAM_ID
+    )
+  );
+  await sendAndConfirmTransaction(connection, tx, [payer, mint]);
+  return mint;
 }
 
 describe("tminus", () => {
@@ -472,5 +557,175 @@ describe("tminus", () => {
       escrowAta: escrow,
       tokenProgram: TOKEN_2022_PROGRAM_ID,
     }).signers([owner]).rpc();
+  });
+
+  it("rejects place when failsafe floor exceeds min ratio", async () => {
+    const nonce = 9n;
+    const pda = orderPda(nonce);
+    const escrow = ata(srcMint.publicKey, pda);
+    const now = Math.floor(Date.now() / 1000);
+    await assert.rejects(async () => {
+      await program.methods
+        .place(
+          new anchor.BN(nonce.toString()),
+          new anchor.BN(1_000_000),
+          new anchor.BN(100_000_000),
+          new anchor.BN(200_000_000),
+          new anchor.BN(now + 10),
+          new anchor.BN(now + 20),
+          new anchor.BN(1),
+          new anchor.BN(5_000_000_000)
+        )
+        .accounts(placeAccounts(pda, escrow))
+        .signers([owner])
+        .rpc();
+    });
+  });
+
+  it("rejects fills below min_fill_raw then accepts a legal partial", async () => {
+    const nonce = 10n;
+    const pda = orderPda(nonce);
+    const escrow = ata(srcMint.publicKey, pda);
+    const now = Math.floor(Date.now() / 1000);
+    await program.methods
+      .place(
+        new anchor.BN(nonce.toString()),
+        new anchor.BN(1_000_000),
+        new anchor.BN(100_000_000),
+        new anchor.BN(100_000_000),
+        new anchor.BN(now + 3600),
+        new anchor.BN(now + 7200),
+        new anchor.BN(500_000),
+        new anchor.BN(5_000_000_000)
+      )
+      .accounts(placeAccounts(pda, escrow))
+      .signers([owner])
+      .rpc();
+    const remaining = Number(
+      (await getAccount(connection, escrow, undefined, TOKEN_2022_PROGRAM_ID)).amount
+    );
+    await assert.rejects(async () => {
+      await program.methods
+        .fill(new anchor.BN(1), new anchor.BN(1))
+        .accounts(fillAccounts(pda, escrow))
+        .signers([filler])
+        .rpc();
+    });
+    const first = 500_000;
+    const minDst = Math.ceil((first * 100_000_000) / 1_000_000_000);
+    await program.methods
+      .fill(new anchor.BN(first), new anchor.BN(minDst))
+      .accounts(fillAccounts(pda, escrow))
+      .signers([filler])
+      .rpc();
+    const left = Number(
+      (await getAccount(connection, escrow, undefined, TOKEN_2022_PROGRAM_ID)).amount
+    );
+    const restDst = Math.ceil((left * 100_000_000) / 1_000_000_000);
+    await program.methods
+      .fill(new anchor.BN(left), new anchor.BN(restDst))
+      .accounts(fillAccounts(pda, escrow))
+      .signers([filler])
+      .rpc();
+    assert.equal(remaining, 990_000);
+  });
+
+  it("rejects place on a paused mint", async () => {
+    const pausedMint = await createPausedFeeMint(connection, payer, 9, 100);
+    const ownerAtaIx = createAssociatedTokenAccountInstruction(
+      payer.publicKey,
+      ata(pausedMint.publicKey, owner.publicKey),
+      owner.publicKey,
+      pausedMint.publicKey,
+      TOKEN_2022_PROGRAM_ID
+    );
+    await sendAndConfirmTransaction(connection, new Transaction().add(ownerAtaIx), [payer]);
+    await sendAndConfirmTransaction(
+      connection,
+      new Transaction().add(
+        createPauseInstruction(pausedMint.publicKey, payer.publicKey, [], TOKEN_2022_PROGRAM_ID)
+      ),
+      [payer]
+    );
+    const nonce = 11n;
+    const n = u64buf(nonce);
+    const pda = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("order"),
+        owner.publicKey.toBuffer(),
+        pausedMint.publicKey.toBuffer(),
+        dstMint.publicKey.toBuffer(),
+        n,
+      ],
+      program.programId
+    )[0];
+    const escrow = ata(pausedMint.publicKey, pda);
+    const now = Math.floor(Date.now() / 1000);
+    await assert.rejects(async () => {
+      await program.methods
+        .place(
+          new anchor.BN(nonce.toString()),
+          new anchor.BN(1_000_000),
+          new anchor.BN(1_000_000_000),
+          new anchor.BN(1_000_000_000),
+          new anchor.BN(now + 10),
+          new anchor.BN(now + 20),
+          new anchor.BN(1),
+          new anchor.BN(5_000_000_000)
+        )
+        .accounts({
+          ...placeAccounts(pda, escrow),
+          srcMint: pausedMint.publicKey,
+          ownerSrcAta: ata(pausedMint.publicKey, owner.publicKey),
+        })
+        .signers([owner])
+        .rpc();
+    });
+  });
+
+  it("rejects place when a transfer hook program is attached", async () => {
+    const hookMint = await createHookFeeMint(connection, payer, 9, 100);
+    const ownerAtaIx = createAssociatedTokenAccountInstruction(
+      payer.publicKey,
+      ata(hookMint.publicKey, owner.publicKey),
+      owner.publicKey,
+      hookMint.publicKey,
+      TOKEN_2022_PROGRAM_ID
+    );
+    await sendAndConfirmTransaction(connection, new Transaction().add(ownerAtaIx), [payer]);
+    const nonce = 12n;
+    const n = u64buf(nonce);
+    const pda = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("order"),
+        owner.publicKey.toBuffer(),
+        hookMint.publicKey.toBuffer(),
+        dstMint.publicKey.toBuffer(),
+        n,
+      ],
+      program.programId
+    )[0];
+    const escrow = ata(hookMint.publicKey, pda);
+    const now = Math.floor(Date.now() / 1000);
+    await assert.rejects(async () => {
+      await program.methods
+        .place(
+          new anchor.BN(nonce.toString()),
+          new anchor.BN(1_000_000),
+          new anchor.BN(1_000_000_000),
+          new anchor.BN(1_000_000_000),
+          new anchor.BN(now + 10),
+          new anchor.BN(now + 20),
+          new anchor.BN(1),
+          new anchor.BN(5_000_000_000)
+        )
+        .accounts({
+          ...placeAccounts(pda, escrow),
+          srcMint: hookMint.publicKey,
+          ownerSrcAta: ata(hookMint.publicKey, owner.publicKey),
+        })
+        .signers([owner])
+        .rpc();
+    });
   });
 });

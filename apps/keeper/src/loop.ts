@@ -21,7 +21,7 @@ import {
 import { env, keeperKeypair } from "./config.ts";
 import { sql } from "./db.ts";
 import { logIssuer, readIssuer } from "./issuer.ts";
-import { fillSize, haltFromIssuer, isConfiguredPair } from "./policy.ts";
+import { fillSize, haltFromFeed, haltFromIssuer, isConfiguredPair } from "./policy.ts";
 import { buildSwap, loadLookupTables, quoteExactIn, toInstruction } from "./jupiter.ts";
 import { tryLease, releaseLease } from "./leases.ts";
 import { log } from "./log.ts";
@@ -84,20 +84,23 @@ export async function tick(connection: Connection): Promise<void> {
       state.lastFeeBps = issuer.transferFeeBps;
     }
     const feed = await latestFeed();
-    if (!feed) {
+    if (feed) {
+      state.lastFeedHash = feed.hash;
+      state.lastFeedAt = feed.fetchedAt.toISOString();
+    }
+    const feedHalt = haltFromFeed(
+      feed ? feed.fetchedAt.getTime() : null,
+      Date.now(),
+      env.feedStaleMs
+    );
+    if (feedHalt) {
       state.halted = true;
-      state.haltReason = "feed_missing";
+      state.haltReason = feedHalt;
       await writeHealth();
       log("halt", { reason: state.haltReason });
       return;
     }
-    state.lastFeedHash = feed.hash;
-    state.lastFeedAt = feed.fetchedAt.toISOString();
-    if (feed.stale) {
-      state.halted = true;
-      state.haltReason = "feed_stale";
-      await writeHealth();
-      log("halt", { reason: state.haltReason });
+    if (!feed) {
       return;
     }
     if (halt) {

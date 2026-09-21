@@ -32,3 +32,14 @@ jobs:
       - run: pnpm --filter @tminus/api typecheck
       - run: pnpm --filter @tminus/keeper typecheck
       - run: node scripts/secret-scan.mjs
+      - run: node scripts/mock-guard.mjs
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test -p tminus --lib

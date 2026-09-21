@@ -8,8 +8,9 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 
 | Piece | Status | Evidence |
 |---|---|---|
-| Anchor program `place` / `cancel` / `fill` / `expire` | Built and tested on **LOCALNET** | `evidence/program-build.json`, `anchor test --validator legacy` 5/5 |
+| Anchor program `place` / `cancel` / `fill` / `expire` | Built and tested on **LOCALNET** | `evidence/program-build.json`, `anchor test --validator legacy` |
 | Token-2022 post-fee escrow + harvest-before-close | **LOCALNET** PASS | 100 bps fee mint fixture (not SPACEX) |
+| Pause / transfer-hook rejection | **UNIT + LOCALNET** | rust TLV tests; mocha paused/hook mint fixtures |
 | Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — 565 bytes, ALT present, `err=AccountNotFound` because keeper has 0 SOL |
 | API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — `evidence/render-free-health.json` |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
@@ -22,13 +23,14 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 - Program ID: `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL`
 - IDL: `idl/tminus.json`
 - Network for the ID: declared for localnet/devnet/mainnet; only localnet execution is proven so far
+- Upgrade authority (once deployed): deploy wallet `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` until after certification
 
 ## Live service (FREE Render)
 
 - API: `https://tminus-api-k2d2.onrender.com`
 - Dashboard: `https://dashboard.render.com/web/srv-dao6t2rtqb8s73e52mbg`
 - Plan: **free** web service. Keeper runs in-process (`KEEPER_EMBEDDED=true`). Render free instances spin down when idle.
-- Proven 2026-09-20T23:40Z from outside the process: `/health` 200, `/ready` db true, live Jupiter quote, live PreStocks feed (`verification_state=verified`, deadline extracted from prestocks.com/spacex), keeper poll writing health rows. Receipts empty because no fills have been sent.
+- Proven 2026-09-20T23:58Z from outside the process: `/health` 200, `/ready` db true, live Jupiter quote, live PreStocks feed, keeper poll writing health rows on commit `275eee9`. Receipts empty because no fills have been sent.
 
 ## Setup
 
@@ -63,16 +65,28 @@ Jupiter composition simulation (does not send):
 
 ```
 pnpm sim:compose
+pnpm phase7
 ```
 
-## Safety
+## Safety card (Phase 7, no send)
 
-- On-chain program is source of truth for escrow.
-- API has no custody and exposes no keys.
-- Keeper will not send transactions unless `KEEPER_SEND_ENABLED=true`.
-- Feed staleness and issuer pause/hook halt keeper fills.
-- Transfer-fee Token-2022 escrow accounts are harvested before close.
-- Do not treat simulations as confirmed transactions.
+Tiny proof, if later authorized:
+
+| Item | Value |
+|---|---|
+| Source mint | `PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh` (SPACEX, Token-2022) |
+| Destination mint | `Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8` (SPCXx) |
+| Size | **200_000_000 raw** = 1 display |
+| Expected place fee | 100 bps withheld on transfer into escrow |
+| Cancel | owner `cancel` while open and unpaused |
+| Expire | anyone after `hard_expiry` |
+| Keeper send | **off** until the program account exists and a tiny spend is authorized |
+| Spend cap | `KEEPER_SPEND_CAP_RAW=200000000` |
+| Deploy wallet | `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` |
+| Keeper wallet | `FbsV4KELsCki2ZujWfRPvu4kpWHDdr1bxAvGNhU13hPf` |
+| Abort | issuer pause, attached transfer hook, or fee-bps change vs keeper baseline |
+
+Failsafe does **not** guarantee conversion regardless of liquidity.
 
 ## Known limitations
 

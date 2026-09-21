@@ -17,6 +17,12 @@ function u64le(n: bigint): Buffer {
   return b;
 }
 
+function i64le(n: bigint): Buffer {
+  const b = Buffer.alloc(8);
+  b.writeBigInt64LE(n);
+  return b;
+}
+
 function meta(pubkey: PublicKey, isSigner: boolean, isWritable: boolean): AccountMeta {
   return { pubkey, isSigner, isWritable };
 }
@@ -61,4 +67,57 @@ export function fillIx(args: {
 
 export function remainingRaw(order: DecodedOrder): bigint {
   return order.escrowedRaw - order.filledRaw;
+}
+
+export function placeIx(args: {
+  programId: PublicKey;
+  owner: PublicKey;
+  order: PublicKey;
+  srcMint: PublicKey;
+  dstMint: PublicKey;
+  ownerSrcAta: PublicKey;
+  escrowAta: PublicKey;
+  associatedTokenProgram?: PublicKey;
+  systemProgram?: PublicKey;
+  tokenProgram?: PublicKey;
+  nonce: bigint;
+  amountRaw: bigint;
+  minRatioE9: bigint;
+  failsafeFloorE9: bigint;
+  failsafeTs: bigint;
+  hardExpiryTs: bigint;
+  minFillRaw: bigint;
+  srcMultiplierE9: bigint;
+}): TransactionInstruction {
+  const tokenProgram = args.tokenProgram ?? TOKEN_2022_PROGRAM_ID;
+  const associatedTokenProgram =
+    args.associatedTokenProgram ??
+    new PublicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL");
+  const systemProgram = args.systemProgram ?? PublicKey.default;
+  const data = Buffer.concat([
+    disc("place"),
+    u64le(args.nonce),
+    u64le(args.amountRaw),
+    u64le(args.minRatioE9),
+    u64le(args.failsafeFloorE9),
+    i64le(args.failsafeTs),
+    i64le(args.hardExpiryTs),
+    u64le(args.minFillRaw),
+    u64le(args.srcMultiplierE9),
+  ]);
+  return new TransactionInstruction({
+    programId: args.programId,
+    data,
+    keys: [
+      meta(args.owner, true, true),
+      meta(args.order, false, true),
+      meta(args.srcMint, false, false),
+      meta(args.dstMint, false, false),
+      meta(args.ownerSrcAta, false, true),
+      meta(args.escrowAta, false, true),
+      meta(tokenProgram, false, false),
+      meta(associatedTokenProgram, false, false),
+      meta(systemProgram, false, false),
+    ],
+  });
 }

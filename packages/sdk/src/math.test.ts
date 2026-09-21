@@ -8,6 +8,7 @@ import {
   isFillable,
   orderPda,
   PROGRAM_ID,
+  DISPLAY_RAW_SPACEX,
 } from "./index.ts";
 
 test("ceil ratio", () => {
@@ -24,6 +25,10 @@ test("quote ratio uses floor division", () => {
   assert.equal(quoteRatioE9(76706836n, 200000000n), 383534180n);
   assert.equal(isFillable(383534180n, 383534180n), true);
   assert.equal(isFillable(383534179n, 383534180n), false);
+});
+
+test("1 display SPACEX is 200_000_000 raw", () => {
+  assert.equal(DISPLAY_RAW_SPACEX, 200_000_000n);
 });
 
 test("order PDA is stable for the declared program id", () => {

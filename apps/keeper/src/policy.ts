@@ -35,3 +35,13 @@ export function haltFromIssuer(
   }
   return null;
 }
+
+export function haltFromFeed(
+  fetchedAtMs: number | null,
+  nowMs: number,
+  staleMs: number
+): string | null {
+  if (fetchedAtMs === null) return "feed_missing";
+  if (nowMs - fetchedAtMs > staleMs) return "feed_stale";
+  return null;
+}

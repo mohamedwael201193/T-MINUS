@@ -13,6 +13,7 @@
     "test": "pnpm --filter @tminus/sdk test && pnpm --filter @tminus/api test && pnpm --filter @tminus/keeper test",
     "secret-scan": "node scripts/secret-scan.mjs",
     "inspect:mint": "tsx scripts/inspect-mint.ts",
+    "phase7": "node --import tsx scripts/phase7-live.ts",
     "sim:compose": "pnpm --filter @tminus/keeper sim:compose",
     "migrate": "pnpm --filter @tminus/api migrate"
   },

@@ -218,3 +218,17 @@ Append-only execution ledger. No secrets.
 - **next step:** mainnet SOL for G13
 
 ---
+
+## 2026-09-21T00:28Z — DEVNET IDL + public program status
+
+- **action:** Install user-local Node in WSL; `anchor idl init`; add `/v1/program` that reads both clusters
+- **command:** `scripts/wsl-idl-devnet.sh`; `pnpm --filter @tminus/api test`
+- **result:** IDL metadata `FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n`; `/v1/program` mainnet exists=false, devnet executable=true; API tests 9/9
+- **evidence:** `evidence/devnet-idl-meta.json`
+- **test:** program-status unit + live `/v1/program` in server.test
+- **decision:** Still no mainnet deploy. Keeper send off.
+- **files changed:** `apps/api/src/server.ts`, `apps/api/src/program-status.ts`
+- **known risks:** none new
+- **next step:** mainnet SOL for G13
+
+---

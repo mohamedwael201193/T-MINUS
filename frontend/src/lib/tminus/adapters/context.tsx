@@ -28,8 +28,15 @@ function createSource(): TMinusSource {
   return createBackendSource();
 }
 
+function isCurrentAdapter(source: TMinusSource): boolean {
+  return typeof source.getSelectedAssetId === "function" && typeof source.selectAsset === "function";
+}
+
 export function TMinusProvider({ children }: { children: ReactNode }) {
-  const [source] = useState<TMinusSource>(() => createSource());
+  const [source, setSource] = useState<TMinusSource>(() => createSource());
+  if (!isCurrentAdapter(source)) {
+    setSource(createSource());
+  }
 
   useEffect(() => {
     const maybeStart = source as unknown as {

@@ -20,7 +20,8 @@ export function OrderTicket() {
   const src = useTMinus();
   const { toast } = useToast();
   const env = src.getEnvironment();
-  const assetId = src.getSelectedAssetId();
+  const assetId =
+    typeof src.getSelectedAssetId === "function" ? src.getSelectedAssetId() : "spacex";
   const asset = src.getAsset(assetId) ?? src.listAssets()[0];
   const market = src.getMarket(asset?.id ?? assetId);
   const ratio = market.executableRatio;

@@ -18,7 +18,8 @@ export function LifecyclePanel() {
   useTMinusVersion();
   const src = useTMinus();
   const assets = src.listAssets();
-  const assetId = src.getSelectedAssetId();
+  const assetId =
+    typeof src.getSelectedAssetId === "function" ? src.getSelectedAssetId() : "spacex";
   const asset = src.getAsset(assetId) ?? src.getAsset(SPACEX_ASSET_ID) ?? assets[0];
   const market = src.getMarket(asset?.id ?? SPACEX_ASSET_ID);
 
@@ -48,7 +49,7 @@ export function LifecyclePanel() {
             <AssetTab
               key={a.id}
               active={asset.id === a.id}
-              onClick={() => src.selectAsset(a.id)}
+              onClick={() => src.selectAsset?.(a.id)}
               label={a.symbol}
               live={a.stage === "CONVERSION_WINDOW"}
             />

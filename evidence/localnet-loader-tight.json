@@ -1,0 +1,20 @@
+{
+  "label": "LOCALNET_LOADER_TIGHT",
+  "at": "2026-09-21T04:09:55Z",
+  "soBytes": 209256,
+  "payer": "GZ1DyBahwTs3SxLzHdh4Hdwx1yR5uJBomZcfMuyrrqwn",
+  "programId": "8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP",
+  "localnetRent": {
+    "programDataLamports": 1457625840,
+    "programLamports": 1141440,
+    "needLamports": 1478767280,
+    "needSol": 1.47876728
+  },
+  "haveBeforeLamports": 2000000000,
+  "haveAfterLamports": 540177720,
+  "deployExit": 0,
+  "deltaLamports": 1459822280,
+  "provedTwoXNotRequired": true,
+  "show": "\nProgram Id: 8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP\nOwner: BPFLoaderUpgradeab1e11111111111111111111111\nProgramData Address: A7RWKFUFdxDR32wp2jGFBPQ5jiMa5RDjUGutCu2G89W9\nAuthority: GZ1DyBahwTs3SxLzHdh4Hdwx1yR5uJBomZcfMuyrrqwn\nLast Deployed In Slot: 15\nData Length: 209256 (0x33168) bytes\nBalance: 1.45762584 SOL",
+  "deployOut": "Program Id: 8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP\n\nSignature: 2uPZyo4i5ZMGm6ZFbM7cHQa1YTUgDHmSADxZAZ5Gz9BB3fcDECgjXGsA85emcpiG8DZSuBfRGruTSdry9TviPmQ1"
+}

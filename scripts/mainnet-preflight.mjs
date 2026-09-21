@@ -44,7 +44,8 @@ for (const a of t22?.value ?? []) {
   });
 }
 const have = payer.value ?? 0;
-const peak = bufferRent + programDataRent + programRent;
+const incorrectDoubleCountPeak = bufferRent + programDataRent + programRent;
+const peak = programDataRent + programRent;
 const need = peak + FEE_BUFFER_LAMPORTS;
 const locked = programDataRent + programRent;
 const canDeploy = have >= need && !program?.value;
@@ -58,6 +59,7 @@ const out = {
     programDataLamports: programDataRent,
     bufferLamports: bufferRent,
     programLamports: programRent,
+    incorrectDoubleCountPeakLamports: incorrectDoubleCountPeak,
     peakDuringDeployLamports: peak,
     lockedAfterDeployLamports: locked,
     feeBufferLamports: FEE_BUFFER_LAMPORTS,
@@ -78,7 +80,7 @@ const out = {
   refusedReason: canDeploy
     ? null
     : have < need
-      ? `INSUFFICIENT_MAINNET_SOL have=${have} need=${need}. Upgradeable deploy peak is buffer+programdata+program (${peak} lamports) plus ${FEE_BUFFER_LAMPORTS} fee buffer.`
+      ? `INSUFFICIENT_MAINNET_SOL have=${have} need=${need}. Loader-v3 peak is ProgramData+program (${peak} lamports) plus ${FEE_BUFFER_LAMPORTS} fee buffer. Buffer lamports are recycled in the same DeployWithMaxDataLen instruction.`
       : "PROGRAM_ALREADY_EXISTS",
 };
 

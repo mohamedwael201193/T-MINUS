@@ -1,6 +1,6 @@
 {
   "label": "MAINNET_DEPLOY_PREFLIGHT",
-  "at": "2026-09-21T01:28:35.015Z",
+  "at": "2026-09-21T04:12:36.747Z",
   "payer": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
   "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
   "soBytes": 209256,
@@ -8,13 +8,14 @@
     "programDataLamports": 1063899320,
     "bufferLamports": 1063858680,
     "programLamports": 833120,
-    "peakDuringDeployLamports": 2128591120,
+    "incorrectDoubleCountPeakLamports": 2128591120,
+    "peakDuringDeployLamports": 1064732440,
     "lockedAfterDeployLamports": 1064732440,
     "feeBufferLamports": 20000000,
-    "refuseBelowLamports": 2148591120,
-    "refuseBelowSol": 2.14859112,
+    "refuseBelowLamports": 1084732440,
+    "refuseBelowSol": 1.08473244,
     "lockedAfterDeploySol": 1.06473244,
-    "peakDuringDeploySol": 2.12859112
+    "peakDuringDeploySol": 1.06473244
   },
   "have": {
     "lamports": 32433259,
@@ -33,10 +34,10 @@
     "ui": "0.009136055"
   },
   "spcxx": null,
-  "shortfallLamports": 2116157861,
-  "shortfallSol": 2.116157861,
+  "shortfallLamports": 1052299181,
+  "shortfallSol": 1.052299181,
   "programExists": false,
   "programExecutable": false,
   "canDeploy": false,
-  "refusedReason": "INSUFFICIENT_MAINNET_SOL have=32433259 need=2148591120. Upgradeable deploy peak is buffer+programdata+program (2128591120 lamports) plus 20000000 fee buffer."
+  "refusedReason": "INSUFFICIENT_MAINNET_SOL have=32433259 need=1084732440. Loader-v3 peak is ProgramData+program (1064732440 lamports) plus 20000000 fee buffer. Buffer lamports are recycled in the same DeployWithMaxDataLen instruction."
 }

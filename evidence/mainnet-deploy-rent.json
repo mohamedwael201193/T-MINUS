@@ -1,6 +1,6 @@
 {
   "label": "MAINNET_DEPLOY_RENT",
-  "at": "2026-09-21T01:28:33.838Z",
+  "at": "2026-09-21T04:12:36.325Z",
   "soBytes": 209256,
   "layout": {
     "programAccountBytes": 36,
@@ -18,20 +18,22 @@
     "programAccount": 833120,
     "programData": 1063899320,
     "buffer": 1063858680,
-    "peakDuringDeploy": 2128591120,
+    "incorrectDoubleCountPeak": 2128591120,
+    "peakDuringDeploy": 1064732440,
     "lockedAfterDeploy": 1064732440,
     "feeBuffer": 20000000,
-    "minSafeDeploy": 2148591120
+    "minSafeDeploy": 1084732440
   },
   "sol": {
     "soOnly": 1.06367072,
     "programAccount": 0.00083312,
     "programData": 1.06389932,
     "buffer": 1.06385868,
-    "peakDuringDeploy": 2.12859112,
+    "incorrectDoubleCountPeak": 2.12859112,
+    "peakDuringDeploy": 1.06473244,
     "lockedAfterDeploy": 1.06473244,
     "feeBuffer": 0.02,
-    "minSafeDeploy": 2.14859112
+    "minSafeDeploy": 1.08473244
   },
-  "note": "solana program deploy keeps the buffer live until DeployWithMaxDataLen creates program+programdata, then closes the buffer to the payer. Peak SOL = buffer + programdata + program + fees. After success, buffer rent is refunded; locked SOL = programdata + program."
+  "note": "Peak SOL = ProgramData rent + program account rent + 0.02 fee buffer. Buffer is funded at ProgramData rent, then drained to the payer in the same DeployWithMaxDataLen instruction that creates ProgramData. The old 2.14859112 number incorrectly summed buffer+ProgramData+program as simultaneous wallet spend."
 }

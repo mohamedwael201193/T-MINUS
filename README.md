@@ -15,7 +15,7 @@ Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS AP
 | API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/pda` `/v1/program` `/v1/prestocks` `/v1/balances` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/prestocks` is MAINNET PreStocks-only catalog; `/v1/program` dual-cluster; `/v1/pda` is SDK derivation + optional inspect |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
 | Devnet deploy | **LIVE** (254,768-byte ELF `978c80e5…`) | Program executable; IDL `FMSPeg37…`; sigs in `evidence/devnet-e2e.json`. Local optimized `.so` is now **209,256** bytes (`838ebc5c…`) — smaller than the already-deployed devnet ELF; behavior tests 12/12 |
-| Mainnet program deploy / fills | **NOT DEPLOYED** | Exact minimum safe balance **2.14859112 SOL** (`2,148,591,120` lamports). See `evidence/mainnet-deploy-rent.json` |
+| Mainnet program deploy / fills | **NOT DEPLOYED** | Proven minimum safe balance **1.08473244 SOL** (`1,084,732,440` lamports). Previous 2.14859112 was a buffer+ProgramData double-count. See `evidence/mainnet-deployment-cost.json` |
 | Frontend | **LIVE on Vercel**, wired to the Render API (place refused on MAINNET until program exists) | https://tminusapp.vercel.app |
 
 ## Program
@@ -116,14 +116,14 @@ Tiny proof, if later authorized:
 | Spend cap | `KEEPER_SPEND_CAP_RAW=200000000` |
 | Deploy wallet | `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` (0 SOL both clusters) |
 | Keeper wallet | `FbsV4KELsCki2ZujWfRPvu4kpWHDdr1bxAvGNhU13hPf` (0 SOL both clusters) |
-| User-fund / upgrade authority | `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` (mainnet 0.032433259 SOL + 1,827,211 raw SPACEX; exact deploy minimum **2.14859112 SOL**) |
+| User-fund / upgrade authority | `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` (mainnet 0.032433259 SOL + 1,827,211 raw SPACEX; proven deploy minimum **1.08473244 SOL**) |
 | Abort | issuer pause, attached transfer hook, or fee-bps change vs keeper baseline |
 
 Failsafe does **not** guarantee conversion regardless of liquidity.
 
 ## Known limitations
 
-- Mainnet program is **not deployed**. Exact minimum safe deploy balance is **2.14859112 SOL** for the 209,256-byte ELF (`evidence/mainnet-deploy-rent.json`). Tiny SPACEX inventory is already on the payer.
+- Mainnet program is **not deployed**. Proven minimum safe deploy balance is **1.08473244 SOL** for the 209,256-byte ELF (`evidence/mainnet-deployment-cost.json`). Tiny SPACEX inventory is already on the payer. Mainnet send is blocked until explicit approval.
 - Phase 1 simulation did not return `err: null` because the program account does not exist on mainnet.
 - Frontend is in `frontend/` (Next.js), live at https://tminusapp.vercel.app. Default adapter is live `BackendSource`. Design simulation is `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
 - Public RPC + keyless Jupiter may 429.

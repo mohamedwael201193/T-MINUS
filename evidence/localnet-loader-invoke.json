@@ -1,0 +1,17 @@
+{
+  "label": "LOCALNET_LOADER_INVOKE",
+  "at": "2026-09-21T04:13:46.784Z",
+  "programId": "8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP",
+  "ok": false,
+  "logs": [
+    "Program 8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP invoke [1]",
+    "Program log: AnchorError occurred. Error Code: DeclaredProgramIdMismatch. Error Number: 4100. Error Message: The declared program id does not match the actual program id.",
+    "Program 8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP consumed 2489 of 200000 compute units",
+    "Program 8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP failed: custom program error: 0x1004"
+  ],
+  "message": "Simulation failed. \nMessage: Transaction simulation failed: Error processing Instruction 0: custom program error: 0x1004. \nLogs: \n[\n  \"Program 8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP invoke [1]\",\n  \"Program log: AnchorError occurred. Error Code: DeclaredProgramIdMismatch. Error Number: 4100. Error Message: The declared program id does not match the actual program id.\",\n  \"Program 8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP consumed 2489 of 200000 compute units\",\n  \"Program 8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP failed: custom program error: 0x1004\"\n]. \nCatch the `SendTransactionError` and call `getLogs()` on it for full details.",
+  "programWasInvoked": true,
+  "executable": true,
+  "owner": "BPFLoaderUpgradeab1e11111111111111111111111",
+  "lamports": 1141440
+}

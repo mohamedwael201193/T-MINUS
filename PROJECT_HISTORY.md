@@ -449,5 +449,26 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T04:14Z — MAINNET DEPLOY COST — 2.14859112 was a double-count; cheapest proven path is loader-v3 at 1.08473244 SOL
+
+- **action:** Investigate cheaper mainnet deployment. Read official Solana deploy docs, Agave CLI `program.rs`, Agave `bpf_loader` `DeployWithMaxDataLen`, SIMD-0167, Agave PRs 5189 / 11569 / 11990 / 11734. Measure current ELF, CLI, rent, and run localnet experiments with a temporary program ID. Did not send mainnet SOL.
+- **sources:** https://solana.com/docs/programs/deploying ; https://solana.com/docs/core/programs/program-deployment ; Agave `cli/src/program.rs` `do_process_program_deploy`; Agave `programs/bpf_loader` drain-buffer-then-create ProgramData; https://github.com/anza-xyz/agave/pull/11990 ; https://github.com/anza-xyz/agave/issues/5189 ; SIMD-0167 closed; kora-deploy README (devnet paymaster, rejected).
+- **toolchain:** solana-cli **4.1.2**, anchor **1.2.0**, rustc **1.96.0**. `solana program-v4` **not recognized**.
+- **ELF:** 209,256 bytes, sha256 `838ebc5c218c26a6883e62e93a9019d818c479b992960225c29284eff2c70335`. Program keypair pubkey still `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL`.
+- **loader-v4:** BLOCKED for mainnet. CLI subcommand deleted (`cli: delete program_v4 module` #11569). Builtin deleted (`delete loader v4 program` #11990). Feature renamed `LoaderV4WasAbandoned…`. Mainnet LoaderV4 account **does not exist**. Devnet LoaderV4 exists as NativeLoader 1 lamport builtin but cannot be targeted by this CLI. No DEVNET loader-v4 deploy attempted against the production program ID.
+- **loader-v3 localnet:** VERIFIED. Temporary program `AKhqVBhDQVfnvMipF5vUbzCidebn385LFKNt4xHR7FBJ` deploy sig `3sAsKdT7…`. Tight wallet **2.0 SOL** (< 2× local ProgramData rent 2.915 SOL) deployed `8y9BKKiUqbcSKhkfJgLPq4RnFcowFE9YG3zh7h7VyzaP` sig `2uPZyo4i…`. `provedTwoXNotRequired=true`. Dump sha matched. Invoke executed the ELF (`DeclaredProgramIdMismatch` 4100 expected because `declare_id!` is HRLmV…, not the temp ID).
+- **cost (mainnet SysvarRent 5080 lamports/byte-year):** ProgramData 1.06389932 + program 0.00083312 + 0.02 fee buffer = **1.08473244 SOL** peak. Locked after success **1.06473244 SOL**. Old **2.14859112 SOL** incorrectly added buffer+ProgramData+program as simultaneous wallet spend. Agave drains the buffer into the payer in the same `DeployWithMaxDataLen` instruction before `create_account(ProgramData)`.
+- **size:** current optimized ELF already `opt-level=z` + fat LTO + codegen-units=1 + trimmed `anchor-spl`. Further 10–30% would require cutting protocol code. Not attempted.
+- **rejected cheaper-looking paths:** kora-deploy (paymaster keeps upgrade authority, 7-day reaper, documented as devnet); BPF loader v1/v2 (management disabled); `--final` immutable (same rent, cannot close); closing the program (recovers rent but Program ID is dead).
+- **mainnet preflight (zero send):** payer `CpTxsg…` has **0.032433259 SOL**. Shortfall **1.052299181 SOL**. Program absent. SPACEX dust 1,827,211 raw still held.
+- **decision:** Cheapest proven path is current loader-v3 `solana program deploy` / `scripts/wsl-deploy-mainnet.sh` using the existing program keypair. MAINNET SEND still BLOCKED pending human approval of **1.08473244 SOL**.
+- **human next action:** fund `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` to at least 1.08473244 SOL, then approve: `Mainnet deployment method loader-v3 (solana program deploy) is verified. Peak required balance is 1.08473244 SOL. Deploy?`
+- **files changed:** rent/preflight/deploy scripts, cost evidence JSON, IMPLEMENTATION_PLAN, README, PROJECT_HISTORY
+- **known risks:** SIMD-0437 pending rent change to 6333 lamports/byte-year would raise cost if activated; closing after `--final` is impossible
+- **next step:** wait for explicit mainnet deploy approval; do not send
+
+---
+
+
 
 

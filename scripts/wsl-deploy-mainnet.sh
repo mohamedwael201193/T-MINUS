@@ -17,17 +17,18 @@ PUB=$(solana-keygen pubkey "$WALLET")
 echo "payer=$PUB"
 LAMPORTS=$(solana balance "$PUB" --url "$RPC" --lamports | awk '{print $1}')
 echo "payer_lamports=$LAMPORTS"
-# Need buffer + programdata + program account rent, plus 0.02 SOL write/priority fees.
-# Peak is 2× ELF rent because DeployWithMaxDataLen creates programdata while the buffer still exists.
+# Need ProgramData + program account rent, plus 0.02 SOL write/priority fees.
+# Buffer is funded at ProgramData rent then drained to the payer in the same
+# DeployWithMaxDataLen instruction before ProgramData is created. Peak is ~1x ELF rent, not 2x.
 NEED_FILE="evidence/mainnet-deploy-rent.json"
 if [ -f "$NEED_FILE" ]; then
   NEED=$(node -e "const j=require('./$NEED_FILE'); process.stdout.write(String(j.lamports.minSafeDeploy))")
 else
-  NEED=2148591120
+  NEED=1084732440
 fi
 if [ "${LAMPORTS:-0}" -lt "$NEED" ]; then
   echo "INSUFFICIENT_MAINNET_SOL have=$LAMPORTS need=$NEED"
-  echo "Minimum safe mainnet deploy is ${NEED} lamports for a ${BYTES}-byte program (buffer+programdata peak + 0.02 SOL fees)."
+  echo "Minimum safe mainnet deploy is ${NEED} lamports for a ${BYTES}-byte program (ProgramData+program peak + 0.02 SOL fees)."
   solana program show "$PROGRAM_ID" --url "$RPC" || true
   exit 2
 fi

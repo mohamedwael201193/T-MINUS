@@ -1,0 +1,27 @@
+{
+  "label": "LOCALNET_LOADER_COST",
+  "at": "2026-09-21T04:08:11Z",
+  "soBytes": 209256,
+  "sha256": "838ebc5c218c26a6883e62e93a9019d818c479b992960225c29284eff2c70335",
+  "payer": "12ybRzMXcPfPn7UqU69EBVit6arPNHRRFhxuo6wB7qFq",
+  "loaderV3": {
+    "programId": "AKhqVBhDQVfnvMipF5vUbzCidebn385LFKNt4xHR7FBJ",
+    "deployExit": 0,
+    "beforeLamports": 5000000000,
+    "afterLamports": 3540177720,
+    "minSampledLamports": 3540177720,
+    "deltaLamports": 1459822280,
+    "peakSpendLamports": 1459822280,
+    "show": "\nProgram Id: AKhqVBhDQVfnvMipF5vUbzCidebn385LFKNt4xHR7FBJ\nOwner: BPFLoaderUpgradeab1e11111111111111111111111\nProgramData Address: zZfuvcLTcKAKGiwChDCxJrwkcVAuakHS4FzYNifbRyx\nAuthority: 12ybRzMXcPfPn7UqU69EBVit6arPNHRRFhxuo6wB7qFq\nLast Deployed In Slot: 17\nData Length: 209256 (0x33168) bytes\nBalance: 1.45762584 SOL",
+    "deployOut": "Program Id: AKhqVBhDQVfnvMipF5vUbzCidebn385LFKNt4xHR7FBJ\n\nSignature: 3sAsKdT7PRcVjtexpf1G17eR94sGLMHMUJ3nhPrGBXtDBSbERJbCtdh4d1ed5N53SDF6LN7LNG4d45vos8yitb5M",
+    "account": "{\n  \"pubkey\": \"AKhqVBhDQVfnvMipF5vUbzCidebn385LFKNt4xHR7FBJ\",\n  \"account\": {\n    \"lamports\": 1141440,\n    \"data\": [\n      \"AgAAAA6/DBcWcNCW0zI8lnfsD7dd3KRn+Uv6ZzqCnefINApX\",\n      \"base64\"\n    ],\n    \"owner\": \"BPFLoaderUpgradeab1e11111111111111111111111\",\n    \"executable\": true,\n    \"rentEpoch\": 18446744073709551615,\n    \"space\": 36\n  }\n}"
+  },
+  "loaderV4": {
+    "cliHelpExit": 1,
+    "result": "cli_absent",
+    "programId": null,
+    "beforeLamports": null,
+    "afterLamports": null,
+    "outputHead": "error: The subcommand 'program-v4' wasn't recognized\n\tDid you mean 'program'?\n\nIf you believe you received this message in error, try re-running with 'solana -- program-v4'\n\nUSAGE:\n    solana [FLAGS] [OPTIONS] <SUBCOMMAND>\n\nFor more information try --help"
+  }
+}

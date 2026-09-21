@@ -4,7 +4,7 @@ Single source of truth. Verified-at **2026-09-21**. Live state wins over older r
 
 **Frontend certification (2026-09-21):** production `frontend/` at https://tminusapp.vercel.app uses BackendSource. `npx tsc --noEmit` and `npx next build` pass with `typescript.ignoreBuildErrors=false`. DEVNET protocol place/fill/partial/failsafe/cancel/expire/double-fill re-executed on-chain this pass. MAINNET program remains absent; MAINNET place is refused.
 
-**Current architecture decision (Option B):** full T-MINUS protocol on **DEVNET** + real PreStocks **MAINNET** lifecycle/market data + honest network labels. Do **not** spend **2.14859112 SOL** on a mainnet program until that spend is proven to add sponsor value. See `evidence/mainnet-architecture-decision.json`.
+**Current architecture decision (Option B):** full T-MINUS protocol on **DEVNET** + real PreStocks **MAINNET** lifecycle/market data + honest network labels. Do **not** spend **1.08473244 SOL** on a mainnet program until that spend is explicitly approved. The previous **2.14859112 SOL** figure was an incorrect buffer+ProgramData double-count. See `evidence/mainnet-deployment-cost.json`.
 
 Frontend exists at `frontend/` (Next.js), live at **https://tminusapp.vercel.app**. Production path is `BackendSource` against `https://tminus-api-k2d2.onrender.com`. `LocalDesignSource` is opt-in via `NEXT_PUBLIC_TMINUS_SOURCE=design` (tests/fixtures only).
 
@@ -97,7 +97,7 @@ Demo pair: **SPACEX → SPCXx**.
 | G10 compose swap+fill one tx | **ASSEMBLY PASS / SIM err AccountNotFound**: `/build` + **real `fill` ix** (not memo) serializes **636** bytes; mainnet program/taker missing | Atomic path kept; inventory fallback used on DEVNET |
 | G11 tx size/compute | **PASS size** 636 ≤ 1232; CU not measured (`unitsConsumed` 0 on AccountNotFound) | Phase 1 |
 | G12 ALTs | **PASS**: `/build` ALT `8CoUnad218pEqxme5jnn9CNu4BmaRAkP7Af8uT9ZBg29` loaded | Phase 1 |
-| G13 mainnet tiny SPACEX→SPCXx via T-MINUS | **NOT RUN** — program absent; exact min deploy **2.14859112 SOL**; dust SPACEX **1,827,211 raw** already held; keeper send off | Phase 8 |
+| G13 mainnet tiny SPACEX→SPCXx via T-MINUS | **NOT RUN** — program absent; proven min deploy **1.08473244 SOL** (old 2.14859112 was a double-count); dust SPACEX **1,827,211 raw** already held; keeper send off | Phase 8 |
 | G14 explorer receipts | **PASS DEVNET** — live `/v1/receipts` includes original e2e plus keeper `fillIx` partial+close sigs; not SPACEX/mainnet | Phase 5–8 |
 
 ---
@@ -1500,7 +1500,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Failure-mode list in Phase 3–5 (under-delivery, double-fill, expire, halt, spend cap, pause, hook, stale feed)
 
 ### MAINNET
-- [!] Tiny fill authorized and done — **blocked**: program absent; exact min deploy **2.14859112 SOL**; dust SPACEX on wallet; `KEEPER_SEND_ENABLED=false`
+- [!] Tiny fill authorized and done — **blocked**: program absent; proven min deploy **1.08473244 SOL**; dust SPACEX on wallet; `KEEPER_SEND_ENABLED=false`
 
 ### RECEIPTS
 - [x] Explorer-linked JSON — DEVNET place/cancel/fill/expire plus keeper `fillIx` and failsafe-tick fills at `/v1/receipts`
@@ -1511,7 +1511,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Live `/v1/prestocks` `/v1/feed` `/v1/quote` `/v1/receipts` `/v1/program` `/v1/balances`
 - [x] Phantom connect (injected); MAINNET balances via API
 - [x] Honest MAINNET / DEVNET labels; no fake place
-- [ ] MAINNET program place/cancel (blocked: Option B — 2.14859112 SOL not spent)
+- [ ] MAINNET program place/cancel (blocked: Option B — 1.08473244 SOL not spent; waiting on human approval)
 - [x] Receipts labeled by eventKind (place/cancel/expire/fill); explorer is a real `<a href>`
 - [x] Landing proof teaser uses a live fill or a labeled SIMULATION fixture (no fake chain sigs)
 - [x] Phantom trusted session remains connected on reload (`CpTxsg…`; first-time approve is still a human extension step)
@@ -1527,7 +1527,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 ## Human blockers now
 
-1. **Mainnet program deploy** exact minimum safe balance is **2.14859112 SOL** (`2,148,591,120` lamports) for the optimized 209,256-byte ELF: buffer 1.06385868 + programdata 1.06389932 + program 0.00083312 + 0.02 fee buffer. After success, buffer rent is refunded and **1.06473244 SOL** stays locked. Measured from mainnet `SysvarRent` (5080 lamports/byte-year, 1-year exemption) via `getMinimumBalanceForRentExemption`. Evidence: `evidence/mainnet-deploy-rent.json`.
+1. **Mainnet program deploy** proven minimum safe balance is **1.08473244 SOL** (`1,084,732,440` lamports) for the optimized 209,256-byte ELF: ProgramData 1.06389932 + program 0.00083312 + 0.02 fee buffer. The previous **2.14859112 SOL** figure incorrectly summed buffer+ProgramData+program as simultaneous wallet spend. Agave `DeployWithMaxDataLen` drains the buffer into the payer in the same instruction before creating ProgramData. After success **1.06473244 SOL** stays locked and is recoverable via `solana program close` (Program ID then cannot be reused). Loader-v4 is not a mainnet path (CLI 4.1.2 has no `program-v4`; LoaderV4 account absent on mainnet). Evidence: `evidence/mainnet-deployment-cost.json`. Do not send until explicit human approval.
 2. **Tiny mainnet fill** will use the dust SPACEX already held (not 1 display / ~$117). Needs the program on mainnet, leftover fee SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000` only after deploy.
 3. **Frontend** is live at https://tminusapp.vercel.app and wired to the live API. Console Protocol panel inspects `/v1/program` + `/v1/pda` + last proof PDA. Trusted Phantom session is already connected in system Chrome. MAINNET place remains refused under Option B. `typescript.ignoreBuildErrors` is **false**.
 4. Rotate Render/GitHub/DB secrets that were pasted in chat. The recovery phrase pasted in chat should be treated as **exposed** — do not keep large mainnet funds on that wallet.

@@ -41,7 +41,8 @@ const [soRent, programDataRent, bufferRent, programRent] = await Promise.all([
   rent(PROGRAM_ACCOUNT),
 ]);
 
-const peakLamports = bufferRent + programDataRent + programRent;
+const incorrectDoubleCountPeak = bufferRent + programDataRent + programRent;
+const peakLamports = programDataRent + programRent;
 const lockedLamports = programDataRent + programRent;
 const feeBufferLamports = 20_000_000;
 const minSafe = peakLamports + feeBufferLamports;
@@ -63,6 +64,7 @@ const out = {
     programAccount: programRent,
     programData: programDataRent,
     buffer: bufferRent,
+    incorrectDoubleCountPeak,
     peakDuringDeploy: peakLamports,
     lockedAfterDeploy: lockedLamports,
     feeBuffer: feeBufferLamports,
@@ -73,12 +75,13 @@ const out = {
     programAccount: programRent / 1e9,
     programData: programDataRent / 1e9,
     buffer: bufferRent / 1e9,
+    incorrectDoubleCountPeak: incorrectDoubleCountPeak / 1e9,
     peakDuringDeploy: peakLamports / 1e9,
     lockedAfterDeploy: lockedLamports / 1e9,
     feeBuffer: feeBufferLamports / 1e9,
     minSafeDeploy: minSafe / 1e9,
   },
-  note: "solana program deploy keeps the buffer live until DeployWithMaxDataLen creates program+programdata, then closes the buffer to the payer. Peak SOL = buffer + programdata + program + fees. After success, buffer rent is refunded; locked SOL = programdata + program.",
+  note: "solana program deploy funds the buffer at ProgramData rent. DeployWithMaxDataLen drains that buffer into the payer in the same instruction before create_account(ProgramData). Peak wallet SOL = ProgramData + program account + fees, not buffer+ProgramData+program. The old 2.14859112 figure was an incorrect double-count. After success, locked SOL = ProgramData + program.",
 };
 
 writeFileSync(resolve("evidence/mainnet-deploy-rent.json"), JSON.stringify(out, null, 2));

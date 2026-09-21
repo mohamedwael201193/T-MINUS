@@ -19,6 +19,7 @@ coverage/
 .next/
 .turbo/
 .vercel/
+.tmp-loader-exp/
 frontend/qa/
 frontend/.zscripts/
 frontend/download/

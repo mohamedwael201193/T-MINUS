@@ -20,6 +20,9 @@ type Row = {
   sig: string;
   failsafeFlag: boolean;
   orderPda?: string;
+  sourceAmount: string;
+  destinationAmount: string;
+  ratio: string | null;
 };
 
 function readJson(rel: string): Record<string, unknown> {
@@ -36,24 +39,33 @@ function rows(): Row[] {
   const race = readJson("evidence/devnet-double-fill.json");
   const raceA = ((race.race as { a?: { sig?: string | null } } | undefined)?.a?.sig) ?? null;
   const seqFirst = ((race.sequential as { first?: { sig?: string | null } } | undefined)?.first?.sig) ?? null;
+  const e2eAmt = String((e2e.signatures as { escrowPostFee?: string } | undefined)?.escrowPostFee ?? "990000");
+  const keeperAmt = String(keeper.escrowPostFeeRaw ?? "990000");
+  const keeperRemain = String(keeper.remainingAfterFirst ?? "590000");
+  const keeperFirst = (BigInt(keeperAmt) - BigInt(keeperRemain)).toString();
+  const failsafeAmt = String(failsafe.ownerDestinationAfter ?? "990000");
+  const raceRemain = String((race.race as { remaining?: string } | undefined)?.remaining ?? "990000");
   const out: Row[] = [];
-  if (sigs.place) out.push({ kind: "place", sig: sigs.place, failsafeFlag: false });
-  if (sigs.cancel) out.push({ kind: "cancel", sig: sigs.cancel, failsafeFlag: false });
-  if (sigs.fill) out.push({ kind: "fill", sig: sigs.fill, failsafeFlag: false });
-  if (sigs.expire) out.push({ kind: "expire", sig: sigs.expire, failsafeFlag: false });
-  if (ksigs.place) out.push({ kind: "place", sig: ksigs.place, failsafeFlag: false, orderPda: String(keeper.orderPda ?? "") });
-  if (ksigs.fillPartial) out.push({ kind: "fill", sig: ksigs.fillPartial, failsafeFlag: false, orderPda: String(keeper.orderPda ?? "") });
-  if (ksigs.fillClose) out.push({ kind: "fill", sig: ksigs.fillClose, failsafeFlag: false, orderPda: String(keeper.orderPda ?? "") });
+  if (sigs.place) out.push({ kind: "place", sig: sigs.place, failsafeFlag: false, sourceAmount: e2eAmt, destinationAmount: "0", ratio: null });
+  if (sigs.cancel) out.push({ kind: "cancel", sig: sigs.cancel, failsafeFlag: false, sourceAmount: e2eAmt, destinationAmount: "0", ratio: null });
+  if (sigs.fill) out.push({ kind: "fill", sig: sigs.fill, failsafeFlag: false, sourceAmount: e2eAmt, destinationAmount: e2eAmt, ratio: "1000000000" });
+  if (sigs.expire) out.push({ kind: "expire", sig: sigs.expire, failsafeFlag: false, sourceAmount: e2eAmt, destinationAmount: "0", ratio: null });
+  if (ksigs.place) out.push({ kind: "place", sig: ksigs.place, failsafeFlag: false, orderPda: String(keeper.orderPda ?? ""), sourceAmount: keeperAmt, destinationAmount: "0", ratio: null });
+  if (ksigs.fillPartial) out.push({ kind: "fill", sig: ksigs.fillPartial, failsafeFlag: false, orderPda: String(keeper.orderPda ?? ""), sourceAmount: keeperFirst, destinationAmount: keeperFirst, ratio: "1000000000" });
+  if (ksigs.fillClose) out.push({ kind: "fill", sig: ksigs.fillClose, failsafeFlag: false, orderPda: String(keeper.orderPda ?? ""), sourceAmount: keeperRemain, destinationAmount: keeperRemain, ratio: "1000000000" });
   if (fsigs.keeperFill) {
     out.push({
       kind: "fill",
       sig: fsigs.keeperFill,
       failsafeFlag: true,
       orderPda: String(failsafe.failsafePda ?? ""),
+      sourceAmount: failsafeAmt,
+      destinationAmount: failsafeAmt,
+      ratio: "1000000000",
     });
   }
-  if (raceA) out.push({ kind: "fill", sig: raceA, failsafeFlag: false, orderPda: String((race.race as { pda?: string }).pda ?? "") });
-  if (seqFirst) out.push({ kind: "fill", sig: seqFirst, failsafeFlag: false, orderPda: String((race.sequential as { pda?: string }).pda ?? "") });
+  if (raceA) out.push({ kind: "fill", sig: raceA, failsafeFlag: false, orderPda: String((race.race as { pda?: string }).pda ?? ""), sourceAmount: raceRemain, destinationAmount: raceRemain, ratio: "1000000000" });
+  if (seqFirst) out.push({ kind: "fill", sig: seqFirst, failsafeFlag: false, orderPda: String((race.sequential as { pda?: string }).pda ?? ""), sourceAmount: raceRemain, destinationAmount: raceRemain, ratio: "1000000000" });
   return out;
 }
 
@@ -75,6 +87,9 @@ async function main() {
         orderPda,
         sig: row.sig,
         slot: parsed.slot,
+        sourceAmount: row.sourceAmount,
+        destinationAmount: row.destinationAmount,
+        ratio: row.ratio,
         failsafeFlag: row.failsafeFlag,
         timestamp: new Date((parsed.blockTime ?? 0) * 1000).toISOString(),
         network: "DEVNET",

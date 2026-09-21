@@ -440,5 +440,14 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T03:50Z — PUSH + VERCEL PROD + RECEIPT AMOUNTS
+
+- **action:** Pushed `0b058b9`. Vercel `--prod` READY (`dpl_9u3S1fhrgZEHtC76m1sdXaA8kiTV`); aliased **https://tminusapp.vercel.app**. Render `/health` 200 (no API code in that commit). Re-ingested DEVNET receipts with real post-fee amounts so fills no longer display 0.0000. Chrome hard-reload of production `#/app`: wallet stayed connected, lifecycle **VERIFIED**, exec **0.7671**, MAINNET program **ABSENT**, DEVNET **EXECUTABLE**, keeper send **OFF**, latest proof sig `2eXaKdhb…` explorer-linked DEVNET.
+- **result:** Production homepage HTTP 200. `/v1/receipts` 18 rows; newest fills have src/dst `990000` ratio `1e9`.
+- **decision:** Option B unchanged.
+- **next step:** keep MAINNET program undeployed
+
+---
+
 
 

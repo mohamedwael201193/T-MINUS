@@ -18,6 +18,7 @@ dist/
 coverage/
 .next/
 .turbo/
+.vercel/
 frontend/qa/
 frontend/.zscripts/
 frontend/download/

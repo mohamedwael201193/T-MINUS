@@ -1,8 +1,9 @@
 # T-MINUS — FRONTEND NOTES
 
-Production frontend for **T-MINUS**. Default adapter is **BackendSource**
-against `https://tminus-api-k2d2.onrender.com`. Local design simulation
-remains behind `NEXT_PUBLIC_TMINUS_SOURCE=design` (not the production path).
+Production frontend for **T-MINUS**, live at **https://tminusapp.vercel.app**.
+Default adapter is **BackendSource** against `https://tminus-api-k2d2.onrender.com`.
+Local design simulation remains behind `NEXT_PUBLIC_TMINUS_SOURCE=design`
+(not the production path).
 
 ---
 

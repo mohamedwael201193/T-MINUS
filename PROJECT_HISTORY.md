@@ -392,5 +392,19 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T03:01Z — VERCEL — public frontend at tminusapp.vercel.app
+
+- **action:** `pnpm test` already PASS (sdk 6 + api 16 + keeper 14 + receiptMap 5; secret-scan files=420). Created Vercel project `t-minus`, linked `frontend/`, set `NEXT_PUBLIC_TMINUS_API=https://tminus-api-k2d2.onrender.com` (non-sensitive). Deployed production. `t-minus.vercel.app` and `tminus.vercel.app` were taken globally; assigned clean alias **https://tminusapp.vercel.app**. Disabled project `ssoProtection` so the site is public (was `all_except_custom_domains`, which 302'd anonymous visitors to Vercel SSO). Did not upload `frontend/.env` / `DATABASE_URL` secrets (dummy sqlite URL only for leftover Prisma generate).
+- **reason:** Judges and visitors need a public frontend URL, not localhost:3001.
+- **result:** Production READY. Anonymous `GET /` **200**. Chrome QA on the live domain: landing MAINNET SPACEX exec **0.7671** / MAR 12 2027; `#/app` live catalog + honest **DATA MAINNET · PROGRAM DEVNET ONLY**; disconnected SET ORDER toasts **CONNECT A WALLET FIRST**; XAI **EXPIRED** / SET ORDER disabled / destination **TBD**; `#/receipts` **4 fills · 8 on-chain** with real DEVNET explorer links. Fetch to Render `/v1/feed` `/v1/prestocks` `/v1/program` `/v1/receipts` `/v1/quote` all **200**. Console errors empty.
+- **evidence:** https://tminusapp.vercel.app ; inspect https://vercel.com/mohamedwael201193s-projects/t-minus/8WxrSLAxcogTNn7oBL4LMuMnYVYH
+- **test:** Vercel `next build` PASS; live browser paths landing → console → receipts → XAI expired; public HTTP 200 after SSO off
+- **decision:** Still Option B. Do not spend 2.14859112 SOL. Do not fake MAINNET place.
+- **files changed:** `frontend/next.config.ts`, `frontend/vercel.json`, `frontend/.vercelignore`, `.gitignore`, README, IMPLEMENTATION_PLAN, FRONTEND_NOTES, PROJECT_HISTORY
+- **known risks:** Hobby Vercel aliases `t-minus` / `tminus` are taken; Render free can mark the feed STALE until it wakes; leftover Prisma sqlite in the Next template is unused
+- **next step:** keep the goal open until a funded human decides on the mainnet program
+
+---
+
 
 

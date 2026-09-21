@@ -4,7 +4,7 @@ Single source of truth. Verified-at **2026-09-21**. Live state wins over older r
 
 **Current architecture decision (Option B):** full T-MINUS protocol on **DEVNET** + real PreStocks **MAINNET** lifecycle/market data + honest network labels. Do **not** spend **2.14859112 SOL** on a mainnet program until that spend is proven to add sponsor value. See `evidence/mainnet-architecture-decision.json`.
 
-Frontend exists at `frontend/` (Next.js). Production path is `BackendSource` against `https://tminus-api-k2d2.onrender.com`. `LocalDesignSource` is opt-in via `NEXT_PUBLIC_TMINUS_SOURCE=design` (tests/fixtures only).
+Frontend exists at `frontend/` (Next.js), live at **https://tminusapp.vercel.app**. Production path is `BackendSource` against `https://tminus-api-k2d2.onrender.com`. `LocalDesignSource` is opt-in via `NEXT_PUBLIC_TMINUS_SOURCE=design` (tests/fixtures only).
 
 ---
 
@@ -1527,7 +1527,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 1. **Mainnet program deploy** exact minimum safe balance is **2.14859112 SOL** (`2,148,591,120` lamports) for the optimized 209,256-byte ELF: buffer 1.06385868 + programdata 1.06389932 + program 0.00083312 + 0.02 fee buffer. After success, buffer rent is refunded and **1.06473244 SOL** stays locked. Measured from mainnet `SysvarRent` (5080 lamports/byte-year, 1-year exemption) via `getMinimumBalanceForRentExemption`. Evidence: `evidence/mainnet-deploy-rent.json`.
 2. **Tiny mainnet fill** will use the dust SPACEX already held (not 1 display / ~$117). Needs the program on mainnet, leftover fee SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000` only after deploy.
-3. **Frontend** exists at `frontend/` and is wired to the live API. Phantom **approve** is a human-only Chrome extension step. MAINNET place remains refused under Option B.
+3. **Frontend** is live at https://tminusapp.vercel.app and wired to the live API. Phantom **approve** is a human-only Chrome extension step. MAINNET place remains refused under Option B.
 4. Rotate Render/GitHub/DB secrets that were pasted in chat. The recovery phrase pasted in chat should be treated as **exposed** — do not keep large mainnet funds on that wallet.
 
 Do not enable keeper send on mainnet until the program account exists there and a tiny spend is explicitly authorized.

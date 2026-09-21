@@ -16,7 +16,7 @@ Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS AP
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
 | Devnet deploy | **LIVE** (254,768-byte ELF `978c80e5…`) | Program executable; IDL `FMSPeg37…`; sigs in `evidence/devnet-e2e.json`. Local optimized `.so` is now **209,256** bytes (`838ebc5c…`) — smaller than the already-deployed devnet ELF; behavior tests 12/12 |
 | Mainnet program deploy / fills | **NOT DEPLOYED** | Exact minimum safe balance **2.14859112 SOL** (`2,148,591,120` lamports). See `evidence/mainnet-deploy-rent.json` |
-| Frontend | **WIRED to live API** (place refused on MAINNET until program exists) | `frontend/src/lib/tminus/adapters/backendSource.ts` |
+| Frontend | **LIVE on Vercel**, wired to the Render API (place refused on MAINNET until program exists) | https://tminusapp.vercel.app |
 
 ## Program
 
@@ -45,6 +45,15 @@ Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS AP
 - Dashboard: `https://dashboard.render.com/web/srv-dao6t2rtqb8s73e52mbg`
 - Plan: **free** web service. Keeper runs in-process (`KEEPER_EMBEDDED=true`). Render free instances spin down when idle.
 - Proven 2026-09-21T00:32Z on commit `136ba97`: `/health` 200, `/ready` db true, `/v1/receipts` returns 4 **DEVNET** rows with explorer sigs. `/v1/program` reports devnet executable, mainnet absent. Keeper send remains off.
+
+## Live frontend (Vercel)
+
+- App: **https://tminusapp.vercel.app**
+- Console: https://tminusapp.vercel.app/#/app
+- Receipts: https://tminusapp.vercel.app/#/receipts
+- Project: `t-minus` (SSO deployment protection **off** — public)
+- Build env: `NEXT_PUBLIC_TMINUS_API=https://tminus-api-k2d2.onrender.com`
+- Design simulation is **not** enabled. MAINNET place is refused. Receipts are **DEVNET** protocol proofs.
 
 ## Setup
 
@@ -75,7 +84,7 @@ cd frontend
 npx next dev -p 3001
 ```
 
-Production path talks to `https://tminus-api-k2d2.onrender.com`. Opt-in design simulation: `NEXT_PUBLIC_TMINUS_SOURCE=design`. MAINNET place is refused while the program is undeployed.
+Production: **https://tminusapp.vercel.app** talks to `https://tminus-api-k2d2.onrender.com`. Opt-in design simulation: `NEXT_PUBLIC_TMINUS_SOURCE=design`. MAINNET place is refused while the program is undeployed.
 
 Program tests (WSL):
 
@@ -116,6 +125,6 @@ Failsafe does **not** guarantee conversion regardless of liquidity.
 
 - Mainnet program is **not deployed**. Exact minimum safe deploy balance is **2.14859112 SOL** for the 209,256-byte ELF (`evidence/mainnet-deploy-rent.json`). Tiny SPACEX inventory is already on the payer.
 - Phase 1 simulation did not return `err: null` because the program account does not exist on mainnet.
-- Frontend is in `frontend/` (Next.js). Default adapter is live `BackendSource`. Design simulation is `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
+- Frontend is in `frontend/` (Next.js), live at https://tminusapp.vercel.app. Default adapter is live `BackendSource`. Design simulation is `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
 - Public RPC + keyless Jupiter may 429.
 - Issuer retains mint/freeze/pause/permanent-delegate powers on SPACEX; the program rejects pause and attached transfer hooks at fill/place time, and the keeper halts on those plus stale feed.

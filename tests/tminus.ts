@@ -35,9 +35,26 @@ function u64buf(n: bigint): Buffer {
   return b;
 }
 
-async function airdrop(connection: anchor.web3.Connection, pk: PublicKey) {
-  const sig = await connection.requestAirdrop(pk, 5 * LAMPORTS_PER_SOL);
-  await connection.confirmTransaction(sig, "confirmed");
+async function sleep(ms: number) {
+  await new Promise((r) => setTimeout(r, ms));
+}
+
+async function airdrop(connection: anchor.web3.Connection, pk: PublicKey, want = 2 * LAMPORTS_PER_SOL) {
+  for (let i = 0; i < 10; i++) {
+    const bal = await connection.getBalance(pk);
+    if (bal >= want) return;
+    try {
+      const sig = await connection.requestAirdrop(pk, 5 * LAMPORTS_PER_SOL);
+      const latest = await connection.getLatestBlockhash("confirmed");
+      await connection.confirmTransaction({ signature: sig, ...latest }, "confirmed");
+    } catch {
+      await sleep(400 * (i + 1));
+    }
+  }
+  const bal = await connection.getBalance(pk);
+  if (bal < LAMPORTS_PER_SOL) {
+    throw new Error(`localnet airdrop failed for ${pk.toBase58()} bal=${bal}`);
+  }
 }
 
 async function createFeeMint(
@@ -206,6 +223,7 @@ describe("tminus", () => {
   before(async () => {
     owner = Keypair.generate();
     filler = Keypair.generate();
+    await airdrop(connection, payer.publicKey, 10 * LAMPORTS_PER_SOL);
     await airdrop(connection, owner.publicKey);
     await airdrop(connection, filler.publicKey);
     srcMint = await createFeeMint(connection, payer, 9, 100);

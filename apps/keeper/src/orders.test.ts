@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { shouldScanProgramAccounts } from "./orders.ts";
+import { shouldScanProgramAccounts } from "./scan-policy.ts";
 
 test("does not scan program accounts when the program is missing or not executable", () => {
   assert.equal(shouldScanProgramAccounts(null), false);

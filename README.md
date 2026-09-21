@@ -15,7 +15,7 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 | API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/program` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/orders?cluster=devnet` served open orders; `/v1/program` dual-cluster |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
 | Devnet deploy | **LIVE** | Program executable; on-chain bytes **exact-match** local `tminus.so` (`978c80e5…`); IDL `FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n`; sigs in `evidence/devnet-e2e.json` and `evidence/devnet-keeper-fill.json` |
-| Mainnet program deploy / fills | Not yet | Program account absent. User-fund `CpTxsg…` has **0 SOL** and **0 SPACEX/SPCXx** on mainnet; ~3.5 SOL on **devnet** (already used for deploy + e2e). Spend cap 200_000_000 raw once funded |
+| Mainnet program deploy / fills | **REFUSED** — 0.032 SOL vs ~1.3–1.9 SOL rent | `evidence/mainnet-deploy-preflight.json`. `CpTxsg…` holds **1,827,211 raw SPACEX** (tiny; scaled UI ~0.009). Program account still absent. Send **2.0 SOL** to that address, then deploy + dust place. |
 | Frontend | Not built | Awaiting `FRONTEND/` |
 
 ## Program
@@ -98,15 +98,15 @@ Tiny proof, if later authorized:
 | Spend cap | `KEEPER_SPEND_CAP_RAW=200000000` |
 | Deploy wallet | `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` (0 SOL both clusters) |
 | Keeper wallet | `FbsV4KELsCki2ZujWfRPvu4kpWHDdr1bxAvGNhU13hPf` (0 SOL both clusters) |
-| User-fund / upgrade authority | `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` (mainnet 0 SOL / 0 tokens; devnet ~3.5 SOL) |
+| User-fund / upgrade authority | `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` (mainnet **0.032 SOL** + **1,827,211 raw SPACEX**; need **2.0 SOL** to deploy; devnet ~3.0 SOL) |
 | Abort | issuer pause, attached transfer hook, or fee-bps change vs keeper baseline |
 
 Failsafe does **not** guarantee conversion regardless of liquidity.
 
 ## Known limitations
 
-- Mainnet keeper/deploy/user-fund wallets are unfunded (0 SOL). User-fund also holds 0 SPACEX and 0 SPCXx on mainnet, so G13 cannot run.
-- Phase 1 simulation did not return `err: null` because the taker account does not exist on mainnet.
+- Mainnet program is **not deployed**: `CpTxsg…` has 0.032 SOL after a ~0.044 SOL inbound and a dust SPACEX buy. Upgradeable rent for `tminus.so` (254,768 bytes) is ~1.3–1.8 SOL; the deploy script refuses below 1.9 SOL. Tiny SPACEX inventory is ready for G13 **after** that SOL lands.
+- Phase 1 simulation did not return `err: null` because the program account does not exist on mainnet.
 - FRONTEND/ is intentionally absent.
 - Public RPC + keyless Jupiter may 429.
 - Issuer retains mint/freeze/pause/permanent-delegate powers on SPACEX; the program rejects pause and attached transfer hooks at fill/place time, and the keeper halts on those plus stale feed.

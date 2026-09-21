@@ -1,15 +1,14 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { decodeOrder, OPEN_STATUS_MEMCMP_BYTES, ORDER_STATUS_OFFSET, STATUS_OPEN, type DecodedOrder } from "@tminus/sdk";
 import { env } from "./config.ts";
+import { shouldScanProgramAccounts } from "./scan-policy.ts";
 
 export type OpenOrder = {
   pda: PublicKey;
   order: DecodedOrder;
 };
 
-export function shouldScanProgramAccounts(info: { executable: boolean } | null): boolean {
-  return Boolean(info?.executable);
-}
+export { shouldScanProgramAccounts };
 
 export async function loadOpenOrders(connection: Connection): Promise<OpenOrder[]> {
   const program = new PublicKey(env.programId);

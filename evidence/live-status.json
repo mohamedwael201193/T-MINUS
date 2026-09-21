@@ -1,6 +1,6 @@
 {
   "label": "LIVE_STATUS",
-  "at": "2026-09-21T00:53:52.502Z",
+  "at": "2026-09-21T01:04:41.253Z",
   "program": {
     "id": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
     "mainnet": {
@@ -32,19 +32,37 @@
   },
   "userFundWallet": {
     "pubkey": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
-    "mainnetSol": 0,
-    "devnetSol": 3.218674174,
+    "mainnetSol": 0.032433259,
+    "devnetSol": 3.046208974,
     "mainnetTokens": {
-      "nonZeroCount": 0,
-      "spacex": null,
+      "nonZeroCount": 1,
+      "spacex": {
+        "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
+        "amount": "1827211",
+        "ui": "0.009136055",
+        "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+      },
       "spcxx": null,
-      "tokens": []
+      "tokens": [
+        {
+          "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
+          "amount": "1827211",
+          "ui": "0.009136055",
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ]
     },
     "devnetTokens": {
-      "nonZeroCount": 11,
+      "nonZeroCount": 13,
       "spacex": null,
       "spcxx": null,
       "tokens": [
+        {
+          "mint": "8hKDyqF9Cr13wf96kxmjF2WdMvjPocRp7Kg4ZvEKRFe7",
+          "amount": "4998000000",
+          "ui": "4.998",
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
         {
           "mint": "9JoZSwS5ixB4hgyLN7jPNNfyHpA2YpfekpaDKygAvsTZ",
           "amount": "990000",
@@ -79,6 +97,12 @@
           "mint": "88eXQtTLzacE7wELL26eMU4mhXyLNyzeBt2NpbrDTAHT",
           "amount": "990000",
           "ui": "0.0099",
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "mint": "FFCjV5CfKjLodK8PpHFnbgn8GrNG5saXDjBsp7Yk5E3o",
+          "amount": "1980000",
+          "ui": "0.0198",
           "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
         },
         {
@@ -120,14 +144,14 @@
       "body": {
         "ok": true,
         "service": "tminus-api",
-        "uptime_ms": 381131
+        "uptime_ms": 325571
       }
     },
     "/ready": {
       "status": 200,
       "body": {
         "ok": true,
-        "slot": 448899040,
+        "slot": 448901464,
         "db": true
       }
     },
@@ -136,18 +160,18 @@
       "body": {
         "health": {
           "payload": {
-            "halted": false,
-            "lastPoll": "2026-09-21T00:53:49.595Z",
-            "haltReason": null,
+            "halted": true,
+            "lastPoll": "2026-09-21T01:04:35.623Z",
+            "haltReason": "feed_stale",
             "lastFeeBps": 100,
-            "lastFeedAt": "2026-09-21T00:51:20.525Z",
+            "lastFeedAt": "2026-09-21T00:59:14.766Z",
             "composition": "atomic_swap_then_fill",
             "lastFillSig": null,
-            "lastFeedHash": "a0aada6a38d171a6820ef29ef5be654ab6647ad36516401eab27af48b4e897d8",
-            "lastRpcError": "413 Request Entity Too Large:  {\"jsonrpc\":\"2.0\",\"error\":{\"code\": 413, \"message\":\"You have used your data allowance\"}, \"id\": \"d0ec7019-fa1c-4561-bd32-71e6d3f28a6d\" } \r\n",
+            "lastFeedHash": "9e56c017a0e8b39b03fec95af7383c4ae528878a449b8002bc4275bfdba04f2f",
+            "lastRpcError": null,
             "lastJupiterError": null
           },
-          "updated_at": "2026-09-21T00:53:49.900Z"
+          "updated_at": "2026-09-21T01:04:36.144Z"
         }
       }
     },

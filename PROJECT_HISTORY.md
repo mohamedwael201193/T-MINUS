@@ -274,3 +274,31 @@ Append-only execution ledger. No secrets.
 - **next step:** mainnet SOL + SPACEX inventory for G13
 
 ---
+
+## 2026-09-21T00:55Z — DOUBLE FILL + skip GPA on missing program
+
+- **action:** Stop keeper `getProgramAccounts` when the program is not executable (live `/v1/keeper` showed RPC 413 data-allowance). Prove duplicate fills on DEVNET: concurrent 1 confirm / 1 fail, sequential second fill Custom 3012 after close.
+- **command:** `pnpm --filter @tminus/keeper test`; `node --import tsx scripts/e2e-devnet-double-fill.ts`
+- **result:** Race wins=1 fails=1. Sequential drain `2FMcQp6…` then reject `UKx5QSW…`. Keeper tests 14/14. Mainnet still 0 SOL / program absent.
+- **evidence:** `evidence/devnet-double-fill.json`; `evidence/live-status.json`
+- **test:** `shouldScanProgramAccounts`; DEVNET double-fill
+- **decision:** Keep Render send off. Localnet mocha airdrop flaked this run; do not claim 12/12 localnet.
+- **files changed:** `apps/keeper/src/orders.ts`, `apps/keeper/src/loop.ts`, `scripts/e2e-devnet-double-fill.ts`, `tests/tminus.ts`
+- **known risks:** public RPC quota; mainnet unfunded
+- **next step:** mainnet SOL + SPACEX inventory for G13
+
+---
+
+## 2026-09-21T01:06Z — MAINNET PREFLIGHT — 0.032 SOL cannot rent the program
+
+- **action:** Confirm Phantom inbound SOL, refuse a doomed mainnet deploy, gate `scripts/wsl-deploy-mainnet.sh` at 1.9 SOL, fix CI keeper tests that imported `config.ts` without a keypair, airdrop the localnet payer before mint creation
+- **command:** `pnpm preflight:mainnet`; `scripts/wsl-deploy-mainnet.sh`; `GET /v1/feed/refresh`; keeper tests with `KEEPER_KEYPAIR_PATH=/dev/null`
+- **result:** Inbound `57c5k5Ff…` credited **0.04414954 SOL**. Phantom swap `4ZDgQRy9…` spent **0.011716281 SOL** for **1,827,211 raw SPACEX** (scaled UI ~0.009). Remaining **0.032433259 SOL**. `solana rent 254768` = **1.294871680 SOL**. Deploy **refused** (no buffer upload). Render `ddc6542` live; `/v1/keeper` `lastRpcError=null` after skipping GPA on a missing program; feed refreshed, halt cleared. CI `ddc6542` node job failed on missing keeper keypair — fixed by scanning policy without loading config + ephemeral keypair when send is off.
+- **evidence:** `evidence/mainnet-deploy-preflight.json`; `evidence/live-status.json`
+- **test:** keeper 14/14 under CI env
+- **decision:** Do not enable Render send. Do not mark G13. Next deploy attempt only after **2.0 SOL** lands on `CpTxsg…`; then place the dust SPACEX already held.
+- **files changed:** `scripts/wsl-deploy-mainnet.sh`, `scripts/mainnet-preflight.mjs`, `apps/keeper/src/scan-policy.ts`, `apps/keeper/src/config.ts`, `tests/tminus.ts`
+- **known risks:** recovery phrase exposed in chat — do not leave extra funds after the tiny proof
+- **next step:** 2.0 SOL on `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX`
+
+---

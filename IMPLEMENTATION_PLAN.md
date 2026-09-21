@@ -93,7 +93,7 @@ Demo pair: **SPACEX → SPCXx**.
 | G10 compose swap+fill one tx | **ASSEMBLY PASS / SIM err AccountNotFound**: `/build` + **real `fill` ix** (not memo) serializes **636** bytes; mainnet program/taker missing | Atomic path kept; inventory fallback used on DEVNET |
 | G11 tx size/compute | **PASS size** 636 ≤ 1232; CU not measured (`unitsConsumed` 0 on AccountNotFound) | Phase 1 |
 | G12 ALTs | **PASS**: `/build` ALT `8CoUnad218pEqxme5jnn9CNu4BmaRAkP7Af8uT9ZBg29` loaded | Phase 1 |
-| G13 mainnet tiny SPACEX→SPCXx via T-MINUS | **NOT RUN** — mainnet program absent; user-fund 0 SOL and 0 SPACEX/SPCXx; keeper send off | Phase 8 |
+| G13 mainnet tiny SPACEX→SPCXx via T-MINUS | **NOT RUN** — program absent; payer 0.032 SOL (need ≥1.9); dust SPACEX **1,827,211 raw** already held; keeper send off | Phase 8 |
 | G14 explorer receipts | **PASS DEVNET** — live `/v1/receipts` includes original e2e plus keeper `fillIx` partial+close sigs; not SPACEX/mainnet | Phase 5–8 |
 
 ---
@@ -1496,7 +1496,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Failure-mode list in Phase 3–5 (under-delivery, double-fill, expire, halt, spend cap, pause, hook, stale feed)
 
 ### MAINNET
-- [!] Tiny fill authorized and done — **blocked**: 0 SOL, program account absent, `KEEPER_SEND_ENABLED=false`
+- [!] Tiny fill authorized and done — **blocked**: program absent; 0.032 SOL cannot cover ~1.3–1.8 SOL rent; dust SPACEX is on the wallet; `KEEPER_SEND_ENABLED=false`
 
 ### RECEIPTS
 - [x] Explorer-linked JSON — DEVNET place/cancel/fill/expire plus keeper `fillIx` and failsafe-tick fills at `/v1/receipts`
@@ -1515,8 +1515,8 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 ## Human blockers now
 
-1. **Mainnet program deploy** still needs **mainnet** SOL. The funded wallet used for this phase had **0 mainnet / 5 devnet SOL**. Devnet program is live.
-2. **Tiny mainnet fill** needs the program on mainnet, keeper SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000`.
+1. **Mainnet program deploy** needs **~2.0 SOL** on `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX`. Current **0.032433259 SOL** after inbound `57c5k5Ff…` (0.044 SOL) and Phantom SPACEX buy `4ZDgQRy9…` (1,827,211 raw). CLI rent-exempt for 254,768 bytes is **1.294871680 SOL**; the deploy script refuses below 1.9 SOL so a buffer upload cannot get stuck. Devnet program is live.
+2. **Tiny mainnet fill** will use the dust SPACEX already held (not 1 display / ~$117). Needs the program on mainnet, leftover fee SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000` only after deploy.
 3. **FRONTEND/** is intentionally not built.
 4. Rotate Render/GitHub/DB secrets that were pasted in chat. The recovery phrase pasted in chat should be treated as **exposed** — do not keep large mainnet funds on that wallet.
 

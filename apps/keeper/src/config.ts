@@ -31,7 +31,10 @@ function loadKeeperKeypair(): Keypair {
   if (path && path !== "/dev/null") {
     return loadKeypair(path);
   }
-  throw new Error("missing KEEPER_KEYPAIR_JSON or KEEPER_KEYPAIR_PATH");
+  if (process.env.KEEPER_SEND_ENABLED === "true") {
+    throw new Error("missing KEEPER_KEYPAIR_JSON or KEEPER_KEYPAIR_PATH");
+  }
+  return Keypair.generate();
 }
 
 export const env = {

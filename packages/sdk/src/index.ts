@@ -9,8 +9,10 @@ export const RATIO_SCALE = 1_000_000_000n;
 export const ORDER_SEED = Buffer.from("order");
 export const STATUS_OPEN = 0;
 export const STATUS_CLOSED = 1;
-/** Discriminator (8) + Order fields through status (202) = 210 */
+/** Discriminator (8) + Order fields through min_fill_raw. Status is the next byte. */
 export const ORDER_STATUS_OFFSET = 210;
+/** RPC memcmp `bytes` for status=open (base58 of a single 0x00). */
+export const OPEN_STATUS_MEMCMP_BYTES = "1";
 
 export function ceilRatio(src: bigint, ratioE9: bigint): bigint {
   if (src <= 0n || ratioE9 <= 0n) throw new Error("invalid ratio inputs");

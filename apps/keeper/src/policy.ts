@@ -1,3 +1,4 @@
+import { ceilRatio, isFillable, quoteRatioE9 } from "@tminus/sdk";
 import type { IssuerSnapshot } from "./issuer.ts";
 
 export function isConfiguredPair(
@@ -44,4 +45,42 @@ export function haltFromFeed(
   if (fetchedAtMs === null) return "feed_missing";
   if (nowMs - fetchedAtMs > staleMs) return "feed_stale";
   return null;
+}
+
+export type FillPlan =
+  | { action: "skip"; reason: string }
+  | { action: "inventory"; fillSrc: bigint; dstRaw: bigint }
+  | { action: "atomic_swap"; fillSrc: bigint; dstRaw: bigint };
+
+export function chooseFillPlan(args: {
+  remaining: bigint;
+  cap: bigint;
+  minFill: bigint;
+  floorE9: bigint;
+  inventoryDst: bigint;
+  quoteIn: bigint | null;
+  quoteOut: bigint | null;
+  allowInventoryWithoutQuote: boolean;
+}): FillPlan {
+  const fillSrc = fillSize(args.remaining, args.cap, args.minFill);
+  if (fillSrc === null) return { action: "skip", reason: "fill_too_small" };
+  const minDst = ceilRatio(fillSrc, args.floorE9);
+  const hasQuote = args.quoteIn !== null && args.quoteOut !== null && args.quoteIn > 0n;
+  if (hasQuote) {
+    const qRatio = quoteRatioE9(args.quoteOut!, args.quoteIn!);
+    if (!isFillable(qRatio, args.floorE9)) {
+      return { action: "skip", reason: "not_fillable" };
+    }
+    if (args.inventoryDst >= minDst) {
+      return { action: "inventory", fillSrc, dstRaw: minDst };
+    }
+    return { action: "atomic_swap", fillSrc, dstRaw: args.quoteOut! };
+  }
+  if (args.allowInventoryWithoutQuote && args.inventoryDst >= minDst) {
+    return { action: "inventory", fillSrc, dstRaw: minDst };
+  }
+  return {
+    action: "skip",
+    reason: args.inventoryDst >= minDst ? "quote_required" : "no_quote_no_inventory",
+  };
 }

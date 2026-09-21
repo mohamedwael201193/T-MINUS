@@ -15,21 +15,18 @@ import {
   PROGRAM_ID,
   activeFloor,
   ceilRatio,
-  isFillable,
   quoteRatioE9,
 } from "@tminus/sdk";
 import { env, keeperKeypair } from "./config.ts";
 import { sql } from "./db.ts";
 import { logIssuer, readIssuer } from "./issuer.ts";
-import { fillSize, haltFromFeed, haltFromIssuer, isConfiguredPair } from "./policy.ts";
+import { fillSize, haltFromFeed, haltFromIssuer, isConfiguredPair, chooseFillPlan } from "./policy.ts";
 import { buildSwap, loadLookupTables, quoteExactIn, toInstruction } from "./jupiter.ts";
 import { tryLease, releaseLease } from "./leases.ts";
 import { log } from "./log.ts";
 import { loadOpenOrders } from "./orders.ts";
 import { persistReceipt } from "./receipts.ts";
 import { fillIx, remainingRaw } from "./ix.ts";
-
-const MEMO = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
 
 export type KeeperState = {
   halted: boolean;
@@ -138,15 +135,28 @@ export async function tick(connection: Connection): Promise<void> {
         item.order.minRatioE9,
         item.order.failsafeFloorE9
       );
-      const fillSrc = fillSize(remaining, env.spendCapRaw, item.order.minFillRaw);
-      if (fillSrc === null) continue;
+      const fillSrcGuess = fillSize(remaining, env.spendCapRaw, item.order.minFillRaw);
+      if (fillSrcGuess === null) continue;
 
-      let quote;
+      const fillerDstPeek = getAssociatedTokenAddressSync(
+        item.order.dstMint,
+        keeperKeypair.publicKey,
+        true,
+        TOKEN_2022_PROGRAM_ID
+      );
+      let inventoryDst = 0n;
+      try {
+        inventoryDst = (await getAccount(connection, fillerDstPeek, "confirmed", TOKEN_2022_PROGRAM_ID)).amount;
+      } catch {
+        inventoryDst = 0n;
+      }
+
+      let quote: { inAmount: string; outAmount: string; routePlan?: unknown } | null = null;
       try {
         quote = await quoteExactIn(
           env.spacexMint,
           env.spcxxMint,
-          fillSrc.toString(),
+          fillSrcGuess.toString(),
           keeperKeypair.publicKey.toBase58()
         );
         state.lastJupiterError = null;
@@ -157,16 +167,20 @@ export async function tick(connection: Connection): Promise<void> {
         if (msg === "jupiter_429") {
           await new Promise((r) => setTimeout(r, 8_000));
         }
-        continue;
       }
 
-      const qRatio = quoteRatioE9(BigInt(quote.outAmount), BigInt(quote.inAmount));
-      if (!isFillable(qRatio, floor)) {
-        log("not_fillable", {
-          pda: item.pda.toBase58(),
-          quote_e9: qRatio.toString(),
-          floor_e9: floor.toString(),
-        });
+      const plan = chooseFillPlan({
+        remaining,
+        cap: env.spendCapRaw,
+        minFill: item.order.minFillRaw,
+        floorE9: floor,
+        inventoryDst,
+        quoteIn: quote ? BigInt(quote.inAmount) : null,
+        quoteOut: quote ? BigInt(quote.outAmount) : null,
+        allowInventoryWithoutQuote: env.inventoryWithoutQuote,
+      });
+      if (plan.action === "skip") {
+        log("not_fillable", { pda: item.pda.toBase58(), reason: plan.reason });
         continue;
       }
 
@@ -177,7 +191,21 @@ export async function tick(connection: Connection): Promise<void> {
       }
 
       try {
-        await attemptFill(connection, item.pda, item.order, fillSrc, BigInt(quote.outAmount), quote, feed.hash, now >= Number(item.order.failsafeTs));
+        await attemptFill(
+          connection,
+          item.pda,
+          item.order,
+          plan.fillSrc,
+          plan.dstRaw,
+          quote ?? {
+            inAmount: plan.fillSrc.toString(),
+            outAmount: plan.dstRaw.toString(),
+            routePlan: { composition: plan.action },
+          },
+          feed.hash,
+          now >= Number(item.order.failsafeTs),
+          plan.action
+        );
       } finally {
         await releaseLease(item.pda.toBase58());
       }
@@ -198,7 +226,8 @@ async function attemptFill(
   dstRaw: bigint,
   quote: { routePlan?: unknown; outAmount: string; inAmount: string },
   feedHash: string,
-  failsafeUsed: boolean
+  failsafeUsed: boolean,
+  mode: "inventory" | "atomic_swap"
 ): Promise<void> {
   const minDst = ceilRatio(fillSrc, activeFloor(
     Math.floor(Date.now() / 1000),
@@ -250,8 +279,14 @@ async function attemptFill(
     ),
   ];
 
+  if (mode === "inventory" && dstBal < dstRaw) {
+    log("inventory_short", { pda: pda.toBase58(), have: dstBal.toString(), need: dstRaw.toString() });
+    return;
+  }
+
   let usedAtomicSwap = false;
-  if (dstBal < dstRaw) {
+  let alts: import("@solana/web3.js").AddressLookupTableAccount[] = [];
+  if (mode === "atomic_swap") {
     const build = await buildSwap({
       inputMint: srcMint.toBase58(),
       outputMint: dstMint.toBase58(),
@@ -263,39 +298,11 @@ async function attemptFill(
     if (build.cleanupInstruction) ixs.push(toInstruction(build.cleanupInstruction));
     usedAtomicSwap = true;
     state.composition = "atomic_swap_then_fill";
-    const alts = await loadLookupTables(connection, build);
-    ixs.push(
-      fillIx({
-        programId: new PublicKey(env.programId || PROGRAM_ID),
-        filler,
-        owner: order.owner,
-        order: pda,
-        srcMint,
-        dstMint,
-        escrowAta: order.escrowAta,
-        ownerDstAta,
-        fillerSrcAta,
-        fillerDstAta,
-        fillSrcRaw: fillSrc,
-        dstRaw,
-      })
-    );
-    await simulateAndMaybeSend({
-      connection,
-      ixs,
-      alts,
-      pda,
-      fillSrc,
-      dstRaw,
-      quote,
-      feedHash,
-      failsafeUsed,
-      usedAtomicSwap,
-    });
-    return;
+    alts = await loadLookupTables(connection, build);
+  } else {
+    state.composition = "two_tx_inventory_fallback";
   }
 
-  state.composition = "two_tx_inventory_fallback";
   ixs.push(
     fillIx({
       programId: new PublicKey(env.programId || PROGRAM_ID),
@@ -315,14 +322,14 @@ async function attemptFill(
   await simulateAndMaybeSend({
     connection,
     ixs,
-    alts: [],
+    alts,
     pda,
     fillSrc,
     dstRaw,
     quote,
     feedHash,
     failsafeUsed,
-    usedAtomicSwap: false,
+    usedAtomicSwap,
   });
 }
 
@@ -394,5 +401,3 @@ async function simulateAndMaybeSend(args: {
   });
   log("fill_confirmed", { sig, pda: args.pda.toBase58(), slot });
 }
-
-void MEMO;

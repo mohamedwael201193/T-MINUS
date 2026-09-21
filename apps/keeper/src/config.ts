@@ -52,6 +52,7 @@ export const env = {
   pollMs: Number(process.env.KEEPER_POLL_MS ?? 5000),
   spendCapRaw: BigInt(required("KEEPER_SPEND_CAP_RAW")),
   sendEnabled: process.env.KEEPER_SEND_ENABLED === "true",
+  inventoryWithoutQuote: process.env.KEEPER_INVENTORY_WITHOUT_QUOTE === "true",
   keypairPath: process.env.KEEPER_KEYPAIR_PATH ?? "",
   workerId: process.env.KEEPER_WORKER_ID ?? "tminus-keeper-1",
 };

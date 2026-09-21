@@ -25,7 +25,8 @@ Do not put secret values in this file, in git, or in chat.
 | `TOKEN_2022_PROGRAM` | TokenzQd… | Yes | Public | `.env` | Render |
 | `KEEPER_POLL_MS` | Loop interval | Yes | Default `5000` | `.env` | Render |
 | `KEEPER_MAX_IN_FLIGHT` | Concurrent fill attempts | Yes | Default `1` | `.env` | Render |
-| `KEEPER_SPEND_CAP_RAW` | Max source raw per fill | Yes before mainnet fills | Operator | `.env` | Render |
+| `KEEPER_SEND_ENABLED` | Actually send fills (default false) | Yes | Operator | `.env` | Render `false` until G13 |
+| `KEEPER_INVENTORY_WITHOUT_QUOTE` | Allow inventory fills when Jupiter quote fails | No, default false | Operator | `.env` | keep `false` on mainnet Render |
 | `FEED_STALE_MS` | Halt if feed older than this | Yes | Default `300000` | `.env` | Render |
 | `KEEPER_EMBEDDED` | Run keeper inside the API process | Free Render | `true` on the free web service | `false` locally unless combining | `true` |
 | `LOG_LEVEL` / `PORT` | Process | Yes | Default `info` / `3000` | `.env` | Render |

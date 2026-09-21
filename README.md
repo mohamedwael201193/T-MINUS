@@ -11,10 +11,10 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 | Anchor program `place` / `cancel` / `fill` / `expire` | Built, tested on LOCALNET, **deployed DEVNET** | `evidence/program-build.json`, `evidence/devnet-e2e.json` |
 | Token-2022 post-fee escrow + harvest-before-close | **LOCALNET** PASS | 100 bps fee mint fixture (not SPACEX) |
 | Pause / transfer-hook rejection | **UNIT + LOCALNET** | rust TLV tests; mocha paused/hook mint fixtures |
-| Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — 565 bytes, ALT present, `err=AccountNotFound` because keeper has 0 SOL |
-| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/program` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/program` reports dual-cluster status |
+| Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — **636** bytes with real `fill` ix, ALT present, `err=AccountNotFound` (no mainnet program / unfunded taker) |
+| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/program` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/orders?cluster=devnet` served open orders; `/v1/program` dual-cluster |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
-| Devnet deploy | **LIVE** | Program executable; on-chain bytes **exact-match** local `tminus.so` (`978c80e5…`); IDL `FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n`; sigs in `evidence/devnet-e2e.json` |
+| Devnet deploy | **LIVE** | Program executable; on-chain bytes **exact-match** local `tminus.so` (`978c80e5…`); IDL `FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n`; sigs in `evidence/devnet-e2e.json` and `evidence/devnet-keeper-fill.json` |
 | Mainnet program deploy / fills | Not yet | Program account absent. User-fund `CpTxsg…` has **0 SOL** and **0 SPACEX/SPCXx** on mainnet; ~3.5 SOL on **devnet** (already used for deploy + e2e). Spend cap 200_000_000 raw once funded |
 | Frontend | Not built | Awaiting `FRONTEND/` |
 
@@ -32,7 +32,9 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 - Cancel: https://explorer.solana.com/tx/27RpwuFScXheLTScUEckuB8vgZKF7KCRSGC4E22BgWP1KRnfUirXJD5rJsGUCGq2ay3a8JbtKW9inVWnQFWyMTf6?cluster=devnet
 - Fill: https://explorer.solana.com/tx/26YLJiQh51AeQH2XNXqGgruM3L5KthHNNk83z1iSsNL4WiLnDYbmPD4ffaZX997sibXvc8doRZZKDJSARcc9mv7x?cluster=devnet
 - Expire: https://explorer.solana.com/tx/3H6f11sD5F3vzVgTD287CW4xcUWePNjkwCRiLdDJDEB251cyuD56Y2GPyzjLCWcTPePGVaJD8u7D8ZSJUBTRY8Zm?cluster=devnet
-- Fixture mints are **not** SPACEX. Post-fee escrow was 990_000 raw on 1_000_000 in at 100 bps.
+- Keeper `fillIx` partial: https://explorer.solana.com/tx/3Hjih2B1D932mKZfBC2WTXM9feET7hjESDom3XoGWC2PFz1SgMBcygCWn6xjeRMexrrR71PJwmRc8JBpc6pSRDDq?cluster=devnet
+- Keeper `fillIx` close: https://explorer.solana.com/tx/2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r?cluster=devnet
+- Fixture mints are **not** SPACEX. Post-fee escrow was 990_000 raw on 1_000_000 in at 100 bps. Keeper inventory fills were 400_000 then 590_000.
 
 ## Live service (FREE Render)
 

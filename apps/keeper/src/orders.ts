@@ -1,10 +1,5 @@
 import { Connection, PublicKey } from "@solana/web3.js";
-import {
-  decodeOrder,
-  ORDER_STATUS_OFFSET,
-  STATUS_OPEN,
-  type DecodedOrder,
-} from "@tminus/sdk";
+import { decodeOrder, OPEN_STATUS_MEMCMP_BYTES, ORDER_STATUS_OFFSET, STATUS_OPEN, type DecodedOrder } from "@tminus/sdk";
 import { env } from "./config.ts";
 
 export type OpenOrder = {
@@ -14,7 +9,7 @@ export type OpenOrder = {
 
 export async function loadOpenOrders(connection: Connection): Promise<OpenOrder[]> {
   const accounts = await connection.getProgramAccounts(new PublicKey(env.programId), {
-    filters: [{ memcmp: { offset: ORDER_STATUS_OFFSET, bytes: Buffer.from([0]).toString("base64"), encoding: "base64" } }],
+    filters: [{ memcmp: { offset: ORDER_STATUS_OFFSET, bytes: OPEN_STATUS_MEMCMP_BYTES } }],
   });
   const open: OpenOrder[] = [];
   for (const acc of accounts) {

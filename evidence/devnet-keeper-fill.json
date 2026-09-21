@@ -1,0 +1,80 @@
+{
+  "label": "DEVNET_KEEPER_FILL",
+  "notSpacex": true,
+  "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+  "payer": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
+  "filler": "HgVFzokBigqYuT4RatKMFBJoEKsHNPThDyosrKZtf8Vm",
+  "mockSrcMint": "B9k7g74jGD1FG69RdLCWLyHqEfFZZMMkuXB9Cn4WxkLf",
+  "mockDstMint": "EhYbzGEw7L16jqa6FtVHDcDUmbjtHXRtcNDPtbLCABFA",
+  "orderPda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+  "escrowPostFeeRaw": "990000",
+  "composition": "two_tx_inventory_fallback",
+  "fillIxUsed": true,
+  "signatures": {
+    "place": "4wrp1oidRAhesZ5sVrDAHt1tM6dEs6TAyW9U9EcEb2cAHHyMpEQmcrs2wwbZbvB1XZrS6G4X4wTbrLSJDNw9D9Gf",
+    "fillPartial": "3Hjih2B1D932mKZfBC2WTXM9feET7hjESDom3XoGWC2PFz1SgMBcygCWn6xjeRMexrrR71PJwmRc8JBpc6pSRDDq",
+    "fillClose": "2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r"
+  },
+  "explorer": {
+    "place": "https://explorer.solana.com/tx/4wrp1oidRAhesZ5sVrDAHt1tM6dEs6TAyW9U9EcEb2cAHHyMpEQmcrs2wwbZbvB1XZrS6G4X4wTbrLSJDNw9D9Gf?cluster=devnet",
+    "fillPartial": "https://explorer.solana.com/tx/3Hjih2B1D932mKZfBC2WTXM9feET7hjESDom3XoGWC2PFz1SgMBcygCWn6xjeRMexrrR71PJwmRc8JBpc6pSRDDq?cluster=devnet",
+    "fillClose": "https://explorer.solana.com/tx/2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r?cluster=devnet",
+    "order": "https://explorer.solana.com/address/EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC?cluster=devnet"
+  },
+  "liveOrders": {
+    "afterPlace": {
+      "status": 200,
+      "body": {
+        "network": "devnet",
+        "pda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+        "lamports": 1727200,
+        "order": {
+          "owner": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
+          "srcMint": "B9k7g74jGD1FG69RdLCWLyHqEfFZZMMkuXB9Cn4WxkLf",
+          "dstMint": "EhYbzGEw7L16jqa6FtVHDcDUmbjtHXRtcNDPtbLCABFA",
+          "escrowAta": "Ff9jGCuR8khNjHRMQj2bPz2NtrpyKtjQdPZDzUZThuPq",
+          "nonce": "1789951461803",
+          "escrowedRaw": "990000",
+          "filledRaw": "0",
+          "minRatioE9": "1000000000",
+          "failsafeFloorE9": "100000000",
+          "failsafeTs": "1789955061",
+          "hardExpiryTs": "1789958661",
+          "minFillRaw": "300000",
+          "status": "open"
+        }
+      }
+    },
+    "afterFirst": {
+      "status": 200,
+      "body": {
+        "network": "devnet",
+        "pda": "EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC",
+        "lamports": 1727200,
+        "order": {
+          "owner": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
+          "srcMint": "B9k7g74jGD1FG69RdLCWLyHqEfFZZMMkuXB9Cn4WxkLf",
+          "dstMint": "EhYbzGEw7L16jqa6FtVHDcDUmbjtHXRtcNDPtbLCABFA",
+          "escrowAta": "Ff9jGCuR8khNjHRMQj2bPz2NtrpyKtjQdPZDzUZThuPq",
+          "nonce": "1789951461803",
+          "escrowedRaw": "990000",
+          "filledRaw": "400000",
+          "minRatioE9": "1000000000",
+          "failsafeFloorE9": "100000000",
+          "failsafeTs": "1789955061",
+          "hardExpiryTs": "1789958661",
+          "minFillRaw": "300000",
+          "status": "open"
+        }
+      }
+    },
+    "afterSecond": {
+      "status": 404,
+      "body": {
+        "error": "not_found"
+      }
+    }
+  },
+  "ownerDestinationAfter": "990000",
+  "remainingAfterFirst": "590000"
+}

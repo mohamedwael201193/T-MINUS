@@ -246,3 +246,17 @@ Append-only execution ledger. No secrets.
 - **next step:** mainnet SOL + SPACEX inventory for G13, or keep demo labeled DEVNET
 
 ---
+
+## 2026-09-21T00:40Z — KEEPER PATH — inventory plan + real fill compose + DEVNET partial fills
+
+- **action:** Replace memo stand-in with real `fill` ix in Jupiter compose; choose inventory vs atomic swap in keeper policy; prove two `fillIx` inventory fills on DEVNET; live `/v1/orders` during the open window
+- **command:** `pnpm test`; `pnpm sim:compose`; `node --import tsx scripts/e2e-devnet-keeper.ts`
+- **result:** Compose **636** bytes (`fillStandInMemo: false`) still `AccountNotFound` on mainnet. DEVNET order `EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC` escrow 990_000; partial fill 400_000 then close 590_000; owner dst 990_000. Live `/v1/orders?cluster=devnet` 200 open → 200 filledRaw=400000 → 404 after close. Receipts ingested (place + two fills).
+- **evidence:** `evidence/phase1-sim.json`; `evidence/devnet-keeper-fill.json`
+- **test:** sdk 6, api 9, keeper 13; secret-scan PASS
+- **decision:** Keep Render `KEEPER_SEND_ENABLED=false`. `KEEPER_INVENTORY_WITHOUT_QUOTE` stays false on mainnet. G8 PASS DEVNET. G13 still blocked (0 mainnet SOL / 0 SPACEX).
+- **files changed:** `apps/keeper/src/policy.ts`, `apps/keeper/src/loop.ts`, `apps/keeper/src/orders.ts`, `apps/keeper/scripts/sim-compose.ts`, `scripts/e2e-devnet-keeper.ts`, `packages/sdk/src/index.ts`
+- **known risks:** recovery phrase exposed; mainnet unfunded
+- **next step:** mainnet SOL + SPACEX inventory for G13
+
+---

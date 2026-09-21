@@ -1,12 +1,13 @@
 {
   "label": "SIMULATION",
   "network": "MAINNET",
-  "taker": "FbsV4KELsCki2ZujWfRPvu4kpWHDdr1bxAvGNhU13hPf",
+  "composition": "jupiter_swap_v2_build_plus_fill_ix",
+  "taker": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
   "quote": {
     "inAmount": "200000000",
     "outAmount": "76706836",
     "otherAmountThreshold": "76323302",
-    "swapUsdValue": "119.68338611908540"
+    "swapUsdValue": "120.68699538063480"
   },
   "build": {
     "inAmount": "200000000",
@@ -34,8 +35,15 @@
       }
     ]
   },
+  "fill": {
+    "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+    "order": "7ZNcc2SS9UMjVsM7qn8Ls6iib12wsU69eimSAy7JZefq",
+    "fillSrcRaw": "200000000",
+    "dstRaw": "76706836",
+    "standInMemo": false
+  },
   "tx": {
-    "serializedBytes": 565,
+    "serializedBytes": 636,
     "version0Limit": 1232,
     "underLimit": true,
     "altCount": 1,
@@ -46,5 +54,5 @@
     "unitsConsumed": 0,
     "logs": []
   },
-  "decision": "ATOMIC_COMPOSITION_SERIALIZES; simulation_err_present_likely_missing_inventory; keep atomic path if err is funds/token, else two-tx"
+  "decision": "ATOMIC_SWAP_PLUS_FILL_SERIALIZES; simulation_err_present_likely_missing_program_or_inventory; keep atomic path if err is funds/token/program, else two-tx"
 }

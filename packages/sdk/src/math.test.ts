@@ -9,6 +9,8 @@ import {
   orderPda,
   PROGRAM_ID,
   DISPLAY_RAW_SPACEX,
+  OPEN_STATUS_MEMCMP_BYTES,
+  ORDER_STATUS_OFFSET,
 } from "./index.ts";
 
 test("ceil ratio", () => {
@@ -29,6 +31,11 @@ test("quote ratio uses floor division", () => {
 
 test("1 display SPACEX is 200_000_000 raw", () => {
   assert.equal(DISPLAY_RAW_SPACEX, 200_000_000n);
+});
+
+test("open-order memcmp bytes are portable base58 for status=0", () => {
+  assert.equal(OPEN_STATUS_MEMCMP_BYTES, "1");
+  assert.equal(ORDER_STATUS_OFFSET, 210);
 });
 
 test("order PDA is stable for the declared program id", () => {

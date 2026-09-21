@@ -49,7 +49,7 @@ function send(res: http.ServerResponse, status: number, body: unknown, extra: Re
     "content-type": "application/json; charset=utf-8",
     "cache-control": extra["cache-control"] ?? "no-store",
     "access-control-allow-origin": "*",
-    "access-control-allow-methods": "GET,OPTIONS",
+    "access-control-allow-methods": "GET,POST,OPTIONS",
     "access-control-allow-headers": "content-type",
     ...extra,
   });
@@ -62,6 +62,17 @@ export function createServer() {
       const url = new URL(req.url ?? "/", "http://localhost");
       if (req.method === "OPTIONS") {
         send(res, 204, {});
+        return;
+      }
+      if (req.method === "POST") {
+        if (url.pathname === "/v1/conversions/execute") {
+          const body = await readJson(req);
+          const { executeSignedConversion } = await import("./executable.ts");
+          const result = await executeSignedConversion(body);
+          send(res, result.status, result.body);
+          return;
+        }
+        send(res, 405, { error: "method_not_allowed" });
         return;
       }
       if (req.method !== "GET") {
@@ -228,6 +239,50 @@ export function createServer() {
         const feed = await latestFeed();
         const catalog = await buildPrestocksCatalog({ spacexFeed: feed });
         send(res, 200, catalog, { "cache-control": "public, max-age=30" });
+        return;
+      }
+      if (url.pathname === "/v1/actions") {
+        const { listCorporateActions } = await import("./corporate-action.ts");
+        const list = await listCorporateActions();
+        send(res, 200, list, { "cache-control": "public, max-age=15" });
+        return;
+      }
+      const actionMatch = url.pathname.match(
+        /^\/v1\/actions\/([a-z0-9]+)(?:\/(evidence|executable|status))?$/,
+      );
+      if (actionMatch) {
+        const assetId = actionMatch[1];
+        const rest = actionMatch[2] ?? "";
+        const { getCorporateAction, actionEvidence, actionStatus } = await import("./corporate-action.ts");
+        const action = await getCorporateAction(assetId);
+        if (!action) {
+          send(res, 404, { error: "unknown_asset" });
+          return;
+        }
+        if (rest === "evidence") {
+          send(res, 200, actionEvidence(action), { "cache-control": "public, max-age=15" });
+          return;
+        }
+        if (rest === "status") {
+          send(res, 200, actionStatus(action), { "cache-control": "public, max-age=15" });
+          return;
+        }
+        if (rest === "executable") {
+          const { buildExecutable } = await import("./executable.ts");
+          const amount = url.searchParams.get("amount");
+          const taker = url.searchParams.get("taker");
+          const floorRaw = url.searchParams.get("floorRatio");
+          const floorRatio = floorRaw != null && floorRaw !== "" ? Number(floorRaw) : null;
+          const result = await buildExecutable({
+            assetId,
+            amountRaw: amount && /^[0-9]+$/.test(amount) ? amount : null,
+            taker: taker && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(taker) ? taker : null,
+            floorRatio: floorRatio != null && Number.isFinite(floorRatio) ? floorRatio : null,
+          });
+          send(res, result.status, result.body, { "cache-control": "no-store" });
+          return;
+        }
+        send(res, 200, action, { "cache-control": "public, max-age=15" });
         return;
       }
       if (url.pathname === "/v1/balances") {

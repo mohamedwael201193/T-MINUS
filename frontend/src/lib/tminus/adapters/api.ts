@@ -15,6 +15,18 @@ export async function apiGet<T>(path: string, signal?: AbortSignal): Promise<T> 
   return (await res.json()) as T;
 }
 
+export async function apiPost<T>(path: string, body: unknown, signal?: AbortSignal): Promise<{ status: number; body: T }> {
+  const res = await fetch(`${TMINUS_API}${path}`, {
+    method: "POST",
+    cache: "no-store",
+    headers: { accept: "application/json", "content-type": "application/json" },
+    body: JSON.stringify(body),
+    signal,
+  });
+  const json = (await res.json().catch(() => ({}))) as T;
+  return { status: res.status, body: json };
+}
+
 export async function apiGetMaybe<T>(
   path: string,
   signal?: AbortSignal,
@@ -59,6 +71,10 @@ export type PrestocksCatalogResponse = {
     destinationMint: string | null;
     destinationSymbol: string | null;
     destinationName: string | null;
+    destinationAllowsAny?: boolean;
+    statedRatio?: number | null;
+    actionType?: "GOING_PUBLIC" | "ACQUISITION" | "EXPIRY" | "NONE";
+    issuerStatement?: string | null;
     tokenPrice: number | null;
     markPrice: number | null;
     holders: number | null;
@@ -113,6 +129,66 @@ export type PdaResponse = {
   };
 };
 
+export type ActionsListResponse = {
+  network: "MAINNET";
+  actions: Array<{
+    assetId: string;
+    symbol: string;
+    stage: "CONVERSION_WINDOW" | "TERMS_PENDING" | "EXPIRED" | "CONVERTED";
+    actionType: "GOING_PUBLIC" | "ACQUISITION" | "EXPIRY" | "NONE";
+    settlementKind: "TRADE" | "NONE";
+    deadline: string | null;
+    destinationVerified: boolean;
+    destination: { symbol: string; mint: string } | null;
+    issuer: {
+      statement: string | null;
+      statedRatio: number | null;
+      destinationAllowsAny: boolean;
+    };
+    transferFeeBps: number | null;
+    onchain: {
+      paused: boolean | null;
+      hookProgramId: string | null;
+      tokenProgram: string | null;
+      rpcOk: boolean;
+    };
+    truth: { tminus: { allowSign: boolean; refusals: string[] } };
+    evidence: { issuerPageUrl: string | null; sourceHash: string | null };
+  }>;
+};
+
+export type ExecutableResponse = {
+  allowed: boolean;
+  refusals: string[];
+  path: "order_execute" | "none";
+  transaction: string | null;
+  requestId: string | null;
+  quote: {
+    inAmount: string | null;
+    outAmount: string | null;
+    executableRatio: number | null;
+    router: string | null;
+    error: string | null;
+  };
+  action: {
+    symbol: string;
+    destinationSymbol: string | null;
+    destinationMint: string | null;
+    transferFeeBps: number | null;
+  };
+};
+
+export type ExecuteConversionResponse = {
+  settled?: boolean;
+  signature?: string;
+  explorer?: string;
+  executableRatio?: number | null;
+  error?: string;
+  detail?: string;
+  note?: string;
+  refusals?: string[];
+};
+
 export type QuoteResponse = {
   network: string;
   source: string;
@@ -129,16 +205,19 @@ export type ReceiptRow = {
     kind?: string;
     slot?: number;
     ratio?: string;
-    route?: { composition?: string } | string;
+    route?: { composition?: string; path?: string } | string;
     network?: string;
     explorer?: string;
     feedHash?: string | null;
     orderPda?: string;
-    programId?: string;
+    programId?: string | null;
     timestamp?: string;
     failsafeFlag?: boolean;
     sourceAmount?: string;
     destinationAmount?: string;
+    destinationSymbol?: string;
+    settlementKind?: string;
+    assetId?: string;
   };
 };
 

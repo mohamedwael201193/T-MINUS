@@ -1,5 +1,6 @@
 import type {
   ConversionOrder,
+  CorporateActionView,
   ExecutionReceipt,
   LifecycleAsset,
   MarketSnapshot,
@@ -48,6 +49,18 @@ export interface EngineNotice {
   receiptId?: string;
 }
 
+export interface ConversionRequestInput {
+  assetId: string;
+  amountDisplay: number;
+  floorRatio: number;
+}
+
+export type ConversionResult =
+  | { status: "refused"; refusals: string[]; message: string }
+  | { status: "settled"; signature: string; explorer: string; ratio: number | null }
+  | { status: "submitted"; signature: string; explorer: string; message: string }
+  | { status: "error"; message: string };
+
 export interface TMinusSource {
   /* lifecycle */
   listAssets(): LifecycleAsset[];
@@ -65,6 +78,9 @@ export interface TMinusSource {
   /* receipts */
   listReceipts(): ExecutionReceipt[];
   getReceipt(id: string): ExecutionReceipt | undefined;
+
+  getAction(assetId: string): CorporateActionView | undefined;
+  requestConversion(input: ConversionRequestInput): Promise<ConversionResult>;
 
   /* wallet */
   getWallet(): WalletState;

@@ -1,6 +1,6 @@
 # T-MINUS
 
-Conditional conversion orders for PreStocks Token-2022 mints: escrow source tokens, fill at an executable destination ratio or after a failsafe timestamp, expire leftover to the owner.
+Corporate action layer for PreStocks Token-2022 mints. T-MINUS reads the issuer instruction, compares it to on-chain mint state and a live Jupiter route, then either asks the holder to sign a Mainnet **TRADE** or refuses. Unattended escrow (place/cancel/fill/expire) is proven on **DEVNET**, not on Mainnet.
 
 Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS API (`BackendSource`). Design simulation is `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
 
@@ -8,15 +8,17 @@ Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS AP
 
 | Piece | Status | Evidence |
 |---|---|---|
+| Corporate action API `/v1/actions` | **MAINNET data** | Live issuer pages + official catalog/metrics + mint extensions |
+| Conversion desk (user-signed Jupiter Swap V2 `/order`+`/execute`) | **MAINNET execution path** | Safety gates; no fake signatures; T-MINUS never holds tokens |
 | Anchor program `place` / `cancel` / `fill` / `expire` | Built, tested on LOCALNET, **deployed DEVNET** | `evidence/program-build.json`, `evidence/devnet-e2e.json` |
 | Token-2022 post-fee escrow + harvest-before-close | **LOCALNET** PASS | 100 bps fee mint fixture (not SPACEX) |
 | Pause / transfer-hook rejection | **UNIT + LOCALNET** | rust TLV tests; mocha paused/hook mint fixtures |
-| Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — **636** bytes with real `fill` ix, ALT present, `err=AccountNotFound` (no mainnet program / unfunded taker) |
-| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/pda` `/v1/program` `/v1/prestocks` `/v1/balances` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/prestocks` is MAINNET PreStocks-only catalog; `/v1/program` dual-cluster; `/v1/pda` is SDK derivation + optional inspect |
+| Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — keeper path, not the conversion desk |
+| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/pda` `/v1/program` `/v1/prestocks` `/v1/balances` `/v1/actions` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
-| Devnet deploy | **LIVE** (254,768-byte ELF `978c80e5…`) | Program executable; IDL `FMSPeg37…`; sigs in `evidence/devnet-e2e.json`. Local optimized `.so` is now **209,256** bytes (`838ebc5c…`) — smaller than the already-deployed devnet ELF; behavior tests 12/12 |
-| Mainnet program deploy / fills | **NOT DEPLOYED** | Proven minimum safe balance **1.08473244 SOL** (`1,084,732,440` lamports). Previous 2.14859112 was a buffer+ProgramData double-count. See `evidence/mainnet-deployment-cost.json` |
-| Frontend | **LIVE on Vercel**, wired to the Render API (place refused on MAINNET until program exists) | https://tminusapp.vercel.app |
+| Devnet deploy | **LIVE** (254,768-byte ELF `978c80e5…`) | Program executable; IDL `FMSPeg37…`; sigs in `evidence/devnet-e2e.json`. Local optimized `.so` is now **209,256** bytes (`838ebc5c…`) |
+| Mainnet program deploy / fills | **NOT DEPLOYED** | Proven minimum safe balance **1.08473244 SOL**. Not required for the conversion desk |
+| Frontend | **LIVE on Vercel**, wired to the Render API | https://tminusapp.vercel.app |
 
 ## Program
 
@@ -53,7 +55,7 @@ Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS AP
 - Receipts: https://tminusapp.vercel.app/#/receipts
 - Project: `t-minus` (SSO deployment protection **off** — public)
 - Build env: `NEXT_PUBLIC_TMINUS_API=https://tminus-api-k2d2.onrender.com`
-- Design simulation is **not** enabled. MAINNET place is refused. Receipts are **DEVNET** protocol proofs.
+- Design simulation is **not** enabled. MAINNET escrow place is refused. MAINNET conversion is a user-signed Jupiter TRADE when the safety gate allows it. DEVNET receipts are protocol proofs.
 
 ## Setup
 
@@ -123,8 +125,8 @@ Failsafe does **not** guarantee conversion regardless of liquidity.
 
 ## Known limitations
 
-- Mainnet program is **not deployed**. Proven minimum safe deploy balance is **1.08473244 SOL** for the 209,256-byte ELF (`evidence/mainnet-deployment-cost.json`). Tiny SPACEX inventory is already on the payer. Mainnet send is blocked until explicit approval.
-- Phase 1 simulation did not return `err: null` because the program account does not exist on mainnet.
-- Frontend is in `frontend/` (Next.js), live at https://tminusapp.vercel.app. Default adapter is live `BackendSource`. Design simulation is `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
-- Public RPC + keyless Jupiter may 429.
-- Issuer retains mint/freeze/pause/permanent-delegate powers on SPACEX; the program rejects pause and attached transfer hooks at fill/place time, and the keeper halts on those plus stale feed.
+- Mainnet T-MINUS program is **not deployed**. Unattended escrow/failsafe cannot run on Mainnet. The conversion desk does **not** require that program.
+- Conversion is a **TRADE** into the issuer-named destination, not a 1:1 rollover or automatic mint mutation.
+- XAI's published deadline is past. T-MINUS refuses new conversions. On-chain burn/freeze of leftover XAI is **not** claimed.
+- Public RPC + Jupiter may 429. Stale quotes cannot be signed.
+- Issuer retains mint/freeze/pause/permanent-delegate powers on SPACEX; the safety gate refuses pause and attached transfer hooks.

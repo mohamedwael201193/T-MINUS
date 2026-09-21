@@ -33,11 +33,12 @@ export function Problem() {
             The deadline is the whole game.
           </h2>
           <p className="mt-5 max-w-2xl text-[16.5px] leading-relaxed text-fog">
-            A PreStocks token isn’t an ordinary position. It’s a promise with
-            an expiry date — convert into the public stock before the window
-            closes, or the tokens expire worthless.{" "}
+            A PreStocks token isn’t an ordinary position. When the issuer
+            publishes a conversion window, holders must trade out before the
+            deadline or the token is scheduled to expire worthless. Jupiter
+            will still quote a swap. It will not tell you the window is closed.{" "}
             <span className="font-semibold text-ink">
-              Nobody should have to babysit a market for eight months.
+              The missing layer is the corporate action, not another chart.
             </span>
           </p>
         </Reveal>
@@ -129,11 +130,12 @@ export function Problem() {
                   With T-MINUS:
                 </p>
                 <p className="mt-1.5 font-display text-[clamp(1.6rem,3vw,2.1rem)] uppercase leading-none text-ink">
-                  set once. walk away.
+                  the gate speaks first.
                 </p>
                 <p className="mt-3 font-mono text-[10px] uppercase leading-relaxed tracking-[0.1em] text-ink/70">
-                  The order watches the executable ratio for you — and falls
-                  back to your floor before the window closes.
+                  Issuer instruction, mint state, fee-aware route — then a
+                  signature, or a refusal. You stay present. Unattended escrow
+                  is the DEVNET protocol proof, not Mainnet custody.
                 </p>
               </div>
             </Panel>

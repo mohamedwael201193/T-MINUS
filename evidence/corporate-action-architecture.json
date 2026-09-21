@@ -1,0 +1,39 @@
+{
+  "fetchedAt": "2026-09-22T00:00:00.000Z",
+  "decision": "corporate_action_layer",
+  "product": "T-MINUS is the corporate action layer for PreStocks. Conversion desk is the consumer. Unattended escrow remains DEVNET protocol proof.",
+  "killed": [
+    "premium-vs-mark analytics (prestocks-pulse occupies it)",
+    "generic limit bot (Trigger V2 excludes transfer-fee SPACEX)",
+    "Mainnet program as the hackathon product (1.08473244 SOL, not required)"
+  ],
+  "evidence": {
+    "catalogSymbols": ["ANDURIL", "ANTHROPIC", "FIGUREAI", "KALSHI", "NEURALINK", "OPENAI", "POLYMARKET", "SPACEX"],
+    "xaiInCatalog": false,
+    "xaiInMetrics": true,
+    "spacexDeadline": "before 11:59pm UTC on 12 March 2027",
+    "xaiDeadline": "before 11:59pm UTC on 12 September 2026",
+    "faqMechanics": [
+      "What happens if the company goes public?",
+      "What happens if the company gets acquired or merges with another company?"
+    ],
+    "jupiterLiteQuote": {
+      "inAmount": "200000000",
+      "outAmount": "75722514",
+      "route": "Meteora DLMM"
+    }
+  },
+  "mainnetProgram": {
+    "required": false,
+    "peakSol": 1.08473244,
+    "reason": "User-signed Jupiter TRADE does not need T-MINUS escrow on Mainnet."
+  },
+  "apis": [
+    "GET /v1/actions",
+    "GET /v1/actions/:asset",
+    "GET /v1/actions/:asset/evidence",
+    "GET /v1/actions/:asset/executable",
+    "GET /v1/actions/:asset/status",
+    "POST /v1/conversions/execute"
+  ]
+}

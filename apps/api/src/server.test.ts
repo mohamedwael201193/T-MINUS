@@ -76,6 +76,40 @@ test("pda rejects bad keys", async () => {
   server.close();
 });
 
+test("unknown corporate action is 404", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const addr = server.address();
+  assert.ok(addr && typeof addr === "object");
+  const res = await fetch(`http://127.0.0.1:${addr.port}/v1/actions/notanasset/status`);
+  assert.equal(res.status, 404);
+  server.close();
+});
+
+test("OPTIONS is allowed for CORS preflight", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const addr = server.address();
+  assert.ok(addr && typeof addr === "object");
+  const res = await fetch(`http://127.0.0.1:${addr.port}/v1/actions`, { method: "OPTIONS" });
+  assert.equal(res.status, 204);
+  server.close();
+});
+
+test("conversion execute without body is 400", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const addr = server.address();
+  assert.ok(addr && typeof addr === "object");
+  const res = await fetch(`http://127.0.0.1:${addr.port}/v1/conversions/execute`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: "{}",
+  });
+  assert.equal(res.status, 400);
+  server.close();
+});
+
 test("program status names both clusters", async () => {
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, resolve));

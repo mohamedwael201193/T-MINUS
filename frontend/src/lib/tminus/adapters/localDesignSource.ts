@@ -1,5 +1,6 @@
 import type {
   ConversionOrder,
+  CorporateActionView,
   ExecutionReceipt,
   LifecycleAsset,
   MarketSnapshot,
@@ -22,6 +23,8 @@ import {
   WALLET_PROVIDERS,
 } from "../data/walletState";
 import type {
+  ConversionRequestInput,
+  ConversionResult,
   CreateOrderInput,
   EngineNotice,
   TMinusSource,
@@ -297,6 +300,41 @@ export class LocalDesignSource implements TMinusSource {
 
   getReceipt(id: string): ExecutionReceipt | undefined {
     return this.receipts.find((r) => r.id === id);
+  }
+
+  getAction(assetId: string): CorporateActionView | undefined {
+    const asset = this.getAsset(assetId);
+    if (!asset) return undefined;
+    return {
+      assetId,
+      symbol: asset.symbol,
+      stage: asset.stage,
+      actionType: asset.stage === "CONVERSION_WINDOW" ? "GOING_PUBLIC" : "NONE",
+      settlementKind: "NONE",
+      deadline: asset.windowClosesAt,
+      issuerStatement: asset.stageNote,
+      destinationSymbol: asset.destinationSymbol,
+      destinationMint: asset.destinationMint ?? null,
+      destinationVerified: Boolean(asset.destinationMint),
+      statedRatio: null,
+      allowsAnyToken: true,
+      transferFeeBps: asset.transferFeeBps,
+      paused: false,
+      hookProgramId: null,
+      tokenProgram: null,
+      sourceHash: null,
+      issuerPageUrl: null,
+      refusals: ["TERMS_PENDING"],
+      allowSign: false,
+      onchainRpcOk: false,
+    };
+  }
+
+  async requestConversion(_input: ConversionRequestInput): Promise<ConversionResult> {
+    return {
+      status: "error",
+      message: "Design simulation cannot sign Mainnet conversions.",
+    };
   }
 
   /* -------------------------------- wallet ------------------------------ */

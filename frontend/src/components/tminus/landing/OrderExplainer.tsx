@@ -25,12 +25,13 @@ export function OrderExplainer() {
         <Reveal>
           <Eyebrow>The order</Eyebrow>
           <h2 className="mt-5 font-display text-[clamp(2.2rem,5.4vw,4.2rem)] uppercase leading-[0.95] text-ink">
-            Two rules. That’s the whole order.
+            A floor. A gate. A signature.
           </h2>
           <p className="mt-5 max-w-2xl text-[16.5px] leading-relaxed text-fog">
-            No terminal. No stack of indicators. You write two conditions —
-            the conversion you want, and the worst you’ll accept — and the
-            clock does the rest.
+            Issuer instruction, on-chain mint state, a live Jupiter quote, and a
+            safety gate. You write a floor. If the window is open and the route
+            clears it, you sign a Mainnet trade. If XAI already expired, T-MINUS
+            refuses.
           </p>
         </Reveal>
 
@@ -118,17 +119,16 @@ export function OrderExplainer() {
                     1
                   </span>
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-fog">
-                    Rule 01 — the target
+                    Rule 01 — the window
                   </p>
                 </div>
                 <p className="mt-4 font-mono text-[15px] font-bold uppercase leading-snug tracking-[0.02em] text-ink">
-                  IF the executable ratio reaches{" "}
-                  <span className="rounded bg-lime px-1.5">0.820</span>
+                  IF the issuer window is open and the quote is fresh
                 </p>
                 <p className="mt-2 flex items-center gap-2 text-[14px] text-fog">
                   <span aria-hidden className="font-bold text-ink">→</span>
-                  Convert your SPACEX into {asset.destinationSymbol} at 0.820
-                  or better.
+                  You may sign a TRADE of SPACEX into {asset.destinationSymbol}.
+                  Not a 1:1 rollover.
                 </p>
               </div>
             </Reveal>
@@ -140,18 +140,17 @@ export function OrderExplainer() {
                     2
                   </span>
                   <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-fog">
-                    Rule 02 — the failsafe
+                    Rule 02 — the floor
                   </p>
                 </div>
                 <p className="mt-4 font-mono text-[15px] font-bold uppercase leading-snug tracking-[0.02em] text-ink">
-                  IF{" "}
-                  <span className="rounded bg-amber px-1.5">MAR 01 2027</span>{" "}
-                  arrives first
+                  IF the post-fee route is below{" "}
+                  <span className="rounded bg-amber px-1.5">0.700</span>
                 </p>
                 <p className="mt-2 flex items-center gap-2 text-[14px] text-fog">
                   <span aria-hidden className="font-bold text-ink">→</span>
-                  Attempt the conversion at your floor — 0.700 or better. No
-                  worse, no surprises.
+                  T-MINUS refuses. Unattended failsafe lives on the DEVNET
+                  program, not this Mainnet trade.
                 </p>
               </div>
             </Reveal>
@@ -162,15 +161,14 @@ export function OrderExplainer() {
                   Executable = after fees
                 </p>
                 <p className="mt-2.5 text-[13.5px] leading-relaxed text-fog">
-                  The ratio you set is the ratio you’d receive. The 1%
-                  Token-2022 transfer fee is priced in before the condition
-                  is ever checked — so the trigger you see is the fill you
-                  get.
+                  The ratio on the desk is post-fee. The 1% Token-2022
+                  transfer fee is priced in before the gate ever asks you
+                  to sign.
                 </p>
                 <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.1em] text-fog">
-                  Failsafe can be set any day up to{" "}
+                  Hard issuer deadline{" "}
                   {asset.windowClosesAt ? fmtDate(asset.windowClosesAt) : "—"}{" "}
-                  — the hard deadline.
+                  — after that, the desk refuses.
                 </p>
               </div>
             </Reveal>

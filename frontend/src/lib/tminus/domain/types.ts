@@ -157,8 +157,34 @@ export interface ExecutionReceipt {
   programId?: string;
   sourceSymbol?: string;
   destinationSymbol?: string;
-  eventKind?: "fill" | "cancel" | "expire" | "place";
+  eventKind?: "fill" | "cancel" | "expire" | "place" | "conversion";
 }
+
+export type ActionType = "GOING_PUBLIC" | "ACQUISITION" | "EXPIRY" | "NONE";
+
+export type CorporateActionView = {
+  assetId: string;
+  symbol: string;
+  stage: LifecycleStage;
+  actionType: ActionType;
+  settlementKind: "TRADE" | "NONE";
+  deadline: string | null;
+  issuerStatement: string | null;
+  destinationSymbol: string | null;
+  destinationMint: string | null;
+  destinationVerified: boolean;
+  statedRatio: number | null;
+  allowsAnyToken: boolean;
+  transferFeeBps: number | null;
+  paused: boolean | null;
+  hookProgramId: string | null;
+  tokenProgram: string | null;
+  sourceHash: string | null;
+  issuerPageUrl: string | null;
+  refusals: string[];
+  allowSign: boolean;
+  onchainRpcOk: boolean;
+};
 
 /* --------------------------------- wallet ------------------------------- */
 

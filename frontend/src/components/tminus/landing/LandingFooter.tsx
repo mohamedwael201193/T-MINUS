@@ -11,8 +11,8 @@ export function LandingFooter() {
           <div>
             <Wordmark size="md" />
             <p className="mt-4 max-w-xs text-[13.5px] leading-relaxed text-fog">
-              Lifecycle orders for tokenized pre-IPO assets. Set the price.
-              Set the clock. T-MINUS watches.
+              Corporate action layer for PreStocks. Issuer instruction,
+              on-chain mint, fee-aware route, safety gate, your signature.
             </p>
             <p className="mt-5 inline-flex items-center gap-2 rounded-full border-2 border-ink bg-paper px-3 py-1.5 font-mono text-[9.5px] font-bold uppercase tracking-[0.16em] text-ink">
               <span className="h-1.5 w-1.5 rounded-full bg-lime animate-pulse-ring" aria-hidden />

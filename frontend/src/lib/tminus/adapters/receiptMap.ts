@@ -1,6 +1,9 @@
 import type { ExecutionReceipt } from "../domain/types";
 import { PROGRAM_ID, type ReceiptRow } from "./api";
 
+const SPACEX_DISPLAY_RAW = 200_000_000;
+const SPCXX_DISPLAY_RAW = 100_000_000;
+
 export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
   const payload = row.payload ?? {};
   const network = (payload.network === "MAINNET" || payload.network === "DEVNET"
@@ -12,8 +15,10 @@ export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
   const composition =
     typeof payload.route === "string" ? payload.route : payload.route?.composition ?? "unknown";
   const kindRaw = typeof payload.kind === "string" ? payload.kind.toLowerCase() : "";
-  const eventKind: ExecutionReceipt["eventKind"] =
-    kindRaw === "fill" || kindRaw === "cancel" || kindRaw === "expire" || kindRaw === "place"
+  const isConversion = kindRaw === "mainnet_jupiter_conversion" || kindRaw === "conversion";
+  const eventKind: ExecutionReceipt["eventKind"] = isConversion
+    ? "conversion"
+    : kindRaw === "fill" || kindRaw === "cancel" || kindRaw === "expire" || kindRaw === "place"
       ? kindRaw
       : dstRaw > 0
         ? "fill"
@@ -22,13 +27,13 @@ export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
   return {
     id: `R-${String(index + 1).padStart(4, "0")}`,
     orderId: row.order_pda,
-    assetId: isDevnet ? "protocol-devnet" : "spacex",
+    assetId: payload.assetId ?? (isDevnet ? "protocol-devnet" : "spacex"),
     path: payload.failsafeFlag ? "FAILSAFE" : "TARGET",
     targetRatio: ratioE9 ? ratioE9 / 1e9 : 0,
     floorRatio: ratioE9 ? ratioE9 / 1e9 : 0,
     executedRatio: ratioE9 ? ratioE9 / 1e9 : 0,
-    size: srcRaw / 1e6,
-    filled: dstRaw / 1e6,
+    size: isConversion ? srcRaw / SPACEX_DISPLAY_RAW : srcRaw / 1e6,
+    filled: isConversion ? dstRaw / SPCXX_DISPLAY_RAW : dstRaw / 1e6,
     signature: row.sig,
     slot: Number(row.slot ?? payload.slot ?? 0),
     route: `${network} · ${eventKind} · ${composition}`,
@@ -41,9 +46,13 @@ export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
       (network === "DEVNET"
         ? `https://explorer.solana.com/tx/${row.sig}?cluster=devnet`
         : `https://explorer.solana.com/tx/${row.sig}`),
-    programId: payload.programId ?? PROGRAM_ID,
-    sourceSymbol: isDevnet ? "DEVNET-SRC" : "SPACEX",
-    destinationSymbol: isDevnet ? "DEVNET-DST" : "SPCXx",
+    programId: isConversion ? "jupiter-swap-v2" : payload.programId ?? PROGRAM_ID,
+    sourceSymbol: isConversion ? "SPACEX" : isDevnet ? "DEVNET-SRC" : "SPACEX",
+    destinationSymbol: isConversion
+      ? payload.destinationSymbol ?? "SPCXx"
+      : isDevnet
+        ? "DEVNET-DST"
+        : "SPCXx",
     eventKind,
   };
 }

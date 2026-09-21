@@ -25,12 +25,12 @@ export function ReceiptsView() {
               The ledger
             </h1>
             <p className="mt-4 max-w-md text-[14px] leading-relaxed text-bone-dim">
-              Every on-chain place, fill, cancel, and expire leaves one of these.
-              DEVNET rows are protocol proofs — not MAINNET PreStocks fills.
+              Every on-chain place, fill, cancel, expire, and Mainnet conversion leaves one of these.
+              DEVNET rows are protocol proofs. MAINNET conversion rows are user-signed Jupiter trades.
             </p>
           </div>
           <span className="rounded-full border-2 border-bone/40 px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-bone">
-            {fills.length} fills · {receipts.length} on-chain
+            {fills.length} fills · {receipts.filter((r) => r.eventKind === "conversion").length} trades · {receipts.length} on-chain
           </span>
         </div>
 
@@ -53,7 +53,7 @@ export function ReceiptsView() {
         )}
 
         <p className="mt-12 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-bone-dim">
-          Ledger from the live API · DEVNET receipts are protocol proofs, not MAINNET PreStocks fills
+          Ledger from the live API · DEVNET = protocol proof · MAINNET conversion = Jupiter trade you signed
         </p>
       </div>
     </div>

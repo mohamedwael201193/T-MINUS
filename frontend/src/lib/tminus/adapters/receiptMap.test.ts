@@ -58,3 +58,31 @@ test("missing kind with destination defaults to fill", () => {
   );
   assert.equal(r.eventKind, "fill");
 });
+
+test("mainnet jupiter conversion is labeled conversion not protocol fill", () => {
+  const r = mapReceipt(
+    {
+      order_pda: "conversion:spacex:CpTxsgPj",
+      sig: "1111111111111111111111111111111111111111111111111111111111111111",
+      slot: 9,
+      created_at: "2026-09-22T00:00:00.000Z",
+      payload: {
+        kind: "mainnet_jupiter_conversion",
+        network: "MAINNET",
+        sourceAmount: "200000000",
+        destinationAmount: "75722514",
+        ratio: "757225140",
+        destinationSymbol: "SPCXx",
+        assetId: "spacex",
+        explorer: "https://explorer.solana.com/tx/1111111111111111111111111111111111111111111111111111111111111111",
+      },
+    },
+    5,
+  );
+  assert.equal(r.eventKind, "conversion");
+  assert.equal(r.network, "MAINNET");
+  assert.equal(r.size, 1);
+  assert.ok(Math.abs(r.filled - 0.75722514) < 1e-9);
+  assert.equal(r.programId, "jupiter-swap-v2");
+  assert.doesNotMatch(r.explorerUrl ?? "", /cluster=devnet/);
+});

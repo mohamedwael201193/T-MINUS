@@ -23,8 +23,9 @@ export function ReceiptCard({
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const kind = receipt.eventKind ?? "fill";
-  const isFill = kind === "fill";
-  const targetFill = isFill && receipt.path === "TARGET";
+  const isConversion = kind === "conversion";
+  const isFill = kind === "fill" || isConversion;
+  const targetFill = kind === "fill" && receipt.path === "TARGET";
   const badge =
     kind === "cancel"
       ? "Cancelled"
@@ -32,10 +33,12 @@ export function ReceiptCard({
         ? "Expired"
         : kind === "place"
           ? "Placed"
-          : targetFill
-            ? "Target met"
-            : "Failsafe used";
-  const stamp = isFill ? "Settled" : kind === "cancel" ? "Closed" : kind === "expire" ? "Expired" : "On-chain";
+          : isConversion
+            ? "Mainnet trade"
+            : targetFill
+              ? "Target met"
+              : "Failsafe used";
+  const stamp = isConversion ? "Traded" : isFill ? "Settled" : kind === "cancel" ? "Closed" : kind === "expire" ? "Expired" : "On-chain";
 
   return (
     <article

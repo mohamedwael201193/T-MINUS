@@ -30,12 +30,14 @@ src/
       WhyToolsFail, ProofTeaser, Safety, FinalCta, LandingFooter
     app/                        ← application surfaces
       AppShell.tsx              ← top chrome, tabs, wallet button + modal, mobile bottom nav
-      ConsoleView.tsx           ← lifecycle panel + ticket + orders + latest proof
-      LifecyclePanel.tsx        ← asset switcher (SPACEX live / OPENAI terms-pending)
-      OrderTicket.tsx           ← THE order form (validation, plain-English summary)
+      ConsoleView.tsx           ← lifecycle + corporate action + ticket + protocol + orders
+      LifecyclePanel.tsx        ← asset switcher (SPACEX live / OPENAI terms-pending / XAI expired)
+      ActionDesk.tsx            ← five-layer truth: issuer / chain / market / Jupiter / T-MINUS
+      OrderTicket.tsx           ← conversion signature (Mainnet Jupiter) or design-mode order
       MyOrders.tsx              ← order cards, filters, cancel dialog
       OrderDetail.tsx           ← state machine + rule + activity + advanced panel
       ReceiptsView.tsx          ← the proof ledger
+      ProtocolPanel.tsx         ← DEVNET program inspect
   lib/tminus/
     domain/types.ts             ← THE product vocabulary (LifecycleAsset,
                                   ConversionOrder, ExecutionReceipt, …)
@@ -99,9 +101,12 @@ Rules the UI already follows — keep them:
 **Current production factory:** `adapters/context.tsx` calls
 `createBackendSource()` unless `NEXT_PUBLIC_TMINUS_SOURCE=design`.
 
-MAINNET place is **refused** while program `HRLm…` is not executable on
-mainnet. Receipts from `/v1/receipts` are labeled **DEVNET** and open
-real explorer URLs. Lifecycle catalog is `/v1/prestocks` (Pre* mints only).
+MAINNET **escrow place** is **refused** while program `HRLm…` is not executable on
+mainnet. MAINNET **conversion** is a user-signed Jupiter Swap V2 trade when the
+corporate-action safety gate allows it. Receipts from `/v1/receipts` with
+`network=DEVNET` are protocol proofs. `kind=mainnet_jupiter_conversion` rows are
+Mainnet Jupiter trades. Lifecycle catalog is `/v1/prestocks`. Corporate actions
+are `/v1/actions`.
 
 ---
 

@@ -50,9 +50,9 @@ const FAILURES = [
         Pre-IPO liquidity is thin. Size market-sells realize 23–34% below
         parity, and past ~$118k there are{" "}
         <span className="font-mono text-[12.5px] font-bold text-coral">NO_ROUTES</span>{" "}
-        at all. A T-MINUS order rests patiently, moves the moment your
-        price exists — or falls back to your floor before the window
-        closes.
+        at all. T-MINUS will not ask you to sign a hurried dump. It prices
+        the live post-fee route, then refuses if the book cannot clear your
+        floor.
       </>
     ),
     icon: (

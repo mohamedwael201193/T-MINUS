@@ -24,12 +24,12 @@ const jbmono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "T-MINUS — Your token has a clock.",
   description:
-    "Conditional conversion orders for tokenized pre-IPO lifecycles. Set the ratio you want, set the floor you'll accept, set the failsafe. T-MINUS watches the clock for you.",
+    "Corporate action layer for PreStocks. Issuer instruction, on-chain mint, fee-aware Jupiter route, safety gate, then your signature — or a refusal.",
   keywords: [
     "T-MINUS",
     "PreStocks",
-    "lifecycle orders",
-    "conditional conversion",
+    "corporate actions",
+    "conversion desk",
     "SPACEX",
     "Token-2022",
     "Solana",
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "T-MINUS — Your token has a clock.",
     description:
-      "Pre-IPO tokens don't just have a price — they have a deadline. Set your conversion rule once. T-MINUS watches the clock.",
+      "PreStocks tokens carry issuer events and deadlines. T-MINUS reads the corporate action, then asks you to sign a real trade — or refuses.",
     siteName: "T-MINUS",
     type: "website",
   },

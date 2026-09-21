@@ -1,10 +1,12 @@
 # T-MINUS — MASTER IMPLEMENTATION PLAN
 
-Single source of truth. Verified-at **2026-09-21**. Live state wins over older rows.
+Single source of truth. Verified-at **2026-09-22**. Live state wins over older rows.
 
-**Frontend certification (2026-09-21):** production `frontend/` at https://tminusapp.vercel.app uses BackendSource. `npx tsc --noEmit` and `npx next build` pass with `typescript.ignoreBuildErrors=false`. DEVNET protocol place/fill/partial/failsafe/cancel/expire/double-fill re-executed on-chain this pass. MAINNET program remains absent; MAINNET place is refused.
+**Product (2026-09-22):** T-MINUS is the **corporate action layer for PreStocks**. The consumer surface is a conversion desk. Mainnet path is a user-signed Jupiter Swap V2 `/order` + `/execute` TRADE (not an automatic rollover, not T-MINUS escrow). DEVNET remains the trust-minimized protocol proof (place/cancel/fill/expire). Do **not** spend **1.08473244 SOL** on a Mainnet program for this product.
 
-**Current architecture decision (Option B):** full T-MINUS protocol on **DEVNET** + real PreStocks **MAINNET** lifecycle/market data + honest network labels. Do **not** spend **1.08473244 SOL** on a mainnet program until that spend is explicitly approved. The previous **2.14859112 SOL** figure was an incorrect buffer+ProgramData double-count. See `evidence/mainnet-deployment-cost.json`.
+**Frontend certification (2026-09-21):** production `frontend/` at https://tminusapp.vercel.app uses BackendSource. `npx tsc --noEmit` and `npx next build` pass with `typescript.ignoreBuildErrors=false`. DEVNET protocol place/fill/partial/failsafe/cancel/expire/double-fill re-executed on-chain this pass. MAINNET program remains absent; MAINNET **escrow place** is refused. MAINNET **conversion signatures** are a separate Jupiter path.
+
+**Current architecture decision (Option B + corporate-action API):** full T-MINUS protocol on **DEVNET** + real PreStocks **MAINNET** lifecycle/corporate-action data + user-signed Jupiter execution + honest network labels. See `GET /v1/actions`.
 
 Frontend exists at `frontend/` (Next.js), live at **https://tminusapp.vercel.app**. Production path is `BackendSource` against `https://tminus-api-k2d2.onrender.com`. `LocalDesignSource` is opt-in via `NEXT_PUBLIC_TMINUS_SOURCE=design` (tests/fixtures only).
 
@@ -12,9 +14,9 @@ Frontend exists at `frontend/` (Next.js), live at **https://tminusapp.vercel.app
 
 ## 0. Executive Summary
 
-T-MINUS is a **conditional conversion order** for PreStocks Token-2022 mints: escrow source tokens, fill when the **executable destination ratio** meets the user’s target, or after a user-set failsafe time at no worse than the user’s floor. Permissionless fillers. TypeScript keeper on Render. Off-chain lifecycle feed. Frontend in `frontend/` wired to the live API.
+T-MINUS is the **corporate action layer for PreStocks**. The consumer desk reads an issuer instruction, compares it to on-chain mint state and a live Jupiter route, then either asks the holder to sign a Mainnet TRADE or refuses. A public machine-readable API (`GET /v1/actions`) exposes the same object. Unattended escrow (`place` / `cancel` / `fill` / `expire`) remains the **DEVNET** protocol proof. The Mainnet program is **not** required for the desk and is not deployed.
 
-**Chosen architecture (one):** Anchor program with four instructions (`place`, `cancel`, `fill`, `expire`) using `token_interface::transfer_checked`; keeper obtains Jupiter **Swap API V2 `GET /swap/v2/build`** instructions and composes them with `fill` in one v0 transaction using returned ALTs. Recurring V1 is unmaintained; Trigger V1 still rejects transfer-fee mints; Trigger V2 docs exclude transfer-fee mints. Pyth is out of the money path.
+**Chosen architecture (one):** Corporate-action domain + conversion desk on Mainnet data/execution, plus the existing Anchor program on DEVNET. Conversion desk uses Jupiter **Swap API V2 `/order` + `/execute`** (user-signed). DEVNET keeper still uses **`GET /swap/v2/build`** so it can compose `fill`. Trigger V1/V2 reject transfer-fee mints. Pyth is out of the money path.
 
 **Mainnet program:** not deployed. Toolchain: Solana CLI **4.1.2** and Anchor **1.2.0** in WSL (`devmo`). Native Windows has no `solana`/`anchor`.
 

@@ -67,7 +67,7 @@ export function MyOrders() {
           </p>
           <p className="mx-auto mt-2 max-w-sm font-mono text-[10.5px] uppercase leading-relaxed tracking-[0.1em] text-fog">
             {orders.length === 0
-              ? "SPACEX’s window is open. Set your rule — it takes about thirty seconds."
+              ? "Open a PreStock. If the window is live, the desk will ask you to sign a real trade — or refuse."
               : `No ${filter.toLowerCase()} orders right now.`}
           </p>
           {orders.length === 0 ? (

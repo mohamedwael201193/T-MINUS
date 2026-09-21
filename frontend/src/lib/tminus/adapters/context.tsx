@@ -32,7 +32,9 @@ function isCurrentAdapter(source: TMinusSource): boolean {
   return (
     typeof source.getSelectedAssetId === "function" &&
     typeof source.selectAsset === "function" &&
-    typeof source.getProtocolInspect === "function"
+    typeof source.getProtocolInspect === "function" &&
+    typeof source.getAction === "function" &&
+    typeof source.requestConversion === "function"
   );
 }
 

@@ -18,8 +18,8 @@ const STEPS = [
   },
   {
     n: "02",
-    title: "Set the rule",
-    body: "Target ratio. Failsafe floor. Your deadline. Two conditions, written in plain English before you confirm.",
+    title: "Read the action",
+    body: "Issuer instruction, on-chain mint, market, Jupiter route, T-MINUS gate — five layers, none of them a dummy countdown.",
     icon: (
       <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden>
         <circle cx="13" cy="13" r="9.5" fill="none" stroke="var(--color-ink)" strokeWidth="2.4" />
@@ -30,8 +30,8 @@ const STEPS = [
   },
   {
     n: "03",
-    title: "Let it run",
-    body: "The order watches the executable ratio so you don’t have to. Close the tab. Really.",
+    title: "Sign or refuse",
+    body: "You only see a signature request when the window is open, the quote is fresh, and the post-fee route clears your floor.",
     icon: (
       <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden>
         <path d="M3 18c4-7 8 3 11-3s6 1 9-3" fill="none" stroke="var(--color-ink)" strokeWidth="2.4" strokeLinecap="round" />
@@ -59,7 +59,7 @@ export function MentalModel() {
         <Reveal>
           <Eyebrow>The mental model</Eyebrow>
           <h2 className="mt-5 font-display text-[clamp(2.2rem,5.4vw,4.2rem)] uppercase leading-[0.95] text-ink">
-            Four moves. Then it runs.
+            Four truths. Then you sign — or you don’t.
           </h2>
         </Reveal>
 
@@ -90,8 +90,8 @@ export function MentalModel() {
 
         <Reveal delay={200}>
           <p className="mt-10 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-fog">
-            See the clock <span className="text-ink">→</span> set the rule{" "}
-            <span className="text-ink">→</span> let it run{" "}
+            See the clock <span className="text-ink">→</span> read the action{" "}
+            <span className="text-ink">→</span> sign or refuse{" "}
             <span className="text-ink">→</span> see the proof
           </p>
         </Reveal>

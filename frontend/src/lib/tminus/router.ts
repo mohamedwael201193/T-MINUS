@@ -35,7 +35,7 @@ export function parseHash(hash: string): View {
 export function navigate(to: string) {
   if (typeof window === "undefined") return;
   if (window.location.hash === to) {
-    // same route — force a scroll top for app-entry buttons
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
     if (to.startsWith("#/")) window.scrollTo({ top: 0, behavior: "auto" });
     return;
   }

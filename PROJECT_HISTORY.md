@@ -469,6 +469,38 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-22T00:40Z — PRESTOCKS CORPORATE ACTION LAYER — research freeze + implementation
+
+- **phase:** research → architecture lock → implement API + conversion desk
+- **objective:** Decide whether "Conversion Desk" was deep enough; upgrade T-MINUS into a PreStocks-native corporate-action layer with provenance, safety gates, and a public actions API. Do not deploy the Mainnet program. Do not fake receipts.
+- **action:** Live-read Stocklana, PreStocks FAQ/products/ecosystem/API/issuer pages, Jupiter Swap V2 docs. Catalog is 8 tokens; XAI is metrics-only with a passed 12 Sep 2026 deadline; SPACEX window is open until 12 Mar 2027 into $SPCXx. FAQ mechanics names IPO and acquisition. Ecosystem has no corporate-action category. Jupiter lite quote 200_000_000 SPACEX → 75_722_514 SPCXx via Meteora DLMM. Implemented issuer-instruction parser, safety gate, on-chain mint snapshot, `/v1/actions*` , POST `/v1/conversions/execute`, conversion desk UI, five-layer ActionDesk. Mainnet execution is user-signed Swap V2 `/order`+`/execute`. DEVNET protocol unchanged.
+- **result:** Architecture locked: corporate action layer + conversion desk consumer. Mainnet program still not required (peak 1.08473244 SOL unused).
+- **evidence:** `evidence/corporate-action-research.json`, `evidence/corporate-action-architecture.json`, live pages https://prestocks.com/spacex https://prestocks.com/xai https://prestocks.com/faq?tab=mechanics
+- **test:** api 38 pass (issuer-instruction, safety-gate, onchain-mint, actions 404, execute 400); sdk 6; keeper 14; receiptMap 6 including MAINNET conversion labeling; secret-scan PASS files=460; api typecheck PASS; frontend `tsc --noEmit` PASS
+- **decision:** Do not spend Mainnet SOL. Do not call a Jupiter trade an automatic rollover. XAI is EXPIRED / HALTED. SPACEX default destination is SPCXx (issuer also allows any token).
+- **files changed:** apps/api corporate-action/safety/issuer/jupiter/executable; frontend ActionDesk, OrderTicket, backendSource, landing copy; README; IMPLEMENTATION_PLAN; FRONTEND_NOTES
+- **known risks:** `/order` may omit a transaction for transfer-fee mints (quote fallback then NO_ROUTE for signing); Render free cold start; public RPC 429; holder must approve Phantom to actually land a Mainnet trade
+- **next step:** frontend production build, local+Chrome QA of XAI refuse / SPACEX gate, push, verify Render `/v1/actions` and Vercel
+
+---
+
+## 2026-09-22T00:50Z — QA + honesty pass — Chrome local, then ship
+
+- **phase:** 15–18 — tests, Chrome QA, copy honesty, git push pending
+- **objective:** Prove refusals, strip unattended-Mainnet claims from the landing, keep PROJECT_HISTORY append-only, then push and verify Render/Vercel.
+- **action:** Restarted local API so issuer-statement clipping is live. Chrome localhost:3001: landing is PreStocks corporate-action copy; SPACEX GOING_PUBLIC / CAN SIGN / TRADE; XAI EXPIRED / ACQUISITION / stated 0.7165 / WINDOW CLOSED; OPENAI TERMS_PENDING / DESTINATION Unverified; receipts 18 DEVNET rows 0 trades; oversize Sign conversion shows EXCEEDS WALLET 0.0091 SPACEX and does not open Phantom. Live API: XAI executable EXPIRED no tx; SPACEX floor 0.99 is BELOW_FLOOR no tx; SPACEX floor 0.70 with taker returns Jupiter `/order` transaction (`path=order_execute`). Landing no longer says walk-away / close-the-tab for Mainnet. Failsafe labeled DEVNET-only on the conversion ticket.
+- **result:** Local bar green. Mainnet program still not deployed. No fake receipts.
+- **evidence:** Chrome localhost `#/` `#/app` `#/receipts`; `GET http://127.0.0.1:3000/v1/actions/{xai,spacex,openai}`; issuer pages https://prestocks.com/spacex https://prestocks.com/xai
+- **tests:** sdk 6 PASS; api 40 PASS; keeper 14 PASS; receiptMap 6 PASS; secret-scan PASS files=461; api/sdk/keeper typecheck PASS; frontend `npx tsc --noEmit` + `npx next build` PASS
+- **decision:** Push this state. Do not spend 1.08473244 SOL. Do not complete a live Mainnet swap in this pass (wallet dust is 0.0091 SPACEX; Phantom approval not requested).
+- **files changed:** landing honesty (Problem, MentalModel, Safety, OrderExplainer, WhyToolsFail, Footer, FinalCta, layout metadata); OrderTicket failsafe reset + conversion-open floor vs target; router hashchange when already on the same hash; CORS OPTIONS test
+- **known risks:** Render free cold start; public RPC 429; FEED STALE banner can appear if `/v1/feed` is older than the UI freshness window; a real Mainnet conversion still needs the holder to approve Phantom
+- **next step:** commit + push origin/main using repo token from local env (not printed); monitor Vercel + Render; production Chrome smoke
+
+---
+
+
+
 
 
 

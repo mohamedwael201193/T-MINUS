@@ -4,17 +4,17 @@ import { Eyebrow, Label } from "@/components/tminus/system/primitives";
 import { Reveal } from "@/components/tminus/system/Reveal";
 
 const CANNOT = [
-  "Withdraw anything beyond the order",
-  "Change your floor after the fact",
-  "Invent a better price than the fill",
-  "Outlive the hard expiry",
+  "Hold your Mainnet PreStocks",
+  "Fake a receipt or a signature",
+  "Swap a PreStock after the issuer window closed",
+  "Pretend DEVNET escrow is Mainnet custody",
 ];
 
 const CAN = [
-  "Cancel anytime — one click, escrow returns",
-  "Set the worst case yourself, in advance",
-  "Verify every fill against its receipt",
-  "Run your own filler — it’s permissionless",
+  "Refuse expired, stale, paused, or unroutable actions",
+  "Price Token-2022 transfer fees before you sign",
+  "Ask you to sign a Mainnet Jupiter TRADE only when gates pass",
+  "Keep DEVNET protocol receipts labeled as protocol proofs",
 ];
 
 export function Safety() {
@@ -50,7 +50,7 @@ export function Safety() {
                 </span>
               </div>
               <p className="mt-4 font-mono text-[10px] uppercase leading-relaxed tracking-[0.1em] text-fog">
-                Written by you. Locked at place time.
+                Written by you. Re-checked at click time. Never silently stale.
               </p>
             </div>
 
@@ -69,9 +69,9 @@ export function Safety() {
                 <p className="font-display text-xl uppercase text-bone">Bounded execution</p>
               </div>
               <p className="mt-3 text-[13.5px] leading-relaxed text-bone-dim">
-                The program can fill the order within the rule — at your
-                target or better, at your floor or better, before your
-                failsafe. Every other path simply doesn’t exist in code.
+                Mainnet conversion is a user-signed Jupiter TRADE inside
+                your floor. Unattended place/cancel/fill/expire is proven on
+                DEVNET. Every other path is a refusal, not a fake receipt.
               </p>
             </div>
 
@@ -133,8 +133,8 @@ export function Safety() {
 
         <Reveal delay={240}>
           <p className="mt-8 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-fog">
-            Escrow is a program, not a person — no admin key over user funds ·
-            no pooled capital · cancel anytime
+            Mainnet: you sign, T-MINUS never holds · DEVNET: escrow is a
+            program, not a person · no fake receipts
           </p>
         </Reveal>
       </div>

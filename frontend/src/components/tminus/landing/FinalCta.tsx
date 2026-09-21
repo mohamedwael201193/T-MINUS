@@ -51,8 +51,8 @@ export function FinalCta() {
             </span>
           </h2>
           <p className="mx-auto mt-7 max-w-md text-[16px] leading-relaxed text-bone-dim">
-            Set your rule before the clock sets it for you. It takes about
-            thirty seconds.
+            Open the desk before the window closes. You stay present for
+            the signature.
           </p>
           <div className="mt-9 flex flex-col items-center gap-5">
             <Button size="lg" onClick={() => navigate("#/app")}>

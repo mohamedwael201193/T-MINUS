@@ -1,0 +1,121 @@
+{
+  "fetchedAt": "2026-09-21T23:20:06.777Z",
+  "sources": {
+    "https://prestocks.com/faq": {
+      "status": 200,
+      "hash": "1cb213e3a677bfd99c7d10e308e97c7de9dd161d1f7fb7aa426ee7a164290b77",
+      "bytes": 51267,
+      "deadline": null,
+      "gonePublic": false,
+      "expireWorthless": false,
+      "acquired": false,
+      "faqHits": [
+        "Can I sell PreStocks at any time?"
+      ],
+      "snippet": "Products Ecosystem FAQ Frequently Asked Questions Common questions about PreStocks and how they work. Overview Mechanics Legal What are PreStocks? + - What are the benefits of PreStocks? + - Where can I buy PreStocks? + - Can I sell PreStocks at any time? + - What are the fees? + - Do I need to KYC? + - What else can I do with PreStocks besides trading? + - How are PreStocks backed? + - What does the price of PreStocks represent? + - Home Products Ecosystem FAQ Home Products Ecosystem FAQ PreSto"
+    },
+    "https://prestocks.com/faq?tab=mechanics": {
+      "status": 200,
+      "hash": "572a8364da1ef92b72f666549ef6742b7659aa95710d72675caf2033eb84f2f2",
+      "bytes": 48525,
+      "deadline": null,
+      "gonePublic": false,
+      "expireWorthless": false,
+      "acquired": true,
+      "faqHits": [
+        "What happens if the company goes public?",
+        "What happens if the company gets acquired or merges with another company?"
+      ],
+      "snippet": "Products Ecosystem FAQ Frequently Asked Questions Common questions about PreStocks and how they work. Overview Mechanics Legal What happens if the company goes public? + - What happens if the company gets acquired or merges with another company? + - What keeps PreStocks prices aligned with real-world prices? + - Home Products Ecosystem FAQ Home Products Ecosystem FAQ PreStocks provide only economic exposure to private companies; confer no ownership, voting, dividend, information, or other legal "
+    },
+    "https://prestocks.com/faq?tab=legal": {
+      "status": 200,
+      "hash": "5d1319d57a6945c50358b29b19462da36a07a2a412b34db4b7fbb57b877d3364",
+      "bytes": 49480,
+      "deadline": null,
+      "gonePublic": false,
+      "expireWorthless": false,
+      "acquired": false,
+      "faqHits": [
+        "How can I verify that PreStocks are fully backed?",
+        "Which entities provide the backing for PreStocks?"
+      ],
+      "snippet": "Products Ecosystem FAQ Frequently Asked Questions Common questions about PreStocks and how they work. Overview Mechanics Legal Are PreStocks available in all countries? + - Are PreStocks affiliated with the referenced companies? + - What rights do I get as a PreStocks holder? + - How can I verify that PreStocks are fully backed? + - Which entities provide the backing for PreStocks? + - Home Products Ecosystem FAQ Home Products Ecosystem FAQ PreStocks provide only economic exposure to private com"
+    },
+    "https://prestocks.com/spacex": {
+      "status": 200,
+      "hash": "e2e36ad0305f99f65beaef76071cf5b6d7efaeed3bdc6329ade3f3f85ff15cdd",
+      "bytes": 101955,
+      "deadline": "before 11:59pm UTC on 12 March 2027",
+      "gonePublic": true,
+      "expireWorthless": true,
+      "acquired": false,
+      "faqHits": [],
+      "snippet": "Products Ecosystem FAQ Products &gt; SpaceX SpaceX Get SpaceX TX, USA Founded 2002 Aerospace SpaceX engineers reusable launch vehicles and the Starlink satellite constellation for global broadband. Their focus on rapid reusability and vertical integration drives down launch costs and accelerates space access. Website Twitter LinkedIn Crunchbase Transparency Transparency Get SpaceX ⚠️ SpaceX has gone public! SpaceX PreStocks tokens must be swapped into $SPCXx or any other token before 11:59pm UTC"
+    },
+    "https://prestocks.com/xai": {
+      "status": 200,
+      "hash": "94feeab69918206124e70848784e85a0fb1822bd8f4ddb46e0f34a6321e757eb",
+      "bytes": 102906,
+      "deadline": "before 11:59pm UTC on 12 September 2026",
+      "gonePublic": false,
+      "expireWorthless": true,
+      "acquired": true,
+      "faqHits": [],
+      "snippet": "Products Ecosystem FAQ Products &gt; xAI xAI Get xAI CA, USA Founded 2023 AI xAI develops Grok, an AI chatbot, and owns X (formerly Twitter). Their integrated platform leverages social data for up-to-date, context-aware insights and conversations. Website Twitter LinkedIn Crunchbase Get xAI 🚨 xAI was acquired by SpaceX. Each XAI token must be swapped into 0.7165 SPACEX before 11:59pm UTC on 12 September 2026, or it will expire worthless. Price Token Price ‌ Impl Val Implied Val ‌ Mark Mark Pric"
+    },
+    "https://prestocks.com/ecosystem": {
+      "status": 200,
+      "hash": "6b8056134e36b1363370d5ffad2a8ab3424427a2b989e1d02cd42da43c15b083",
+      "bytes": 160555,
+      "deadline": null,
+      "gonePublic": false,
+      "expireWorthless": false,
+      "acquired": false,
+      "faqHits": [],
+      "snippet": "Products Ecosystem FAQ PreStocks Ecosystem An overview of apps and integrations in the PreStocks ecosystem. ⭐ Looking to join the PreStocks ecosystem? ⭐ Are you a project looking to join the PreStocks ecosystem? Get in Touch All ( 71 ) Trading ( 38 ) Wallet ( 16 ) Analytics ( 15 ) Launchpad ( 5 ) Misc ( 4 ) Research ( 4 ) Bot ( 4 ) Leverage ( 3 ) Index ( 3 ) Liquidity ( 2 ) Bridge ( 2 ) Chain ( 1 ) Solana Chain Jupiter Trading Wallet Trust Wallet Trading Wallet Binance Wallet Trading Wallet Gate"
+    },
+    "https://prestocks.com/products": {
+      "status": 200,
+      "hash": "a2c52211461bd41ff43dce87e56d47203edb7c1972dfb3644a28097730568ca2",
+      "bytes": 145609,
+      "deadline": null,
+      "gonePublic": false,
+      "expireWorthless": false,
+      "acquired": false,
+      "faqHits": [],
+      "snippet": "Products Ecosystem FAQ Products PreStocks are tokens that track the price of pre-IPO companies. Fully backed, tradable 24/7, no minimums. Live now on Solana! PreStocks are tokens that track the price of pre-IPO companies. Fully backed, tradable 24/7, no minimums. Live now on Solana! AUM ‌ Volume ‌ Holders ‌ Txns ‌ Product Token Price Implied Val Mark Price Premium % Mark Val Address Actions ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ "
+    }
+  },
+  "catalogCount": 8,
+  "catalogSymbols": [
+    "ANDURIL",
+    "ANTHROPIC",
+    "FIGUREAI",
+    "KALSHI",
+    "NEURALINK",
+    "OPENAI",
+    "POLYMARKET",
+    "SPACEX"
+  ],
+  "metricsSymbols": [
+    "ANDURIL",
+    "ANTHROPIC",
+    "FIGUREAI",
+    "KALSHI",
+    "NEURALINK",
+    "OPENAI",
+    "POLYMARKET",
+    "SPACEX",
+    "XAI"
+  ],
+  "xaiInCatalog": false,
+  "xaiInMetrics": true,
+  "jupiterLiteQuote": {
+    "status": 200,
+    "inAmount": "200000000",
+    "outAmount": "75722514",
+    "error": null,
+    "route": "Meteora DLMM"
+  }
+}

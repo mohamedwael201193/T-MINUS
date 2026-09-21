@@ -24,7 +24,7 @@ export function Hero() {
         <div className="relative z-10">
           <Reveal>
             <div className="flex flex-wrap items-center gap-2.5">
-              <Eyebrow>PreStocks · Lifecycle Orders</Eyebrow>
+              <Eyebrow>PreStocks · Corporate Action Layer</Eyebrow>
               <span className="inline-flex items-center gap-2 rounded-full border-2 border-ink bg-ink px-3 py-1.5 font-mono text-[10.5px] font-bold uppercase tracking-[0.16em] text-lime">
                 <span className="h-1.5 w-1.5 rounded-full bg-lime animate-pulse-ring" aria-hidden />
                 System watching
@@ -46,13 +46,13 @@ export function Hero() {
 
           <Reveal delay={180}>
             <p className="mt-8 max-w-md text-[17px] leading-relaxed text-fog">
-              PreStocks gave private-company exposure a market. Those tokens
-              have clocks, destinations, and deadlines generic trading
-              infrastructure does not understand. Set the conversion you want.
-              Set the floor you’ll accept.{" "}
+              PreStocks tokens carry issuer events: IPO, acquisition, expiry.
+              Generic DEX UIs will still swap them after they are scheduled to
+              expire worthless. T-MINUS reads the issuer instruction, checks
+              the mint, prices a fee-aware route, then asks the holder to sign
+              a real trade — or refuses.{" "}
               <span className="font-semibold text-ink">
-                T-MINUS is the lifecycle-aware order: target, floor, failsafe,
-                destination, proof.
+                Not a 1:1 rollover. Not unattended Mainnet custody. A corporate-action desk.
               </span>
             </p>
           </Reveal>

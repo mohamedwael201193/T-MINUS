@@ -38,11 +38,7 @@ export function OrderTicket() {
         : asset.stage !== "CONVERSION_WINDOW"
           ? `${asset.symbol} has no open conversion window.`
           : null;
-  const placeBlocked =
-    lifecycleBlocked ??
-    (!env.programMainnetExists
-      ? "T-MINUS program is not on MAINNET — place will not be faked."
-      : null);
+  const conversionOpen = asset?.stage === "CONVERSION_WINDOW" && !lifecycleBlocked;
 
   const [target, setTarget] = useState("0.820");
   const [floor, setFloor] = useState("0.700");
@@ -52,12 +48,15 @@ export function OrderTicket() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!failsafe && deadlineIso) {
-      const d = new Date(`${deadlineIso}T00:00:00.000Z`);
-      d.setUTCDate(d.getUTCDate() - 11);
-      setFailsafe(d.toISOString().slice(0, 10));
+    if (!deadlineIso) {
+      setFailsafe("");
+      return;
     }
-  }, [deadlineIso, failsafe]);
+    const d = new Date(`${deadlineIso}T00:00:00.000Z`);
+    d.setUTCDate(d.getUTCDate() - 11);
+    const next = d.toISOString().slice(0, 10);
+    setFailsafe(next > deadlineIso ? deadlineIso : next);
+  }, [deadlineIso]);
 
   const num = (s: string) => Number.parseFloat(s);
   const t = num(target);
@@ -68,7 +67,7 @@ export function OrderTicket() {
     const errs: Record<string, string> = {};
     if (Number.isNaN(t) || t < TARGET_BOUNDS.min || t > TARGET_BOUNDS.max) {
       errs.target = `Between ${TARGET_BOUNDS.min.toFixed(2)} and ${TARGET_BOUNDS.max.toFixed(2)} — the executable range`;
-    } else if (!Number.isNaN(f) && f >= t) {
+    } else if (!conversionOpen && !Number.isNaN(f) && f >= t) {
       errs.target = "Target must sit above your floor.";
     }
     if (Number.isNaN(f) || f < FLOOR_BOUNDS.min || f > FLOOR_BOUNDS.max) {
@@ -83,13 +82,11 @@ export function OrderTicket() {
     } else if (wallet.connected && !isSpacex) {
       errs.amount = `Live balances are wired for SPACEX only. ${asset?.symbol ?? "This mint"} cannot be sized from this wallet yet.`;
     }
-    if (!failsafe) {
-      errs.failsafe = "Pick your failsafe date.";
-    } else if (deadlineIso && failsafe > deadlineIso) {
+    if (conversionOpen && failsafe && deadlineIso && failsafe > deadlineIso) {
       errs.failsafe = `After the hard deadline — ${fmtDate(Date.parse(deadlineIso + "T23:59:00Z"))}.`;
     }
     return errs;
-  }, [t, f, a, failsafe, maxAmount, wallet.connected, deadlineIso, isSpacex, asset?.symbol]);
+  }, [t, f, a, failsafe, maxAmount, wallet.connected, deadlineIso, isSpacex, asset?.symbol, conversionOpen]);
 
   const valid = Object.keys(errors).length === 0;
 
@@ -101,41 +98,75 @@ export function OrderTicket() {
     if (!wallet.connected) {
       toast({
         title: "CONNECT A WALLET FIRST",
-        body: "Your rule is ready — connect to place it.",
+        body: "Your rule is ready — connect to sign.",
         tone: "amber",
       });
       return;
     }
-    if (placeBlocked) {
+    if (lifecycleBlocked) {
       toast({
-        title: "PLACE NOT SENT",
-        body: placeBlocked,
+        title: "CONVERSION BLOCKED",
+        body: lifecycleBlocked,
         tone: "coral",
       });
       return;
     }
     if (!asset) return;
     setSubmitting(true);
-    const failsafeIso = new Date(`${failsafe}T00:00:00.000Z`).toISOString();
     try {
-      const order = await Promise.resolve(
-        src.createOrder({
-          assetId: asset.id,
-          amount: round(a, 4),
-          targetRatio: round(t, 4),
-          floorRatio: round(f, 4),
-          failsafeAt: failsafeIso,
-        }),
-      );
-      toast({
-        title: `ORDER ${order.id} PLACED`,
-        body: "Escrow funding · arming the rule…",
-        tone: "lime",
+      if (env.dataCluster === "SIMULATION") {
+        const failsafeIso = new Date(`${failsafe}T00:00:00.000Z`).toISOString();
+        const order = await Promise.resolve(
+          src.createOrder({
+            assetId: asset.id,
+            amount: round(a, 4),
+            targetRatio: round(t, 4),
+            floorRatio: round(f, 4),
+            failsafeAt: failsafeIso,
+          }),
+        );
+        toast({
+          title: `ORDER ${order.id} PLACED`,
+          body: "Design simulation only — not a Mainnet conversion.",
+          tone: "lime",
+        });
+        setTouched(false);
+        return;
+      }
+      const result = await src.requestConversion({
+        assetId: asset.id,
+        amountDisplay: round(a, 4),
+        floorRatio: round(f, 4),
       });
+      if (result.status === "settled") {
+        toast({
+          title: "CONVERSION SETTLED",
+          body: `Mainnet Jupiter trade · ${result.signature.slice(0, 8)}…`,
+          tone: "lime",
+        });
+      } else if (result.status === "submitted") {
+        toast({
+          title: "SUBMITTED — NOT CONFIRMED",
+          body: result.message,
+          tone: "amber",
+        });
+      } else if (result.status === "refused") {
+        toast({
+          title: "SAFETY GATE",
+          body: result.message,
+          tone: "coral",
+        });
+      } else {
+        toast({
+          title: "CONVERSION NOT SENT",
+          body: result.message,
+          tone: "coral",
+        });
+      }
       setTouched(false);
     } catch (err) {
       toast({
-        title: "PLACE NOT SENT",
+        title: "CONVERSION NOT SENT",
         body: err instanceof Error ? err.message : "unknown",
         tone: "coral",
       });
@@ -154,7 +185,9 @@ export function OrderTicket() {
   return (
     <Panel tone="paper" shadow="lg" className="p-5 md:p-6" as="section" aria-label="Set your rule">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-2xl uppercase leading-none text-ink">Set your rule</h2>
+        <h2 className="font-display text-2xl uppercase leading-none text-ink">
+          {conversionOpen ? "Sign conversion" : "Set your rule"}
+        </h2>
         <span className="rounded-full border-2 border-ink bg-ink px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-bone">
           {asset?.symbol ?? "PRESTOCK"} → {asset?.destinationSymbol ?? "TBD"}
         </span>
@@ -169,8 +202,8 @@ export function OrderTicket() {
       </div>
       {env.dataCluster !== "SIMULATION" ? (
         <p className="mt-3 rounded-xl border-2 border-ink/20 bg-bone/50 px-3 py-2 font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.1em] text-fog">
-          Data {env.dataCluster} · program {env.programMainnetExists ? "MAINNET" : env.programDevnetExists ? "DEVNET only" : "UNDEPLOYED ON MAINNET"}
-          {env.programMainnetExists ? "" : " — place will not be faked."}
+          Data {env.dataCluster} · settlement {conversionOpen ? "MAINNET Jupiter TRADE" : "none"} · protocol {env.programDevnetExists ? "DEVNET proof" : "UNDEPLOYED"}
+          {conversionOpen ? " — this button never fakes a signature." : " — Mainnet escrow place is not offered."}
         </p>
       ) : null}
 
@@ -180,6 +213,8 @@ export function OrderTicket() {
           <Label>Target ratio</Label>
           <div className="relative mt-1.5">
             <input
+              id="tminus-target-ratio"
+              name="targetRatio"
               type="number"
               inputMode="decimal"
               step="0.005"
@@ -212,6 +247,8 @@ export function OrderTicket() {
           <Label>Floor ratio</Label>
           <div className="relative mt-1.5">
             <input
+              id="tminus-floor-ratio"
+              name="floorRatio"
               type="number"
               inputMode="decimal"
               step="0.005"
@@ -243,6 +280,8 @@ export function OrderTicket() {
         <div className="col-span-2 sm:col-span-1">
           <Label>Failsafe date</Label>
           <input
+            id="tminus-failsafe-date"
+            name="failsafeDate"
             type="date"
             value={failsafe}
             min="2026-01-01"
@@ -253,7 +292,9 @@ export function OrderTicket() {
             className={cn(fieldCls(touched && !!errors.failsafe), "font-medium")}
           />
           <p className="mt-2.5 font-mono text-[9px] uppercase leading-relaxed tracking-[0.08em] text-fog-2">
-            Attempt at floor if the target hasn’t hit{deadlineIso ? ` · latest ${fmtDate(deadlineIso)}` : ""}
+            {conversionOpen
+              ? `DEVNET protocol failsafe — unused on this Mainnet signature${deadlineIso ? ` · latest ${fmtDate(deadlineIso)}` : ""}`
+              : `DEVNET failsafe only${deadlineIso ? ` · latest ${fmtDate(deadlineIso)}` : ""}`}
           </p>
           {touched && errors.failsafe ? <FieldError>{errors.failsafe}</FieldError> : null}
         </div>
@@ -262,6 +303,8 @@ export function OrderTicket() {
           <Label>Amount</Label>
           <div className="relative mt-1.5">
             <input
+              id="tminus-amount"
+              name="amount"
               type="number"
               inputMode="decimal"
               step="0.01"
@@ -304,34 +347,29 @@ export function OrderTicket() {
 
       {/* plain-english summary */}
       <div className="mt-5 rounded-xl border-2 border-ink bg-bone-deep/70 p-4">
-        <p className="mlabel text-fog">What this order means</p>
+        <p className="mlabel text-fog">{conversionOpen ? "What this signature means" : "What this order means"}</p>
         <div className="mt-3 space-y-2.5">
           <p className="flex items-start gap-2.5">
             <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-lime" aria-hidden />
             <span className="font-mono text-[11px] leading-relaxed tracking-[0.02em] text-ink">
-              IF the executable ratio reaches{" "}
-              <span className="font-bold">{!Number.isNaN(t) ? fmtRatio(t) : "—"}</span> →
-              convert {!Number.isNaN(a) ? a.toFixed(4) : "—"} {asset?.symbol ?? "SPACEX"} at{" "}
-              <span className="font-bold">{!Number.isNaN(t) ? fmtRatio(t) : "—"}</span> or
-              better.
+              {conversionOpen
+                ? `TRADE ${!Number.isNaN(a) ? a.toFixed(4) : "—"} ${asset?.symbol ?? "SPACEX"} into ${asset?.destinationSymbol ?? "SPCXx"} if the live post-fee ratio is at least ${!Number.isNaN(f) ? fmtRatio(f) : "—"} and every safety gate passes.`
+                : `IF the executable ratio reaches ${!Number.isNaN(t) ? fmtRatio(t) : "—"} → convert ${!Number.isNaN(a) ? a.toFixed(4) : "—"} ${asset?.symbol ?? "SPACEX"} at ${!Number.isNaN(t) ? fmtRatio(t) : "—"} or better.`}
             </span>
           </p>
           <p className="flex items-start gap-2.5">
             <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-amber" aria-hidden />
             <span className="font-mono text-[11px] leading-relaxed tracking-[0.02em] text-ink">
-              IF{" "}
-              <span className="font-bold">
-                {failsafe ? fmtDate(Date.parse(`${failsafe}T00:00:00Z`)) : "—"}
-              </span>{" "}
-              arrives first → attempt at{" "}
-              <span className="font-bold">{!Number.isNaN(f) ? fmtRatio(f) : "—"}</span> or
-              better. No worse.
+              {conversionOpen
+                ? "You must be present to sign. Unattended escrow/failsafe is the DEVNET protocol proof, not this Mainnet trade."
+                : `IF ${failsafe ? fmtDate(Date.parse(`${failsafe}T00:00:00Z`)) : "—"} arrives first → attempt at ${!Number.isNaN(f) ? fmtRatio(f) : "—"} or better. No worse.`}
             </span>
           </p>
         </div>
         <p className="mt-3.5 border-t-2 border-dashed border-ink/15 pt-3 font-mono text-[9px] uppercase leading-relaxed tracking-[0.08em] text-fog">
-          1% transfer fee priced in · escrow returns on cancel (fee applies
-          on the way out) · cancel anytime before execution
+          {conversionOpen
+            ? "Not a 1:1 rollover · transfer fee priced by the router · destination is the issuer-named mint · T-MINUS never holds these tokens"
+            : "1% transfer fee priced in · escrow returns on cancel (fee applies on the way out) · cancel anytime before execution"}
         </p>
       </div>
 
@@ -341,7 +379,7 @@ export function OrderTicket() {
         onClick={onSubmit}
         disabled={submitting || Boolean(lifecycleBlocked)}
       >
-        {submitting ? "Placing…" : "Set order"}
+        {submitting ? "Signing…" : conversionOpen ? "Sign conversion" : "Window closed"}
         <span aria-hidden>→</span>
       </Button>
       {lifecycleBlocked ? (
@@ -350,11 +388,11 @@ export function OrderTicket() {
         </p>
       ) : !wallet.connected ? (
         <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.12em] text-fog">
-          Connect a wallet to place — takes ten seconds
+          Connect a wallet to sign a real Mainnet Jupiter trade
         </p>
       ) : (
         <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.12em] text-fog">
-          {placeBlocked ?? "Ready to sign on this cluster."}
+          Safety gates run again at click time. No fake receipt.
         </p>
       )}
     </Panel>

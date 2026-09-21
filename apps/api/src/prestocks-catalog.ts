@@ -1,5 +1,10 @@
 import { parseEventType, parsePageDeadlineIso, type MetricsToken } from "./feed-parse.ts";
 import {
+  parseIssuerInstruction,
+  resolveDestination,
+  type ActionType,
+} from "./issuer-instruction.ts";
+import {
   assetIdFromSymbol,
   classifyExecution,
   classifyStage,
@@ -26,6 +31,10 @@ export type CatalogAsset = {
   destinationMint: string | null;
   destinationSymbol: string | null;
   destinationName: string | null;
+  destinationAllowsAny: boolean;
+  statedRatio: number | null;
+  actionType: ActionType;
+  issuerStatement: string | null;
   tokenPrice: number | null;
   markPrice: number | null;
   holders: number | null;
@@ -187,14 +196,16 @@ export async function buildPrestocksCatalog(opts: {
       : `https://prestocks.com/products`;
     const pageDeadline = issuerPage ? parsePageDeadlineIso(issuerPage) : null;
     const pageEvent = issuerPage ? parseEventType(issuerPage) : null;
+    const instruction = issuerPage ? parseIssuerInstruction(issuerPage) : null;
     const metrics = pickMetrics(metricsJson, mint, symbol);
     const isSpacex = mint === SPACEX_MINT || symbol === "SPACEX";
     const feed = isSpacex ? opts.spacexFeed : null;
-    const deadline = feed?.deadline ?? pageDeadline;
+    const deadline = feed?.deadline ?? instruction?.deadlineIso ?? pageDeadline;
     const eventType = feed?.event_type ?? pageEvent;
     const stage = classifyStage({ deadline, eventType, now });
-    const destinationMint = isSpacex ? (feed?.destination ?? SPCXX_MINT) : null;
-    const destinationSymbol = isSpacex ? "SPCXx" : null;
+    const resolved = resolveDestination(instruction?.destinationTicker);
+    const destinationMint = resolved?.mint ?? (isSpacex ? (feed?.destination ?? SPCXX_MINT) : null);
+    const destinationSymbol = resolved?.symbol ?? (isSpacex ? "SPCXx" : null);
     const hasQuote = isSpacex && feed?.ratio != null;
     const executionAvailability = classifyExecution(stage, Boolean(hasQuote));
     let verificationState: VerificationState = "unknown";
@@ -204,9 +215,9 @@ export async function buildPrestocksCatalog(opts: {
 
     let stageNote = "No issuer conversion deadline extracted from the current page.";
     if (stage === "CONVERSION_WINDOW" && deadline) {
-      stageNote = `Issuer conversion window is open until ${deadline}.`;
+      stageNote = instruction?.statement ?? `Issuer conversion window is open until ${deadline}.`;
     } else if (stage === "EXPIRED" && deadline) {
-      stageNote = `Issuer conversion deadline ${deadline} has passed. Execution is halted.`;
+      stageNote = instruction?.statement ?? `Issuer conversion deadline ${deadline} has passed. Execution is halted.`;
     } else if (stage === "TERMS_PENDING") {
       stageNote = "Pre-IPO — conversion window opens when the issuer publishes terms.";
     }
@@ -218,7 +229,14 @@ export async function buildPrestocksCatalog(opts: {
       mint,
       destinationMint,
       destinationSymbol,
-      destinationName: destinationSymbol === "SPCXx" ? "SpaceX equity token" : destinationSymbol,
+      destinationName:
+        destinationSymbol === "SPCXx"
+          ? "SpaceX xStocks token (issuer-named destination, not a PreStock)"
+          : destinationSymbol,
+      destinationAllowsAny: Boolean(instruction?.destinationAllowsAny),
+      statedRatio: instruction?.statedRatio ?? null,
+      actionType: instruction?.actionType ?? "NONE",
+      issuerStatement: instruction?.statement ?? null,
       tokenPrice: token.tokenPrice ?? metrics?.tokenPrice ?? (feed?.ratio != null ? Number(feed.ratio) : null),
       markPrice: token.markPrice ?? null,
       holders: token.holderCount ?? metrics?.holderCount ?? null,

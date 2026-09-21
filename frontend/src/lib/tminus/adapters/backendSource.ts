@@ -1,5 +1,6 @@
 import type {
   ConversionOrder,
+  CorporateActionView,
   ExecutionReceipt,
   LifecycleAsset,
   MarketSnapshot,
@@ -8,14 +9,18 @@ import type {
   RatioPoint,
   WalletState,
 } from "../domain/types";
-import type { CreateOrderInput, EngineNotice, TMinusSource } from "./sources";
+import type { ConversionRequestInput, ConversionResult, CreateOrderInput, EngineNotice, TMinusSource } from "./sources";
 import { mapReceipt } from "./receiptMap";
 import {
   PROGRAM_ID,
   TMINUS_API,
   apiGet,
   apiGetMaybe,
+  apiPost,
+  type ActionsListResponse,
   type BalancesResponse,
+  type ExecuteConversionResponse,
+  type ExecutableResponse,
   type FeedResponse,
   type PdaResponse,
   type PrestocksCatalogResponse,
@@ -23,12 +28,16 @@ import {
   type QuoteResponse,
   type ReceiptRow,
 } from "./api";
+import { txFromBase64, txToBase64 } from "../wallet/jupiterTx";
+
+const SPACEX_DISPLAY_RAW = 200_000_000;
 
 type PhantomLike = {
   isPhantom?: boolean;
   publicKey?: { toBase58(): string };
   connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: { toBase58(): string } }>;
   disconnect?: () => Promise<void>;
+  signTransaction?: (tx: unknown) => Promise<unknown>;
 };
 
 function injectedProvider(id: string): PhantomLike | null {
@@ -88,7 +97,7 @@ function mapAsset(row: PrestocksCatalogResponse["assets"][number]): LifecycleAss
     destinationPrice: row.destinationSymbol === "SPCXx" ? row.markPrice : null,
     price: row.tokenPrice ?? 0,
     markPrice: row.markPrice ?? row.tokenPrice ?? 0,
-    prescribedRatio: 1,
+    prescribedRatio: row.statedRatio ?? 0,
     transferFeeBps: row.transferFeeBps ?? 0,
     holders: row.holders ?? 0,
     supplyDisplay: 0,
@@ -108,6 +117,32 @@ function mapAsset(row: PrestocksCatalogResponse["assets"][number]): LifecycleAss
     inOfficialCatalog: row.inOfficialCatalog,
     eventType: row.eventType,
     sourceHash: row.sourceHash,
+  };
+}
+
+function mapAction(row: ActionsListResponse["actions"][number]): CorporateActionView {
+  return {
+    assetId: row.assetId,
+    symbol: row.symbol,
+    stage: row.stage,
+    actionType: row.actionType,
+    settlementKind: row.settlementKind,
+    deadline: row.deadline,
+    issuerStatement: row.issuer.statement,
+    destinationSymbol: row.destination?.symbol ?? null,
+    destinationMint: row.destination?.mint ?? null,
+    destinationVerified: row.destinationVerified,
+    statedRatio: row.issuer.statedRatio,
+    allowsAnyToken: row.issuer.destinationAllowsAny,
+    transferFeeBps: row.transferFeeBps,
+    paused: row.onchain.paused,
+    hookProgramId: row.onchain.hookProgramId,
+    tokenProgram: row.onchain.tokenProgram,
+    sourceHash: row.evidence.sourceHash,
+    issuerPageUrl: row.evidence.issuerPageUrl,
+    refusals: row.truth.tminus.refusals,
+    allowSign: row.truth.tminus.allowSign,
+    onchainRpcOk: row.onchain.rpcOk,
   };
 }
 
@@ -156,6 +191,7 @@ class BackendSource implements TMinusSource {
   private timer: ReturnType<typeof setInterval> | null = null;
   private abort: AbortController | null = null;
   private assets: LifecycleAsset[] = [];
+  private actions: CorporateActionView[] = [];
   private markets = new Map<string, MarketSnapshot>();
   private receipts: ExecutionReceipt[] = [];
   private notices: EngineNotice[] = [];
@@ -223,6 +259,82 @@ class BackendSource implements TMinusSource {
 
   getReceipt(id: string): ExecutionReceipt | undefined {
     return this.receipts.find((r) => r.id === id);
+  }
+
+  getAction(assetId: string): CorporateActionView | undefined {
+    return this.actions.find((a) => a.assetId === assetId);
+  }
+
+  async requestConversion(input: ConversionRequestInput): Promise<ConversionResult> {
+    if (!this.walletState.connected || !this.walletState.address) {
+      return { status: "refused", refusals: ["USER_WALLET_REQUIRED"], message: "Connect a wallet to sign." };
+    }
+    if (input.assetId !== "spacex") {
+      return {
+        status: "refused",
+        refusals: ["TERMS_PENDING"],
+        message: "Live conversion signing is wired for SPACEX while it is the open issuer window.",
+      };
+    }
+    const amountRaw = String(Math.round(input.amountDisplay * SPACEX_DISPLAY_RAW));
+    if (!/^[1-9][0-9]*$/.test(amountRaw)) {
+      return { status: "refused", refusals: ["AMOUNT_INVALID"], message: "Amount is too small." };
+    }
+    const q = new URLSearchParams({
+      amount: amountRaw,
+      taker: this.walletState.address,
+      floorRatio: String(input.floorRatio),
+    });
+    const exec = await apiGet<ExecutableResponse>(`/v1/actions/spacex/executable?${q}`);
+    if (!exec.allowed || !exec.transaction || !exec.requestId) {
+      return {
+        status: "refused",
+        refusals: exec.refusals ?? ["NO_ROUTE"],
+        message: `Safety gate refused: ${(exec.refusals ?? ["NO_ROUTE"]).join(", ")}`,
+      };
+    }
+    const provider = injectedProvider(this.walletState.providerId ?? "phantom");
+    if (!provider?.signTransaction) {
+      return { status: "error", message: "Wallet cannot sign a VersionedTransaction." };
+    }
+    const tx = txFromBase64(exec.transaction);
+    const signed = await provider.signTransaction(tx);
+    const signedB64 = txToBase64(signed as Parameters<typeof txToBase64>[0]);
+    const landed = await apiPost<ExecuteConversionResponse>("/v1/conversions/execute", {
+      signedTransaction: signedB64,
+      requestId: exec.requestId,
+      assetId: "spacex",
+      taker: this.walletState.address,
+      amountRaw,
+      floorRatio: input.floorRatio,
+    });
+    if (landed.status === 200 && landed.body.settled && landed.body.signature && landed.body.explorer) {
+      return {
+        status: "settled",
+        signature: landed.body.signature,
+        explorer: landed.body.explorer,
+        ratio: landed.body.executableRatio ?? exec.quote.executableRatio,
+      };
+    }
+    if (landed.status === 202 && landed.body.signature && landed.body.explorer) {
+      return {
+        status: "submitted",
+        signature: landed.body.signature,
+        explorer: landed.body.explorer,
+        message: landed.body.note ?? "Submitted but not yet confirmed — no receipt stored.",
+      };
+    }
+    if (landed.status === 409) {
+      return {
+        status: "refused",
+        refusals: landed.body.refusals ?? ["NO_ROUTE"],
+        message: "Safety gate refused at execute time.",
+      };
+    }
+    return {
+      status: "error",
+      message: landed.body.detail ?? landed.body.error ?? `execute HTTP ${landed.status}`,
+    };
   }
 
   getWallet(): WalletState {
@@ -474,12 +586,13 @@ class BackendSource implements TMinusSource {
     const abort = new AbortController();
     this.abort = abort;
     try {
-      const [catalog, feed, program, receipts, quote] = await Promise.all([
+      const [catalog, feed, program, receipts, quote, actions] = await Promise.all([
         apiGet<PrestocksCatalogResponse>("/v1/prestocks", abort.signal).catch(() => null),
         apiGet<FeedResponse>("/v1/feed", abort.signal).catch(() => null),
         apiGet<ProgramResponse>("/v1/program", abort.signal).catch(() => null),
         apiGet<{ receipts: ReceiptRow[] }>("/v1/receipts", abort.signal).catch(() => ({ receipts: [] })),
         apiGet<QuoteResponse>("/v1/quote", abort.signal).catch(() => null),
+        apiGet<ActionsListResponse>("/v1/actions", abort.signal).catch(() => null),
       ]);
       if (abort.signal.aborted) return;
 
@@ -488,6 +601,7 @@ class BackendSource implements TMinusSource {
         : feed
           ? [mapAssetFromFeed(feed)]
           : [];
+      this.actions = actions?.actions?.map(mapAction) ?? [];
       this.receipts = (receipts.receipts ?? []).map(mapReceipt);
       this.env = {
         dataCluster: "MAINNET",

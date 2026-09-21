@@ -8,13 +8,13 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 
 | Piece | Status | Evidence |
 |---|---|---|
-| Anchor program `place` / `cancel` / `fill` / `expire` | Built and tested on **LOCALNET** | `evidence/program-build.json`, `anchor test --validator legacy` |
+| Anchor program `place` / `cancel` / `fill` / `expire` | Built, tested on LOCALNET, **deployed DEVNET** | `evidence/program-build.json`, `evidence/devnet-e2e.json` |
 | Token-2022 post-fee escrow + harvest-before-close | **LOCALNET** PASS | 100 bps fee mint fixture (not SPACEX) |
 | Pause / transfer-hook rejection | **UNIT + LOCALNET** | rust TLV tests; mocha paused/hook mint fixtures |
 | Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — 565 bytes, ALT present, `err=AccountNotFound` because keeper has 0 SOL |
 | API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — `evidence/render-free-health.json` |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
-| Devnet deploy | Not yet | Needs faucet SOL |
+| Devnet deploy | **LIVE** | Program `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL` executable; place/cancel/fill/expire sigs in `evidence/devnet-e2e.json` |
 | Mainnet program deploy / fills | Not yet | Deploy and keeper wallets have **0 SOL**; spend cap 200_000_000 raw once funded |
 | Frontend | Not built | Awaiting `FRONTEND/` |
 
@@ -22,8 +22,8 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 
 - Program ID: `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL`
 - IDL: `idl/tminus.json`
-- Network for the ID: declared for localnet/devnet/mainnet; only localnet execution is proven so far
-- Upgrade authority (once deployed): deploy wallet `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` until after certification
+- Network for the ID: **DEVNET executable**; localnet tests also pass. Mainnet account still absent.
+- Upgrade authority (devnet): `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX`
 
 ## Live service (FREE Render)
 

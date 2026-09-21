@@ -1456,7 +1456,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Repo scaffolded and pushed
 
 ### SOLANA
-- [!] Program deployed (devnet) — **blocked**: deploy wallet 0 SOL, faucet rate-limited
+- [x] Program deployed (devnet) — `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL` executable; e2e sigs in `evidence/devnet-e2e.json`
 - [!] Program deployed (mainnet) — **absent**: account `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL` does not exist on mainnet (`evidence/live-status.json`)
 
 ### TOKEN-2022
@@ -1512,9 +1512,9 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 ## Human blockers now
 
-1. **Devnet/mainnet program deploy** needs SOL in `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` (currently 0 on both clusters; official faucet rate-limited).
-2. **Tiny mainnet fill** needs the program on-chain, keeper SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000`.
+1. **Mainnet program deploy** still needs **mainnet** SOL. The funded wallet used for this phase had **0 mainnet / 5 devnet SOL**. Devnet program is live.
+2. **Tiny mainnet fill** needs the program on mainnet, keeper SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000`.
 3. **FRONTEND/** is intentionally not built.
-4. Rotate Render/GitHub/DB secrets that were pasted in chat.
+4. Rotate Render/GitHub/DB secrets that were pasted in chat. The recovery phrase pasted in chat should be treated as **exposed** — do not keep large mainnet funds on that wallet.
 
-Do not enable keeper send until the program account exists on the target cluster and a tiny spend is explicitly authorized.
+Do not enable keeper send on mainnet until the program account exists there and a tiny spend is explicitly authorized.

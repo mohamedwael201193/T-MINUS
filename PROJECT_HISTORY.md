@@ -190,3 +190,17 @@ Append-only execution ledger. No secrets.
 - **next step:** SOL for deploy wallet; human authorize tiny mainnet spend after program exists
 
 ---
+
+## 2026-09-21T00:15Z — PHASE 4 — DEVNET program live + place/cancel/fill/expire
+
+- **action:** Pay deploy + e2e from user-funded wallet `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` (devnet 5 SOL; mainnet 0). Seed never written to git.
+- **command:** `scripts/wsl-deploy-devnet.sh`; `node --import tsx scripts/e2e-devnet.ts`
+- **result:** Program executable on devnet; mock Token-2022 fee mint e2e PASS (post-fee 990000); IDL upload skipped after CLI path glitch
+- **evidence:** `evidence/devnet-e2e.json`
+- **test:** place, cancel, fill (separate filler), expire
+- **decision:** Keep `KEEPER_SEND_ENABLED=false` on mainnet. Do not treat mock mints as SPACEX.
+- **files changed:** `scripts/wsl-deploy-devnet.sh`, `scripts/e2e-devnet.ts`, README
+- **known risks:** recovery phrase was pasted in chat (exposed); mainnet still unfunded
+- **next step:** mainnet SOL for G13, or keep demo labeled DEVNET
+
+---

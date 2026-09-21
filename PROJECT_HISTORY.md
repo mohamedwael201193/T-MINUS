@@ -302,3 +302,17 @@ Append-only execution ledger. No secrets.
 - **next step:** 2.0 SOL on `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX`
 
 ---
+
+## 2026-09-21T01:28Z — SIZE + RENT — optimized ELF 209,256 bytes; min deploy 2.14859112 SOL
+
+- **action:** Measure mainnet `SysvarRent`, shrink `.so` without changing ix behavior, re-run cargo/mocha/node tests, recompute upgradeable deploy peak
+- **command:** `anchor build` with `opt-level=z` and `anchor-spl` default-features off; `pnpm test`; `scripts/wsl-anchor-test.sh`; `node scripts/mainnet-rent.mjs`
+- **result:** ELF **254,768 → 209,256** bytes (−17.86%, sha `838ebc5c…`). `opt-level=3` was **252,512** (worse). Mainnet rent is **5080** lamports/byte-year, **1-year** exemption. Peak during `solana program deploy` = buffer 1.06385868 + programdata 1.06389932 + program 0.00083312 = **2.12859112 SOL**. Plus **0.02 SOL** fee buffer → **2.14859112 SOL** (`2,148,591,120` lamports). After success, buffer is refunded; **1.06473244 SOL** stays locked. cargo 10/10, mocha 12/12, node 6+9+14.
+- **evidence:** `evidence/program-size-opt.json`; `evidence/mainnet-deploy-rent.json`; `evidence/program-build.json`
+- **test:** LOCALNET 12/12 on sha `838ebc5c…`
+- **decision:** Keep overflow-checks. Do not enable Render send. Do not start a mainnet buffer upload.
+- **files changed:** `Cargo.toml`, `programs/tminus/Cargo.toml`, `programs/tminus/src/lib.rs`, `scripts/mainnet-rent.mjs`, `scripts/wsl-deploy-mainnet.sh`
+- **known risks:** optimized local ELF no longer byte-matches the already-deployed **devnet** 254,768-byte program
+- **next step:** mainnet deploy when the payer holds at least 2.14859112 SOL
+
+---

@@ -1,9 +1,10 @@
 {
   "label": "BUILD",
   "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
-  "soSha256": "34ce9c9cc0ae4c8fe288409121e3fe8d40e1fb0447e6bdc5f808ab19365baaf5",
+  "soBytes": 209256,
+  "soSha256": "838ebc5c218c26a6883e62e93a9019d818c479b992960225c29284eff2c70335",
   "anchor": "1.2.0",
   "solanaCli": "4.1.2",
   "rustUnitTests": { "passed": 10, "failed": 0 },
-  "anchorIntegration": { "passed": 11, "failed": 0, "label": "LOCALNET" }
+  "anchorIntegration": { "passed": 12, "failed": 0, "label": "LOCALNET" }
 }

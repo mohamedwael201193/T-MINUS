@@ -306,52 +306,77 @@ fn assert_src_mint_allowed(mint_info: &AccountInfo) -> Result<()> {
     inspect_mint_extensions(&data)
 }
 
-fn return_remaining_and_close(accounts: &mut Cancel<'_>) -> Result<()> {
-    require!(accounts.order.status == STATUS_OPEN, TminusError::StatusClosed);
-    assert_src_mint_allowed(accounts.src_mint.as_ref())?;
-    accounts.escrow_ata.reload()?;
-    let remaining = accounts.escrow_ata.amount;
-    let seeds: &[&[u8]] = &[
-        ORDER_SEED,
-        accounts.order.owner.as_ref(),
-        accounts.order.src_mint.as_ref(),
-        accounts.order.dst_mint.as_ref(),
-        &accounts.order.nonce.to_le_bytes(),
-        &[accounts.order.bump],
-    ];
+fn order_signer_seeds<'a>(
+    owner: &'a Pubkey,
+    src: &'a Pubkey,
+    dst: &'a Pubkey,
+    nonce: &'a [u8; 8],
+    bump: &'a [u8; 1],
+) -> [&'a [u8]; 6] {
+    [ORDER_SEED, owner.as_ref(), src.as_ref(), dst.as_ref(), nonce.as_ref(), bump.as_ref()]
+}
+
+fn drain_escrow_and_close_ata<'info>(
+    order: &mut Account<'info, Order>,
+    src_mint: &InterfaceAccount<'info, Mint>,
+    owner_src_ata: &InterfaceAccount<'info, TokenAccount>,
+    escrow_ata: &mut InterfaceAccount<'info, TokenAccount>,
+    token_program: &Interface<'info, TokenInterface>,
+    owner: AccountInfo<'info>,
+) -> Result<()> {
+    require!(order.status == STATUS_OPEN, TminusError::StatusClosed);
+    assert_src_mint_allowed(src_mint.as_ref())?;
+    escrow_ata.reload()?;
+    let remaining = escrow_ata.amount;
+    let nonce = order.nonce.to_le_bytes();
+    let bump = [order.bump];
+    let seeds = order_signer_seeds(&order.owner, &order.src_mint, &order.dst_mint, &nonce, &bump);
+    let signer: &[&[u8]] = &seeds;
     if remaining > 0 {
         token_interface::transfer_checked(
             CpiContext::new_with_signer(
-                accounts.token_program.key(),
+                token_program.key(),
                 TransferChecked {
-                    from: accounts.escrow_ata.to_account_info(),
-                    mint: accounts.src_mint.to_account_info(),
-                    to: accounts.owner_src_ata.to_account_info(),
-                    authority: accounts.order.to_account_info(),
+                    from: escrow_ata.to_account_info(),
+                    mint: src_mint.to_account_info(),
+                    to: owner_src_ata.to_account_info(),
+                    authority: order.to_account_info(),
                 },
-                &[seeds],
+                &[signer],
             ),
             remaining,
-            accounts.src_mint.decimals,
+            src_mint.decimals,
         )?;
     }
-    accounts.escrow_ata.reload()?;
-    require!(accounts.escrow_ata.amount == 0, TminusError::FeeUnaccounted);
+    escrow_ata.reload()?;
+    require!(escrow_ata.amount == 0, TminusError::FeeUnaccounted);
     harvest_withheld_to_mint(
-        accounts.token_program.to_account_info(),
-        accounts.src_mint.to_account_info(),
-        accounts.escrow_ata.to_account_info(),
+        token_program.to_account_info(),
+        src_mint.to_account_info(),
+        escrow_ata.to_account_info(),
     )?;
     token_interface::close_account(CpiContext::new_with_signer(
-        accounts.token_program.key(),
+        token_program.key(),
         CloseAccount {
-            account: accounts.escrow_ata.to_account_info(),
-            destination: accounts.owner.to_account_info(),
-            authority: accounts.order.to_account_info(),
+            account: escrow_ata.to_account_info(),
+            destination: owner,
+            authority: order.to_account_info(),
         },
-        &[seeds],
+        &[signer],
     ))?;
-    accounts.order.status = STATUS_CLOSED;
+    order.status = STATUS_CLOSED;
+    Ok(())
+}
+
+fn return_remaining_and_close(accounts: &mut Cancel<'_>) -> Result<()> {
+    drain_escrow_and_close_ata(
+        &mut accounts.order,
+        &accounts.src_mint,
+        &accounts.owner_src_ata,
+        &mut accounts.escrow_ata,
+        &accounts.token_program,
+        accounts.owner.to_account_info(),
+    )?;
     emit!(OrderCancelled {
         order: accounts.order.key(),
         owner: accounts.order.owner,
@@ -360,51 +385,14 @@ fn return_remaining_and_close(accounts: &mut Cancel<'_>) -> Result<()> {
 }
 
 fn return_remaining_and_close_expire(accounts: &mut Expire<'_>) -> Result<()> {
-    require!(accounts.order.status == STATUS_OPEN, TminusError::StatusClosed);
-    assert_src_mint_allowed(accounts.src_mint.as_ref())?;
-    accounts.escrow_ata.reload()?;
-    let remaining = accounts.escrow_ata.amount;
-    let seeds: &[&[u8]] = &[
-        ORDER_SEED,
-        accounts.order.owner.as_ref(),
-        accounts.order.src_mint.as_ref(),
-        accounts.order.dst_mint.as_ref(),
-        &accounts.order.nonce.to_le_bytes(),
-        &[accounts.order.bump],
-    ];
-    if remaining > 0 {
-        token_interface::transfer_checked(
-            CpiContext::new_with_signer(
-                accounts.token_program.key(),
-                TransferChecked {
-                    from: accounts.escrow_ata.to_account_info(),
-                    mint: accounts.src_mint.to_account_info(),
-                    to: accounts.owner_src_ata.to_account_info(),
-                    authority: accounts.order.to_account_info(),
-                },
-                &[seeds],
-            ),
-            remaining,
-            accounts.src_mint.decimals,
-        )?;
-    }
-    accounts.escrow_ata.reload()?;
-    require!(accounts.escrow_ata.amount == 0, TminusError::FeeUnaccounted);
-    harvest_withheld_to_mint(
-        accounts.token_program.to_account_info(),
-        accounts.src_mint.to_account_info(),
-        accounts.escrow_ata.to_account_info(),
+    drain_escrow_and_close_ata(
+        &mut accounts.order,
+        &accounts.src_mint,
+        &accounts.owner_src_ata,
+        &mut accounts.escrow_ata,
+        &accounts.token_program,
+        accounts.owner.to_account_info(),
     )?;
-    token_interface::close_account(CpiContext::new_with_signer(
-        accounts.token_program.key(),
-        CloseAccount {
-            account: accounts.escrow_ata.to_account_info(),
-            destination: accounts.owner.to_account_info(),
-            authority: accounts.order.to_account_info(),
-        },
-        &[seeds],
-    ))?;
-    accounts.order.status = STATUS_CLOSED;
     emit!(OrderExpired {
         order: accounts.order.key(),
         owner: accounts.order.owner,

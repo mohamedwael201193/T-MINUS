@@ -8,15 +8,10 @@ const SPCXX = "Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8";
 const TOKEN_2022 = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb";
 const RPC = "https://api.mainnet-beta.solana.com";
 const SO = resolve("target/deploy/tminus.so");
-const LAMPORTS_PER_BYTE_YEAR = 3480;
-const EXEMPTION_YEARS = 2;
-const ACCOUNT_OVERHEAD = 128;
 const PROGRAMDATA_HEADER = 45;
-const NEED_LAMPORTS = 1_900_000_000;
-
-function rentExempt(dataLen) {
-  return (dataLen + ACCOUNT_OVERHEAD) * LAMPORTS_PER_BYTE_YEAR * EXEMPTION_YEARS;
-}
+const BUFFER_HEADER = 37;
+const PROGRAM_ACCOUNT = 36;
+const FEE_BUFFER_LAMPORTS = 20_000_000;
 
 async function rpc(method, params) {
   const res = await fetch(RPC, {
@@ -29,16 +24,14 @@ async function rpc(method, params) {
   return body.result;
 }
 
-const soBytes = existsSync(SO) ? statSync(SO).size : 254768;
-const programDataRent = rentExempt(PROGRAMDATA_HEADER + soBytes);
-const programRent = rentExempt(36);
-const totalLocked = programDataRent + programRent;
-const payer = await rpc("getBalance", [PAYER]);
-const program = await rpc("getAccountInfo", [PROGRAM, { encoding: "base64" }]);
-const t22 = await rpc("getTokenAccountsByOwner", [
-  PAYER,
-  { programId: TOKEN_2022 },
-  { encoding: "jsonParsed" },
+const soBytes = existsSync(SO) ? statSync(SO).size : 0;
+const [programDataRent, bufferRent, programRent, payer, program, t22] = await Promise.all([
+  rpc("getMinimumBalanceForRentExemption", [PROGRAMDATA_HEADER + soBytes]),
+  rpc("getMinimumBalanceForRentExemption", [BUFFER_HEADER + soBytes]),
+  rpc("getMinimumBalanceForRentExemption", [PROGRAM_ACCOUNT]),
+  rpc("getBalance", [PAYER]),
+  rpc("getAccountInfo", [PROGRAM, { encoding: "base64" }]),
+  rpc("getTokenAccountsByOwner", [PAYER, { programId: TOKEN_2022 }, { encoding: "jsonParsed" }]),
 ]);
 const tokens = [];
 for (const a of t22?.value ?? []) {
@@ -51,7 +44,10 @@ for (const a of t22?.value ?? []) {
   });
 }
 const have = payer.value ?? 0;
-const canDeploy = have >= NEED_LAMPORTS && !program?.value;
+const peak = bufferRent + programDataRent + programRent;
+const need = peak + FEE_BUFFER_LAMPORTS;
+const locked = programDataRent + programRent;
+const canDeploy = have >= need && !program?.value;
 const out = {
   label: "MAINNET_DEPLOY_PREFLIGHT",
   at: new Date().toISOString(),
@@ -60,25 +56,29 @@ const out = {
   soBytes,
   rent: {
     programDataLamports: programDataRent,
+    bufferLamports: bufferRent,
     programLamports: programRent,
-    totalLockedLamports: totalLocked,
-    totalLockedSol: totalLocked / 1_000_000_000,
-    refuseBelowLamports: NEED_LAMPORTS,
-    refuseBelowSol: NEED_LAMPORTS / 1_000_000_000,
+    peakDuringDeployLamports: peak,
+    lockedAfterDeployLamports: locked,
+    feeBufferLamports: FEE_BUFFER_LAMPORTS,
+    refuseBelowLamports: need,
+    refuseBelowSol: need / 1_000_000_000,
+    lockedAfterDeploySol: locked / 1_000_000_000,
+    peakDuringDeploySol: peak / 1_000_000_000,
   },
   have: { lamports: have, sol: have / 1_000_000_000 },
   tokens,
   spacex: tokens.find((t) => t.mint === SPACEX) ?? null,
   spcxx: tokens.find((t) => t.mint === SPCXX) ?? null,
-  shortfallLamports: Math.max(0, NEED_LAMPORTS - have),
-  shortfallSol: Math.max(0, NEED_LAMPORTS - have) / 1_000_000_000,
+  shortfallLamports: Math.max(0, need - have),
+  shortfallSol: Math.max(0, need - have) / 1_000_000_000,
   programExists: Boolean(program?.value),
   programExecutable: Boolean(program?.value?.executable),
   canDeploy,
   refusedReason: canDeploy
     ? null
-    : have < NEED_LAMPORTS
-      ? `INSUFFICIENT_MAINNET_SOL have=${have} need=${NEED_LAMPORTS}. A ${soBytes}-byte upgradeable program locks ~${(totalLocked / 1_000_000_000).toFixed(3)} SOL of rent. Do not start a buffer upload that would fail mid-way.`
+    : have < need
+      ? `INSUFFICIENT_MAINNET_SOL have=${have} need=${need}. Upgradeable deploy peak is buffer+programdata+program (${peak} lamports) plus ${FEE_BUFFER_LAMPORTS} fee buffer.`
       : "PROGRAM_ALREADY_EXISTS",
 };
 

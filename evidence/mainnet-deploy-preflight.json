@@ -1,16 +1,20 @@
 {
   "label": "MAINNET_DEPLOY_PREFLIGHT",
-  "at": "2026-09-21T01:04:38.687Z",
+  "at": "2026-09-21T01:28:35.015Z",
   "payer": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
   "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
-  "soBytes": 254768,
+  "soBytes": 209256,
   "rent": {
-    "programDataLamports": 1774389360,
-    "programLamports": 1141440,
-    "totalLockedLamports": 1775530800,
-    "totalLockedSol": 1.7755308,
-    "refuseBelowLamports": 1900000000,
-    "refuseBelowSol": 1.9
+    "programDataLamports": 1063899320,
+    "bufferLamports": 1063858680,
+    "programLamports": 833120,
+    "peakDuringDeployLamports": 2128591120,
+    "lockedAfterDeployLamports": 1064732440,
+    "feeBufferLamports": 20000000,
+    "refuseBelowLamports": 2148591120,
+    "refuseBelowSol": 2.14859112,
+    "lockedAfterDeploySol": 1.06473244,
+    "peakDuringDeploySol": 2.12859112
   },
   "have": {
     "lamports": 32433259,
@@ -29,23 +33,10 @@
     "ui": "0.009136055"
   },
   "spcxx": null,
-  "shortfallLamports": 1867566741,
-  "shortfallSol": 1.867566741,
+  "shortfallLamports": 2116157861,
+  "shortfallSol": 2.116157861,
   "programExists": false,
   "programExecutable": false,
   "canDeploy": false,
-  "cliRentExemptLamports": 1294871680,
-  "observed": {
-    "inboundSol": {
-      "sig": "57c5k5FfVRqQBNxV9PuKowUaaVFGGNz79MKEC2G5drYvxCtmGB7hcFuSwdRgd3gkG1ZKd6eRxbRXNLZhcm5PVjV6",
-      "lamports": 44149540
-    },
-    "spacexBuy": {
-      "sig": "4ZDgQRy9rgFcZxAeRy7s3Pwa43q5QEpMKJ19SPc8QEyVbeocpy3U8Psy8XkHAqL3wdRjmXjRXEgqPz57CV1d2BfM",
-      "solSpentLamports": 11716281,
-      "spacexRaw": "1827211",
-      "scaledUi": "0.009136055"
-    }
-  },
-  "refusedReason": "INSUFFICIENT_MAINNET_SOL have=32433259 need=1900000000. A 254768-byte upgradeable program locks ~1.3–1.8 SOL of rent. Do not start a buffer upload that would fail mid-way."
+  "refusedReason": "INSUFFICIENT_MAINNET_SOL have=32433259 need=2148591120. Upgradeable deploy peak is buffer+programdata+program (2128591120 lamports) plus 20000000 fee buffer."
 }

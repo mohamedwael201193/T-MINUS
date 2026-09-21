@@ -1,0 +1,37 @@
+{
+  "label": "MAINNET_DEPLOY_RENT",
+  "at": "2026-09-21T01:28:33.838Z",
+  "soBytes": 209256,
+  "layout": {
+    "programAccountBytes": 36,
+    "programDataHeader": 45,
+    "bufferHeader": 37,
+    "programDataBytes": 209301,
+    "bufferBytes": 209293
+  },
+  "rentSysvar": {
+    "lamportsPerByteYear": 5080,
+    "exemptionThreshold": 1
+  },
+  "lamports": {
+    "soOnly": 1063670720,
+    "programAccount": 833120,
+    "programData": 1063899320,
+    "buffer": 1063858680,
+    "peakDuringDeploy": 2128591120,
+    "lockedAfterDeploy": 1064732440,
+    "feeBuffer": 20000000,
+    "minSafeDeploy": 2148591120
+  },
+  "sol": {
+    "soOnly": 1.06367072,
+    "programAccount": 0.00083312,
+    "programData": 1.06389932,
+    "buffer": 1.06385868,
+    "peakDuringDeploy": 2.12859112,
+    "lockedAfterDeploy": 1.06473244,
+    "feeBuffer": 0.02,
+    "minSafeDeploy": 2.14859112
+  },
+  "note": "solana program deploy keeps the buffer live until DeployWithMaxDataLen creates program+programdata, then closes the buffer to the payer. Peak SOL = buffer + programdata + program + fees. After success, buffer rent is refunded; locked SOL = programdata + program."
+}

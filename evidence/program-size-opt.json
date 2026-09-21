@@ -1,0 +1,30 @@
+{
+  "label": "PROGRAM_SIZE_OPT",
+  "at": "2026-09-21T01:27:00.000Z",
+  "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+  "baseline": {
+    "bytes": 254768,
+    "sha256": "978c80e5ce1f4a8328f885c89f35d0c9d3b1aa93031903d2b8ee9c22d1cffff6",
+    "profile": "overflow-checks + lto=fat + codegen-units=1 (default opt-level 3)"
+  },
+  "kept": {
+    "bytes": 209256,
+    "sha256": "838ebc5c218c26a6883e62e93a9019d818c479b992960225c29284eff2c70335",
+    "deltaBytes": -45512,
+    "deltaPct": -17.86,
+    "profile": "opt-level=z, lto=fat, codegen-units=1, overflow-checks=true",
+    "anchorSplFeatures": ["token", "token_2022", "associated_token"],
+    "droppedDefaultFeatures": ["mint", "token_2022_extensions"]
+  },
+  "rejected": {
+    "optLevel3Bytes": 252512,
+    "optLevel3Sha256": "02be9277848663edc7664c0ec664810cde7d86fb2b37b081a1d69c2bbfc4e21f",
+    "reason": "43,256 bytes larger than opt-level z"
+  },
+  "behavior": "place/cancel/fill/expire, harvest-before-close, pause/hook rejects unchanged; overflow-checks left on",
+  "regression": {
+    "cargoLib": "10/10",
+    "localnetMocha": "12/12",
+    "node": { "sdk": 6, "api": 9, "keeper": 14 }
+  }
+}

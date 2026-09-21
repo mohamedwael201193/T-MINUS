@@ -14,15 +14,15 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 | Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — **636** bytes with real `fill` ix, ALT present, `err=AccountNotFound` (no mainnet program / unfunded taker) |
 | API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/program` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` — receipts are **DEVNET** explorer-linked JSON; `/v1/orders?cluster=devnet` served open orders; `/v1/program` dual-cluster |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
-| Devnet deploy | **LIVE** | Program executable; on-chain bytes **exact-match** local `tminus.so` (`978c80e5…`); IDL `FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n`; sigs in `evidence/devnet-e2e.json` and `evidence/devnet-keeper-fill.json` |
-| Mainnet program deploy / fills | **REFUSED** — 0.032 SOL vs ~1.3–1.9 SOL rent | `evidence/mainnet-deploy-preflight.json`. `CpTxsg…` holds **1,827,211 raw SPACEX** (tiny; scaled UI ~0.009). Program account still absent. Send **2.0 SOL** to that address, then deploy + dust place. |
+| Devnet deploy | **LIVE** (254,768-byte ELF `978c80e5…`) | Program executable; IDL `FMSPeg37…`; sigs in `evidence/devnet-e2e.json`. Local optimized `.so` is now **209,256** bytes (`838ebc5c…`) — smaller than the already-deployed devnet ELF; behavior tests 12/12 |
+| Mainnet program deploy / fills | **NOT DEPLOYED** | Exact minimum safe balance **2.14859112 SOL** (`2,148,591,120` lamports). See `evidence/mainnet-deploy-rent.json` |
 | Frontend | Not built | Awaiting `FRONTEND/` |
 
 ## Program
 
 - Program ID: `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL`
 - IDL: `idl/tminus.json` (also initialized on **devnet**: [`FMSPeg37…f2n`](https://explorer.solana.com/address/FMSPeg37dVKeHARb5gaBiN8epoJcinqSBHMqkLKu8f2n?cluster=devnet))
-- Network for the ID: **DEVNET executable**; localnet tests also pass. Mainnet account still absent.
+- Network for the ID: **DEVNET executable** (254,768-byte ELF). Localnet tests pass on the optimized **209,256-byte** ELF. Mainnet account still absent.
 - Upgrade authority (devnet): `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX`
 
 ## Devnet explorer
@@ -98,14 +98,14 @@ Tiny proof, if later authorized:
 | Spend cap | `KEEPER_SPEND_CAP_RAW=200000000` |
 | Deploy wallet | `FrwqWhgEhbSnvKXzsG74qkB4ZsRiiheay7LcWBNd5DTj` (0 SOL both clusters) |
 | Keeper wallet | `FbsV4KELsCki2ZujWfRPvu4kpWHDdr1bxAvGNhU13hPf` (0 SOL both clusters) |
-| User-fund / upgrade authority | `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` (mainnet **0.032 SOL** + **1,827,211 raw SPACEX**; need **2.0 SOL** to deploy; devnet ~3.0 SOL) |
+| User-fund / upgrade authority | `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX` (mainnet 0.032433259 SOL + 1,827,211 raw SPACEX; exact deploy minimum **2.14859112 SOL**) |
 | Abort | issuer pause, attached transfer hook, or fee-bps change vs keeper baseline |
 
 Failsafe does **not** guarantee conversion regardless of liquidity.
 
 ## Known limitations
 
-- Mainnet program is **not deployed**: `CpTxsg…` has 0.032 SOL after a ~0.044 SOL inbound and a dust SPACEX buy. Upgradeable rent for `tminus.so` (254,768 bytes) is ~1.3–1.8 SOL; the deploy script refuses below 1.9 SOL. Tiny SPACEX inventory is ready for G13 **after** that SOL lands.
+- Mainnet program is **not deployed**. Exact minimum safe deploy balance is **2.14859112 SOL** for the 209,256-byte ELF (`evidence/mainnet-deploy-rent.json`). Tiny SPACEX inventory is already on the payer.
 - Phase 1 simulation did not return `err: null` because the program account does not exist on mainnet.
 - FRONTEND/ is intentionally absent.
 - Public RPC + keyless Jupiter may 429.

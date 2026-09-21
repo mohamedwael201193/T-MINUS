@@ -34,7 +34,8 @@ Frontend is **not** built in this repository. It will arrive later in `FRONTEND/
 - Expire: https://explorer.solana.com/tx/3H6f11sD5F3vzVgTD287CW4xcUWePNjkwCRiLdDJDEB251cyuD56Y2GPyzjLCWcTPePGVaJD8u7D8ZSJUBTRY8Zm?cluster=devnet
 - Keeper `fillIx` partial: https://explorer.solana.com/tx/3Hjih2B1D932mKZfBC2WTXM9feET7hjESDom3XoGWC2PFz1SgMBcygCWn6xjeRMexrrR71PJwmRc8JBpc6pSRDDq?cluster=devnet
 - Keeper `fillIx` close: https://explorer.solana.com/tx/2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r?cluster=devnet
-- Fixture mints are **not** SPACEX. Post-fee escrow was 990_000 raw on 1_000_000 in at 100 bps. Keeper inventory fills were 400_000 then 590_000.
+- Keeper `tick()` failsafe fill: https://explorer.solana.com/tx/5cZurXQRKMZGWoLhpyamUjGQ9dZn61UgckDf7osoVwk34U6kVMNJ6XuAGiSH7GDoiWaTa2BKV9EXjFHHvVKAuwXw?cluster=devnet
+- Fixture mints are **not** SPACEX. Post-fee escrow was 990_000 raw on 1_000_000 in at 100 bps. Keeper inventory fills were 400_000 then 590_000. Failsafe tick filled 990_000 after `failsafe_ts`.
 
 ## Live service (FREE Render)
 

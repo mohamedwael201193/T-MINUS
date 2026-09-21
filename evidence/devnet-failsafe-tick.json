@@ -1,0 +1,54 @@
+{
+  "label": "DEVNET_FAILSAFE_KEEPER_TICK",
+  "notSpacex": true,
+  "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
+  "payer": "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
+  "filler": "JDvjUVh2Qu2tdUvRWXKZTGUL4Sq4Q8dgbqvvKat1Bott",
+  "mockSrcMint": "8sCbt6mJzn66ZaMoefiwnGnNwkAwXfMvHLzJ2n7TLrWG",
+  "mockDstMint": "ELwTSBpoeRxbB1nVeL3UxfrXy4gytHs3PveRAm2dMXvh",
+  "failsafePda": "5KQFNhjc96PhcAJAQGVue36J4wp87NSNT2UbzxdRXSk6",
+  "controlPda": "DnXh9drB3iZy6WBXZNqv9XdVL1jSrLVnjat8nW4CoNpH",
+  "memcmpOpenCountOurs": 2,
+  "illegalOneToOneOnControl": {
+    "err": {
+      "InstructionError": [
+        1,
+        {
+          "Custom": 6003
+        }
+      ]
+    },
+    "logsPreview": [
+      "Program ComputeBudget111111111111111111111111111111 invoke [1]",
+      "Program ComputeBudget111111111111111111111111111111 success",
+      "Program HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL invoke [1]",
+      "Program log: Instruction: Fill",
+      "Program log: AnchorError thrown in programs/tminus/src/lib.rs:144. Error Code: UnderDelivery. Error Number: 6003. Error Message: Fill under-delivers destination tokens.",
+      "Program HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL consumed 15525 of 399850 compute units",
+      "Program HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL failed: custom program error: 0x1773"
+    ]
+  },
+  "tick": {
+    "exitCode": 0,
+    "lastFillSig": "5cZurXQRKMZGWoLhpyamUjGQ9dZn61UgckDf7osoVwk34U6kVMNJ6XuAGiSH7GDoiWaTa2BKV9EXjFHHvVKAuwXw",
+    "halted": false,
+    "haltReason": null,
+    "composition": "two_tx_inventory_fallback",
+    "lastJupiterError": "jupiter_quote_http_400"
+  },
+  "failsafeAccountAfterTick": "closed",
+  "controlAccountAfterTick": "present",
+  "ownerDestinationAfter": "990000",
+  "signatures": {
+    "placeFailsafe": "2AHLjoFigsdCn6Ed5vak6xU88ccZum1hvPNFM58hEFbYVUqPABgGKgFtzZzxyEVdVsdJmHKR9nuM4kynqynuVzUY",
+    "placeControl": "241tbZZKuhXwEjzSVoBZxmVS16SXbuRKCh2wws8GxMphdndqNaoRK7HcXWoJwjXENUVz6MYBvCC8Z5E11hpRaM1w",
+    "keeperFill": "5cZurXQRKMZGWoLhpyamUjGQ9dZn61UgckDf7osoVwk34U6kVMNJ6XuAGiSH7GDoiWaTa2BKV9EXjFHHvVKAuwXw",
+    "cancelControl": "2YZvcpZZzYjpM8QuJHWF5mFKYYSQncYG9q4LJSfSYis2zoitALWj7QDiYQsZgY2ph1zvmbKH2FeAEvRX2pZAAejU"
+  },
+  "explorer": {
+    "keeperFill": "https://explorer.solana.com/tx/5cZurXQRKMZGWoLhpyamUjGQ9dZn61UgckDf7osoVwk34U6kVMNJ6XuAGiSH7GDoiWaTa2BKV9EXjFHHvVKAuwXw?cluster=devnet",
+    "placeFailsafe": "https://explorer.solana.com/tx/2AHLjoFigsdCn6Ed5vak6xU88ccZum1hvPNFM58hEFbYVUqPABgGKgFtzZzxyEVdVsdJmHKR9nuM4kynqynuVzUY?cluster=devnet",
+    "cancelControl": "https://explorer.solana.com/tx/2YZvcpZZzYjpM8QuJHWF5mFKYYSQncYG9q4LJSfSYis2zoitALWj7QDiYQsZgY2ph1zvmbKH2FeAEvRX2pZAAejU?cluster=devnet"
+  },
+  "fillSlot": 501649888
+}

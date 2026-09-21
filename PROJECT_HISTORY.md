@@ -260,3 +260,17 @@ Append-only execution ledger. No secrets.
 - **next step:** mainnet SOL + SPACEX inventory for G13
 
 ---
+
+## 2026-09-21T00:50Z — FAILSAFE TICK — real keeper loop filled on DEVNET
+
+- **action:** Place failsafe order (`failsafe_ts` in the past, floor 1e9, min_ratio 2e9) and a live control order; prove 1:1 fill on the control simulates `UnderDelivery` 6003; run `tick()` with send enabled locally against DEVNET, inventory-without-quote, filler keypair
+- **command:** `node --import tsx scripts/e2e-devnet-failsafe-tick.ts`; `node scripts/render-wait-free.mjs`
+- **result:** `tick()` sent fill `5cZurXQR…`; failsafe PDA closed; owner dst 990_000; memcmp found both open orders; receipt ingested with `failsafeFlag: true`. Render still live on `8da78a6`, `KEEPER_SEND_ENABLED=false`, CI success. Control order cancelled.
+- **evidence:** `evidence/devnet-failsafe-tick.json`; `evidence/render-free-health.json`
+- **test:** on-chain UnderDelivery vs failsafe tick fill
+- **decision:** Do not enable Render send. G13 still blocked.
+- **files changed:** `scripts/keeper-tick-once.ts`, `scripts/e2e-devnet-failsafe-tick.ts`
+- **known risks:** recovery phrase exposed; mainnet unfunded
+- **next step:** mainnet SOL + SPACEX inventory for G13
+
+---

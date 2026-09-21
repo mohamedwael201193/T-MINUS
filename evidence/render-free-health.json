@@ -1,34 +1,34 @@
 {
   "deploy": {
-    "elapsed_s": 42,
+    "elapsed_s": 1,
     "deployStatus": "live",
-    "commit": "136ba9715d068f2c76b268bc68867df3565e17d5",
-    "finishedAt": "2026-09-21T00:31:54.168885Z"
+    "commit": "8da78a61666a821231b01a65b90a417ceccfc4b6",
+    "finishedAt": "2026-09-21T00:47:35.279513Z"
   },
   "probes": {
     "/health": {
       "status": 200,
-      "body": "{\"ok\":true,\"service\":\"tminus-api\",\"uptime_ms\":25382}"
+      "body": "{\"ok\":true,\"service\":\"tminus-api\",\"uptime_ms\":53485}"
     },
     "/ready": {
       "status": 200,
-      "body": "{\"ok\":true,\"slot\":448894164,\"db\":true}"
+      "body": "{\"ok\":true,\"slot\":448897815,\"db\":true}"
     },
     "/v1/feed": {
       "status": 200,
-      "body": "{\"network\":\"MAINNET\",\"feed\":{\"ratio\":\"120.6869953806347\",\"token\":\"PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh\",\"lockup\":null,\"deadline\":\"2027-03-12T23:59:00.000Z\",\"event_type\":\"prestock_conversion_deadline\",\"fetched_at\":\"2026-09-21T00:31:47.886Z\",\"source_url\":\"https://prestocks.com/api/metrics\",\"destination\":\"Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8\",\"source_hash\":\"bedd0f58c0d5601a32e3a3d834be5"
+      "body": "{\"network\":\"MAINNET\",\"feed\":{\"ratio\":\"120.6869953806347\",\"token\":\"PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh\",\"lockup\":null,\"deadline\":\"2027-03-12T23:59:00.000Z\",\"event_type\":\"prestock_conversion_deadline\",\"fetched_at\":\"2026-09-21T00:47:28.843Z\",\"source_url\":\"https://prestocks.com/api/metrics\",\"destination\":\"Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8\",\"source_hash\":\"134a12b874e5b101c837b6c73dccb"
     },
     "/v1/quote": {
       "status": 200,
-      "body": "{\"network\":\"MAINNET\",\"source\":\"jupiter_swap_v1_quote\",\"cache_ms\":0,\"quote\":{\"inputMint\":\"PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh\",\"inAmount\":\"200000000\",\"outputMint\":\"Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8\",\"outAmount\":\"76706836\",\"otherAmountThreshold\":\"76323302\",\"swapMode\":\"ExactIn\",\"slippageBps\":50,\"platformFee\":null,\"priceImpactPct\":\"0.0275445059677497538124200208\",\"routePlan\":[{\"swapI"
+      "body": "{\"network\":\"MAINNET\",\"source\":\"jupiter_swap_v1_quote\",\"cache_ms\":0,\"quote\":{\"inputMint\":\"PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh\",\"inAmount\":\"200000000\",\"outputMint\":\"Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8\",\"outAmount\":\"76706836\",\"otherAmountThreshold\":\"76323302\",\"swapMode\":\"ExactIn\",\"slippageBps\":50,\"platformFee\":null,\"priceImpactPct\":\"0.0261420137007840995894278782\",\"routePlan\":[{\"swapI"
     },
     "/v1/keeper": {
       "status": 200,
-      "body": "{\"health\":{\"payload\":{\"halted\":false,\"lastPoll\":\"2026-09-21T00:32:13.500Z\",\"haltReason\":null,\"lastFeeBps\":100,\"lastFeedAt\":\"2026-09-21T00:31:47.886Z\",\"composition\":\"atomic_swap_then_fill\",\"lastFillSig\":null,\"lastFeedHash\":\"bedd0f58c0d5601a32e3a3d834be5a2bcaac2bab2226ac6ededb4d364f102e4f\",\"lastRpcError\":null,\"lastJupiterError\":null},\"updated_at\":\"2026-09-21T00:32:13.796Z\"}}"
+      "body": "{\"health\":{\"payload\":{\"halted\":false,\"lastPoll\":\"2026-09-21T00:48:19.531Z\",\"haltReason\":null,\"lastFeeBps\":100,\"lastFeedAt\":\"2026-09-21T00:47:28.843Z\",\"composition\":\"atomic_swap_then_fill\",\"lastFillSig\":null,\"lastFeedHash\":\"134a12b874e5b101c837b6c73dccb6ae29160bdd99a854fa6c1a55661e30521c\",\"lastRpcError\":null,\"lastJupiterError\":null},\"updated_at\":\"2026-09-21T00:48:19.888Z\"}}"
     },
     "/v1/receipts": {
       "status": 200,
-      "body": "{\"receipts\":[{\"order_pda\":\"Cmq5rg7cE1yvzCtkRYRRua6aMs7o6ENqPetWTG7SPXn2\",\"sig\":\"3H6f11sD5F3vzVgTD287CW4xcUWePNjkwCRiLdDJDEB251cyuD56Y2GPyzjLCWcTPePGVaJD8u7D8ZSJUBTRY8Zm\",\"slot\":\"501637600\",\"payload\":{\"sig\":\"3H6f11sD5F3vzVgTD287CW4xcUWePNjkwCRiLdDJDEB251cyuD56Y2GPyzjLCWcTPePGVaJD8u7D8ZSJUBTRY8Zm\",\"kind\":\"expire\",\"slot\":501637600,\"ratio\":null,\"route\":null,\"network\":\"DEVNET\",\"explorer\":\"https://explo"
+      "body": "{\"receipts\":[{\"order_pda\":\"EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC\",\"sig\":\"2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r\",\"slot\":\"501647356\",\"payload\":{\"sig\":\"2BRjKVVtexSTan4FjjtzSSJwvnk1MSgWUamACDqoArTZ2K8b1tmhxMnGnaLjLjcsBFfshbUxCvhh4iWAYUhnDi6r\",\"kind\":\"fill\",\"slot\":501647356,\"ratio\":\"1000000000\",\"route\":{\"fillIxUsed\":true,\"composition\":\"two_tx_in"
     },
     "/v1/program": {
       "status": 200,

@@ -87,7 +87,7 @@ Demo pair: **SPACEX → SPCXx**.
 | G4 raw vs UI | **HAZARD PROVEN**: RPC multiplier 1 vs Jupiter 1 display = 2e8 raw | Program stores raw; pin effective multiplier 5 while timestamp ≤ now |
 | G5 cancel recover | **PASS LOCALNET + DEVNET** after harvest-withheld-to-mint then close | Phase 3–4 |
 | G6 fill respects min_ratio | **PASS LOCALNET** under-delivery rejected; min dst accepted; **DEVNET** fill delivered 990_000 | Phase 3–4 |
-| G7 failsafe timestamp branch | **PASS LOCALNET + DEVNET expire** | Phase 3–4 |
+| G7 failsafe timestamp branch | **PASS LOCALNET + DEVNET expire + DEVNET keeper tick fill** after failsafe_ts; control order 1:1 fill rejected `UnderDelivery` 6003 | Phase 3–4 |
 | G8 partial fills safe | **PASS LOCALNET + DEVNET** two fills (400_000 then 590_000) on 990_000 escrow; harvest-before-close on final fill | Phase 3–4 |
 | G9 Jupiter destination route | **PASS** at 1-display size, outAmount **76706836** 2026-09-21 00:31Z live `/v1/quote` | Re-quote every fill |
 | G10 compose swap+fill one tx | **ASSEMBLY PASS / SIM err AccountNotFound**: `/build` + **real `fill` ix** (not memo) serializes **636** bytes; mainnet program/taker missing | Atomic path kept; inventory fallback used on DEVNET |
@@ -1467,12 +1467,13 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Trigger V1 rejects transfer-fee mint
 - [x] Swap quote + `/build` ixs for SPACEX→SPCXx
 - [x] Swap+fill simulated
-- [ ] Swap+fill executed
+- [!] Swap+fill executed — **blocked on mainnet** (no program, 0 SOL). **DEVNET** keeper `tick()` inventory fill executed (`evidence/devnet-failsafe-tick.json`)
 
 ### KEEPER
 - [x] Deterministic worker
 - [x] Idempotent
 - [x] Halt on issuer-power change
+- [x] DEVNET `tick()` sent an inventory fill (failsafe path); Render send remains **off**
 
 ### BACKEND
 - [x] Health/ready
@@ -1497,7 +1498,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [!] Tiny fill authorized and done — **blocked**: 0 SOL, program account absent, `KEEPER_SEND_ENABLED=false`
 
 ### RECEIPTS
-- [x] Explorer-linked JSON — DEVNET place/cancel/fill/expire at `/v1/receipts` (`evidence/devnet-receipts.json`)
+- [x] Explorer-linked JSON — DEVNET place/cancel/fill/expire plus keeper `fillIx` and failsafe-tick fills at `/v1/receipts`
 
 ### FRONTEND INTEGRATION
 - [ ] FRONTEND/ delivered

@@ -147,12 +147,13 @@ real explorer URLs. Lifecycle catalog is `/v1/prestocks` (Pre* mints only).
 
 ## 6. Receipt integration points
 
-- `ReceiptCard.tsx` renders `ExecutionReceipt` 1:1 — the shape already
-  matches the keeper receipt (signature, slot, route, feedHash).
-- “VIEW ON EXPLORER” buttons (`ReceiptCard.onOpenReceipt`) currently
-  fire a toast placeholder — connect to
-  `https://solscan.io/tx/<signature>` when live.
-- “COPY SIG” already copies `receipt.signature` to the clipboard.
+- `ReceiptCard.tsx` renders `ExecutionReceipt` 1:1 including `eventKind`
+  (`fill` / `cancel` / `expire` / `place`) and `network`.
+- “View on explorer” is a real `<a href={receipt.explorerUrl}>` when the
+  API provides a cluster-correct URL. No `window.open`, no placeholder toast.
+- “COPY SIG” copies `receipt.signature`.
+- Landing `ProofTeaser` prefers a live fill. If none exists it shows the
+  design fixture labeled **SIMULATION** (not a chain signature).
 
 ## 7. Lifecycle feed integration points
 
@@ -165,18 +166,16 @@ real explorer URLs. Lifecycle catalog is `/v1/prestocks` (Pre* mints only).
 - `LifecycleMap.tsx` station positions are computed from the window
   clock; the tranche chips map to `asset.tranches`.
 
-## 8. Environment variables required later
+## 8. Environment variables
 
 ```
-NEXT_PUBLIC_RPC_URL=            # (or VITE_RPC_URL) Solana RPC endpoint
-NEXT_PUBLIC_PROGRAM_ID=         # T-MINUS order program
-NEXT_PUBLIC_FEED_URL=           # signed lifecycle feed endpoint
-NEXT_PUBLIC_FEED_PUBKEY=        # feed verification key
-NEXT_PUBLIC_RECEIPT_LEDGER_URL= # keeper receipt ledger endpoint
-NEXT_PUBLIC_QUOTE_URL=          # executable-ratio quote service
+NEXT_PUBLIC_TMINUS_API=https://tminus-api-k2d2.onrender.com
+NEXT_PUBLIC_TMINUS_SOURCE=      # omit for live BackendSource; `design` for fixtures
 ```
 
-Nothing reads them yet — they arrive with `BackendSource`.
+`BackendSource` reads `/v1/prestocks`, `/v1/feed`, `/v1/feed/refresh`,
+`/v1/quote`, `/v1/receipts`, `/v1/program`, `/v1/balances`. Wallet is
+injected Phantom/Solflare/Backpack — no secret in the browser.
 
 ## 9. Components that should NOT be rewritten during integration
 
@@ -219,15 +218,13 @@ Realistic rewrite candidates: only the *bodies* of the source methods.
 
 ---
 
-## Dev commands (this sandbox)
+## Dev commands
 
 ```
-bun run dev        # dev server on :3000 (already the case)
-bun run lint      # eslint — clean
-bunx tsc --noEmit # typecheck — clean (src/)
+npx next dev -p 3001
+npx next build
+npx tsc --noEmit
 ```
 
-Do **not** run `next build` in this sandbox (dev-server-only
-environment). In the target repo (Vite), the standard
-`npm install && npm run build` applies with no code changes beyond the
-portability notes in §1.
+Default production adapter is `BackendSource`. Do not claim MAINNET
+place while `programMainnetExists` is false.

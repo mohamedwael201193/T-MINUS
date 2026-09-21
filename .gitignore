@@ -16,6 +16,8 @@ test-ledger/
 node_modules/
 dist/
 coverage/
+.next/
+.turbo/
 *.pem
 *.key
 id.json

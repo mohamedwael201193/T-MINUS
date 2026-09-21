@@ -68,6 +68,15 @@ pnpm secret-scan
 pnpm --filter @tminus/api migrate
 ```
 
+Frontend (Windows-safe, no bun/`tee` required):
+
+```
+cd frontend
+npx next dev -p 3001
+```
+
+Production path talks to `https://tminus-api-k2d2.onrender.com`. Opt-in design simulation: `NEXT_PUBLIC_TMINUS_SOURCE=design`. MAINNET place is refused while the program is undeployed.
+
 Program tests (WSL):
 
 ```
@@ -107,6 +116,6 @@ Failsafe does **not** guarantee conversion regardless of liquidity.
 
 - Mainnet program is **not deployed**. Exact minimum safe deploy balance is **2.14859112 SOL** for the 209,256-byte ELF (`evidence/mainnet-deploy-rent.json`). Tiny SPACEX inventory is already on the payer.
 - Phase 1 simulation did not return `err: null` because the program account does not exist on mainnet.
-- FRONTEND/ is intentionally absent.
+- Frontend is in `frontend/` (Next.js). Default adapter is live `BackendSource`. Design simulation is `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
 - Public RPC + keyless Jupiter may 429.
 - Issuer retains mint/freeze/pause/permanent-delegate powers on SPACEX; the program rejects pause and attached transfer hooks at fill/place time, and the keeper halts on those plus stale feed.

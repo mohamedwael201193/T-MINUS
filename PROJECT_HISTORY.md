@@ -354,5 +354,20 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T03:00Z — RECEIPTS HONEST + FRONTEND CERT SLICE
+
+- **action:** Classify live `/v1/receipts` by `payload.kind` (fill/cancel/expire/place). Receipts ledger uses a real `<a href>` explorer URL (`cluster=devnet`). Landing proof teaser prefers a live fill; design fixtures are labeled SIMULATION and no longer carry fake chain signatures. One-shot `GET /v1/feed/refresh` on BackendSource start. Removed hardcoded landing tranche `DEC 08 · FULL`. Dust wallet min amount 0.0001. Secret-scan skips `.next`. README/plan/FRONTEND_NOTES match Option B + `frontend/`.
+- **reason:** Cancel/expire were labeled TARGET MET; `window.open` was popup-blocked; production path must not invent tranches or signatures.
+- **source used:** live `https://tminus-api-k2d2.onrender.com/v1/receipts`; Chrome tabs localhost:3001 and explorer `5cZurXQR…?cluster=devnet`
+- **result:** Ledger shows **4 fills · 8 on-chain**. Place/cancel/expire badges match API kinds. Explorer tab opened **Success** on DEVNET for keeper failsafe fill `5cZurXQR…`. SET ORDER while disconnected toasts CONNECT A WALLET FIRST. Connected session earlier showed live MAINNET dust **0.0091 SPACEX** and refused oversize 0.01. XAI EXPIRED / HALTED. Landing: PRESTOCKS · LIFECYCLE ORDERS + live 0.7671 / MAR 12 2027. `npx next build` PASS (types skipped by delivered `ignoreBuildErrors`). `pnpm test` sdk 6 + api 16 + keeper 14. secret-scan PASS files=418.
+- **evidence:** Chrome explorer https://explorer.solana.com/tx/5cZurXQRKMZGWoLhpyamUjGQ9dZn61UgckDf7osoVwk34U6kVMNJ6XuAGiSH7GDoiWaTa2BKV9EXjFHHvVKAuwXw?cluster=devnet
+- **test:** node tests 6+16+14; secret-scan; next build; browser paths 1, 2, 6, wallet-gate, XAI expired, mobile 390×844
+- **decision:** Still Option B. Do not spend 2.14859112 SOL. Do not fake MAINNET place. Phantom re-approve after reload is human-only.
+- **files changed:** `frontend/src/lib/tminus/adapters/backendSource.ts`, `ReceiptCard.tsx`, `ReceiptsView.tsx`, `ConsoleView.tsx`, `ProofTeaser.tsx`, `receiptData.ts`, `OrderTicket.tsx`, `LifecycleMap.tsx`, `frontend/package.json`, `scripts/secret-scan.mjs`, `.gitignore`, README, IMPLEMENTATION_PLAN, FRONTEND_NOTES, PROJECT_HISTORY
+- **known risks:** delivered Next config still `typescript.ignoreBuildErrors=true`; no frontend unit tests; MAINNET program absent so paths 3–5 (live fill/cancel/failsafe on PreStocks) cannot close
+- **next step:** push this commit; keep Option B; do not mark the goal complete while the mainnet program remains a funded human decision
+
+---
+
 
 

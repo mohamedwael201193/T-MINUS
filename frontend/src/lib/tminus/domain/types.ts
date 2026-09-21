@@ -154,6 +154,7 @@ export interface ExecutionReceipt {
   programId?: string;
   sourceSymbol?: string;
   destinationSymbol?: string;
+  eventKind?: "fill" | "cancel" | "expire" | "place";
 }
 
 /* --------------------------------- wallet ------------------------------- */

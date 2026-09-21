@@ -21,6 +21,10 @@ const skipDir = new Set([
   "test-ledger",
   "dist",
   "FRONTEND",
+  ".next",
+  ".turbo",
+  ".cache",
+  "coverage",
 ]);
 
 function walk(dir, acc = []) {

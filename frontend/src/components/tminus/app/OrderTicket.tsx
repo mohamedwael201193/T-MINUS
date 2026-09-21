@@ -58,8 +58,8 @@ export function OrderTicket() {
     if (Number.isNaN(f) || f < FLOOR_BOUNDS.min || f > FLOOR_BOUNDS.max) {
       errs.floor = `Between ${FLOOR_BOUNDS.min.toFixed(2)} and ${FLOOR_BOUNDS.max.toFixed(2)}`;
     }
-    if (Number.isNaN(a) || a < 0.01) {
-      errs.amount = "At least 0.01 SPACEX.";
+    if (Number.isNaN(a) || a < 0.0001) {
+      errs.amount = "At least 0.0001 SPACEX.";
     } else if (wallet.connected && maxAmount > 0 && a > maxAmount) {
       errs.amount = `Exceeds wallet — you hold ${maxAmount.toFixed(4)} SPACEX.`;
     } else if (wallet.connected && maxAmount <= 0) {
@@ -94,7 +94,7 @@ export function OrderTicket() {
       const order = await Promise.resolve(
         src.createOrder({
           assetId: SPACEX_ASSET_ID,
-          amount: round(a, 2),
+          amount: round(a, 4),
           targetRatio: round(t, 4),
           floorRatio: round(f, 4),
           failsafeAt: failsafeIso,

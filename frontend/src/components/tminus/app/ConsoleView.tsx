@@ -7,7 +7,6 @@ import { OrderTicket } from "./OrderTicket";
 import { MyOrders } from "./MyOrders";
 import { Label } from "@/components/tminus/system/primitives";
 import { ReceiptCard } from "@/components/tminus/system/ReceiptCard";
-import { useToast } from "@/components/tminus/system/toast";
 
 /**
  * The execution console — one screen, four beats:
@@ -16,8 +15,8 @@ import { useToast } from "@/components/tminus/system/toast";
 export function ConsoleView() {
   useTMinusVersion();
   const src = useTMinus();
-  const latest = src.listReceipts()[0];
-  const { toast } = useToast();
+  const receipts = src.listReceipts();
+  const latest = receipts.find((r) => (r.eventKind ?? "fill") === "fill") ?? receipts[0];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-10">
@@ -46,17 +45,7 @@ export function ConsoleView() {
                   </button>
                 </div>
                 <div className="mt-3">
-                  <ReceiptCard
-                    receipt={latest}
-                    compact
-                    onOpenReceipt={() => {
-                      toast({
-                        title: "EXPLORER LINK",
-                        body: "Opens the block explorer once onchain integration lands.",
-                        tone: "ink",
-                      });
-                    }}
-                  />
+                  <ReceiptCard receipt={latest} compact />
                 </div>
               </section>
             ) : null}

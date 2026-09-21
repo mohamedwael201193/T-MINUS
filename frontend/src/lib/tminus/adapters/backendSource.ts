@@ -121,6 +121,13 @@ function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
   const ratioE9 = Number(payload.ratio ?? "0");
   const composition =
     typeof payload.route === "string" ? payload.route : payload.route?.composition ?? "unknown";
+  const kindRaw = typeof payload.kind === "string" ? payload.kind.toLowerCase() : "";
+  const eventKind: ExecutionReceipt["eventKind"] =
+    kindRaw === "fill" || kindRaw === "cancel" || kindRaw === "expire" || kindRaw === "place"
+      ? kindRaw
+      : dstRaw > 0
+        ? "fill"
+        : "place";
   const isDevnet = network === "DEVNET";
   return {
     id: `R-${String(index + 1).padStart(4, "0")}`,
@@ -134,7 +141,7 @@ function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
     filled: dstRaw / 1e6,
     signature: row.sig,
     slot: Number(row.slot ?? payload.slot ?? 0),
-    route: `${network} · ${composition}`,
+    route: `${network} · ${eventKind} · ${composition}`,
     feeBps: 0,
     settledAt: payload.timestamp ?? row.created_at,
     feedHash: payload.feedHash ?? "—",
@@ -147,6 +154,7 @@ function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
     programId: payload.programId ?? PROGRAM_ID,
     sourceSymbol: isDevnet ? "DEVNET-SRC" : "SPACEX",
     destinationSymbol: isDevnet ? "DEVNET-DST" : "SPCXx",
+    eventKind,
   };
 }
 
@@ -307,7 +315,9 @@ class BackendSource implements TMinusSource {
 
   start() {
     if (this.timer) return;
-    void this.refresh();
+    void apiGet("/v1/feed/refresh")
+      .catch(() => undefined)
+      .finally(() => void this.refresh());
     this.timer = setInterval(() => void this.refresh(), 15_000);
   }
 

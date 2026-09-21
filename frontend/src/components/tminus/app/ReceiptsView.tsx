@@ -4,7 +4,6 @@ import { useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
 import { navigate } from "@/lib/tminus/router";
 import { Button } from "@/components/tminus/system/primitives";
 import { ReceiptCard } from "@/components/tminus/system/ReceiptCard";
-import { useToast } from "@/components/tminus/system/toast";
 
 /**
  * PROOF OF CONVERSION — the receipt ledger. Bone tickets on the dark
@@ -14,7 +13,7 @@ export function ReceiptsView() {
   useTMinusVersion();
   const src = useTMinus();
   const receipts = src.listReceipts();
-  const { toast } = useToast();
+  const fills = receipts.filter((r) => (r.eventKind ?? "fill") === "fill");
 
   return (
     <div className="bg-ink-deep pb-16 text-bone">
@@ -26,12 +25,12 @@ export function ReceiptsView() {
               The ledger
             </h1>
             <p className="mt-4 max-w-md text-[14px] leading-relaxed text-bone-dim">
-              Every settled order leaves one of these. Ratio in, ratio out,
-              route, slot, signature — the whole fill, in your hands.
+              Every on-chain place, fill, cancel, and expire leaves one of these.
+              DEVNET rows are protocol proofs — not MAINNET PreStocks fills.
             </p>
           </div>
           <span className="rounded-full border-2 border-bone/40 px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-bone">
-            {receipts.length} settled
+            {fills.length} fills · {receipts.length} on-chain
           </span>
         </div>
 
@@ -48,22 +47,7 @@ export function ReceiptsView() {
         ) : (
           <div className="mt-10 grid gap-7 md:grid-cols-2 xl:grid-cols-3">
             {receipts.map((r) => (
-              <ReceiptCard
-                key={r.id}
-                receipt={r}
-                onOpenReceipt={() => {
-                  const url = r.explorerUrl;
-                  if (!url || !r.signature) {
-                    toast({
-                      title: "NO EXPLORER URL",
-                      body: "This receipt has no on-chain signature.",
-                      tone: "coral",
-                    });
-                    return;
-                  }
-                  window.open(url, "_blank", "noopener,noreferrer");
-                }}
-              />
+              <ReceiptCard key={r.id} receipt={r} />
             ))}
           </div>
         )}

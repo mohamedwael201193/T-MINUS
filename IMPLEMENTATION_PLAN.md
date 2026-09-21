@@ -124,7 +124,7 @@ Holder wallet  --place/cancel-->  Order program (PDA + escrow ATA)
 Filler/keeper  --[Jupiter /build ixs] + fill-->  same program
 Anyone         --expire-->  remaining escrow to owner
 Keeper/API     --HTTP-->  feed snapshots + receipts (Postgres)
-FRONTEND/      --later-->  wallet + program + API (remove mocks)
+frontend/      -->  live API + Phantom + receipts (BackendSource; MAINNET place refused)
 ```
 
 **Jupiter path (chosen):** `GET {JUPITER_API_BASE}/swap/v2/build?inputMint&outputMint&amount&taker` → assemble v0 message: compute budget + setup + **our fill** + swap (order decided in Phase 5 simulation) + ALTs. Do not use `/order`+`/execute` for fills.
@@ -157,11 +157,11 @@ T-MINUS/
   apps/api/                 # TS HTTP
   apps/keeper/              # TS worker
   packages/sdk/             # IDL types, pdas, ratio math
-  FRONTEND/                 # external agent; empty until delivered
+  frontend/                 # Next.js · BackendSource against live API
   .github/workflows/ci.yml
 ```
 
-Remote: https://github.com/mohamedwael201193/T-MINUS (`main`). Local `d:\route\sol\T-MINUS` is not yet git-initialized.
+Remote: https://github.com/mohamedwael201193/T-MINUS (`main`). Local `d:\route\sol\T-MINUS` is the git working tree.
 
 ---
 
@@ -1267,7 +1267,7 @@ Feature flag `VITE_USE_MOCKS` default false.
 
 ## 10.17 Stop/Ask Human Conditions
 
-FRONTEND/ not delivered.
+FRONTEND/ not delivered — superseded: `frontend/` is live behind BackendSource.
 
 ---
 
@@ -1510,8 +1510,10 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 - [x] Phantom connect (injected); MAINNET balances via API
 - [x] Honest MAINNET / DEVNET labels; no fake place
 - [ ] MAINNET program place/cancel (blocked: Option B — 2.14859112 SOL not spent)
-- [ ] Browser QA paths 1–7 after Render catalog deploy
-- [ ] Mocks removed
+- [x] Receipts labeled by eventKind (place/cancel/expire/fill); explorer is a real `<a href>`
+- [x] Landing proof teaser uses a live fill or a labeled SIMULATION fixture (no fake chain sigs)
+- [ ] Phantom approve in this Chrome session (human-only extension prompt)
+- [ ] Full browser QA paths 3–5 (fill/cancel/failsafe) on MAINNET (blocked: no mainnet program)
 
 ### NO-MOCK GUARANTEE
 - [x] Production path uses live RPC/Jupiter/chain (Render `/ready` `/v1/quote` `/v1/feed`)
@@ -1525,7 +1527,7 @@ Legend: `[ ] not started`  `[x] verified`  `[!] blocked`
 
 1. **Mainnet program deploy** exact minimum safe balance is **2.14859112 SOL** (`2,148,591,120` lamports) for the optimized 209,256-byte ELF: buffer 1.06385868 + programdata 1.06389932 + program 0.00083312 + 0.02 fee buffer. After success, buffer rent is refunded and **1.06473244 SOL** stays locked. Measured from mainnet `SysvarRent` (5080 lamports/byte-year, 1-year exemption) via `getMinimumBalanceForRentExemption`. Evidence: `evidence/mainnet-deploy-rent.json`.
 2. **Tiny mainnet fill** will use the dust SPACEX already held (not 1 display / ~$117). Needs the program on mainnet, leftover fee SOL, and `KEEPER_SEND_ENABLED=true` under `KEEPER_SPEND_CAP_RAW=200000000` only after deploy.
-3. **FRONTEND/** is intentionally not built.
+3. **Frontend** exists at `frontend/` and is wired to the live API. Phantom **approve** is a human-only Chrome extension step. MAINNET place remains refused under Option B.
 4. Rotate Render/GitHub/DB secrets that were pasted in chat. The recovery phrase pasted in chat should be treated as **exposed** — do not keep large mainnet funds on that wallet.
 
 Do not enable keeper send on mainnet until the program account exists there and a tiny spend is explicitly authorized.

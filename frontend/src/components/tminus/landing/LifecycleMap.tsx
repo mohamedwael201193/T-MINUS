@@ -147,18 +147,21 @@ export function LifecycleMap() {
               <div>
                 <Label>Upcoming tranches</Label>
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {asset.tranches.slice(0, 3).map((t) => (
-                    <span
-                      key={t.label}
-                      title={t.detail}
-                      className="rounded-full border-2 border-ink/25 bg-bone px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-fog"
-                    >
-                      {t.label}
+                  {asset.tranches.length === 0 ? (
+                    <span className="rounded-full border-2 border-ink/25 bg-bone px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-fog">
+                      None verified in the live feed
                     </span>
-                  ))}
-                  <span className="rounded-full border-2 border-ink/25 bg-bone px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-fog">
-                    DEC 08 · FULL
-                  </span>
+                  ) : (
+                    asset.tranches.slice(0, 3).map((t) => (
+                      <span
+                        key={t.label}
+                        title={t.detail}
+                        className="rounded-full border-2 border-ink/25 bg-bone px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-fog"
+                      >
+                        {t.label}
+                      </span>
+                    ))
+                  )}
                 </div>
               </div>
               <div>

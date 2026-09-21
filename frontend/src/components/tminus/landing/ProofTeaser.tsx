@@ -11,7 +11,9 @@ export function ProofTeaser() {
   useTMinusVersion();
   const src = useTMinus();
   const receipts = src.listReceipts();
-  const showcase = receipts[0] ?? INITIAL_RECEIPTS[0];
+  const liveFill = receipts.find((r) => (r.eventKind ?? "fill") === "fill");
+  const showcase = liveFill ?? { ...INITIAL_RECEIPTS[0], network: "SIMULATION" as const };
+  const isSimulation = showcase.network === "SIMULATION";
 
   return (
     <section
@@ -61,7 +63,9 @@ export function ProofTeaser() {
           <Reveal delay={140} className="mx-auto w-full max-w-md px-4 lg:max-w-none">
             <ReceiptCard receipt={showcase} />
             <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-bone-dim">
-              A settled execution — exactly as the ledger renders it
+              {isSimulation
+                ? "SIMULATION example — not a chain signature"
+                : `${showcase.network ?? "on-chain"} receipt — explorer-linked`}
             </p>
           </Reveal>
         </div>

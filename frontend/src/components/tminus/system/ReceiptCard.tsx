@@ -20,7 +20,20 @@ export function ReceiptCard({
   className?: string;
 }) {
   const { toast } = useToast();
-  const targetFill = receipt.path === "TARGET";
+  const kind = receipt.eventKind ?? "fill";
+  const isFill = kind === "fill";
+  const targetFill = isFill && receipt.path === "TARGET";
+  const badge =
+    kind === "cancel"
+      ? "Cancelled"
+      : kind === "expire"
+        ? "Expired"
+        : kind === "place"
+          ? "Placed"
+          : targetFill
+            ? "Target met"
+            : "Failsafe used";
+  const stamp = isFill ? "Settled" : kind === "cancel" ? "Closed" : kind === "expire" ? "Expired" : "On-chain";
 
   return (
     <article
@@ -45,10 +58,14 @@ export function ReceiptCard({
           <span
             className={cn(
               "inline-block rounded-full border-2 border-ink px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-ink",
-              targetFill ? "bg-lime" : "bg-amber",
+              isFill && targetFill
+                ? "bg-lime"
+                : isFill
+                  ? "bg-amber"
+                  : "bg-paper",
             )}
           >
-            {targetFill ? "Target met" : "Failsafe used"}
+            {badge}
           </span>
         </div>
 
@@ -66,13 +83,15 @@ export function ReceiptCard({
         {/* executed ratio */}
         <div className="mt-4 flex items-end justify-between">
           <div>
-            <p className="mlabel text-fog">Executed ratio</p>
+            <p className="mlabel text-fog">{isFill ? "Executed ratio" : "Event"}</p>
             <p className="mt-1 font-display text-[2.9rem] leading-none text-ink">
-              {fmtRatio(receipt.executedRatio)}
+              {isFill ? fmtRatio(receipt.executedRatio) : stamp}
             </p>
           </div>
           <p className="pb-1 font-mono text-[10px] uppercase tracking-[0.1em] text-fog">
-            {receipt.destinationSymbol ?? "SPCXx"} per {receipt.sourceSymbol ?? "SPACEX"}
+            {isFill
+              ? `${receipt.destinationSymbol ?? "SPCXx"} per ${receipt.sourceSymbol ?? "SPACEX"}`
+              : receipt.network ?? "on-chain"}
           </p>
         </div>
 
@@ -122,6 +141,15 @@ export function ReceiptCard({
               >
                 Open proof →
               </button>
+            ) : receipt.explorerUrl ? (
+              <a
+                href={receipt.explorerUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border-2 border-ink bg-ink px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-lime transition-transform hover:-translate-y-0.5"
+              >
+                View on explorer →
+              </a>
             ) : null}
           </div>
         </div>
@@ -132,12 +160,16 @@ export function ReceiptCard({
         <div
           className={cn(
             "flex flex-col items-center rounded-xl border-[3px] px-3.5 py-2",
-            targetFill ? "border-ink bg-lime" : "border-ink bg-amber",
+            isFill && targetFill
+              ? "border-ink bg-lime"
+              : isFill
+                ? "border-ink bg-amber"
+                : "border-ink bg-paper",
           )}
         >
-          <span className="font-display text-lg uppercase leading-none text-ink">Settled</span>
+          <span className="font-display text-lg uppercase leading-none text-ink">{stamp}</span>
           <span className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-ink">
-            ✓ verified
+            {isFill ? "✓ verified" : receipt.network ?? "on-chain"}
           </span>
         </div>
       </div>

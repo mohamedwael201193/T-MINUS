@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   // Vercel serves Next itself; standalone is for Docker/Render-style hosts.
   ...(process.env.VERCEL ? {} : { output: "standalone" as const }),
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   reactStrictMode: false,
   devIndicators: false,

@@ -8,6 +8,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import postgres from "postgres";
 import { Connection, PublicKey } from "@solana/web3.js";
+import { loadRenderDbUrls } from "./live-sql.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 config({ path: resolve(root, ".env") });
@@ -21,9 +22,6 @@ const evidence = JSON.parse(readFileSync(resolve(root, "evidence/devnet-e2e.json
 
 const rpc = process.env.DEVNET_RPC_URL ?? "https://api.devnet.solana.com";
 const connection = new Connection(rpc, "confirmed");
-const url = process.env.DIRECT_URL;
-if (!url) throw new Error("missing DIRECT_URL");
-const sql = postgres(url, { prepare: false, max: 1 });
 
 const kinds = ["place", "cancel", "fill", "expire"] as const;
 
@@ -51,6 +49,10 @@ function orderPdaFromParsed(
 }
 
 async function main() {
+  const db = await loadRenderDbUrls();
+  if (!db) throw new Error("missing_or_unusable_DIRECT_URL");
+  const sql = postgres(db.directUrl, { prepare: false, max: 1 });
+  try {
   const inserted: { kind: string; sig: string; slot: number; orderPda: string }[] = [];
   for (const kind of kinds) {
     const sig = evidence.signatures[kind];
@@ -89,18 +91,15 @@ async function main() {
     inserted.push({ kind, sig, slot: parsed.slot, orderPda });
   }
   const count = await sql<{ n: number }[]>`select count(*)::int as n from receipts`;
-  await sql.end();
   const out = { inserted, receiptRows: count[0]?.n ?? 0 };
   writeFileSync(resolve(root, "evidence/devnet-receipts.json"), JSON.stringify(out, null, 2));
   console.log(JSON.stringify(out, null, 2));
+  } finally {
+    await sql.end({ timeout: 5 });
+  }
 }
 
-main().catch(async (err: unknown) => {
+main().catch((err: unknown) => {
   console.error(err instanceof Error ? err.message : err);
-  try {
-    await sql.end();
-  } catch {
-    /* ignore */
-  }
   process.exit(1);
 });

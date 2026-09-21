@@ -35,6 +35,7 @@ import { ceilRatio, PROGRAM_ID as DECLARED } from "@tminus/sdk";
 import { fillIx } from "../apps/keeper/src/ix.ts";
 import { chooseFillPlan } from "../apps/keeper/src/policy.ts";
 import postgres from "postgres";
+import { loadRenderDbUrls } from "./live-sql.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 config({ path: resolve(root, ".env") });
@@ -328,9 +329,9 @@ async function main() {
   mkdirSync(resolve(root, "evidence"), { recursive: true });
   writeFileSync(resolve(root, "evidence/devnet-keeper-fill.json"), JSON.stringify(evidence, null, 2));
 
-  const direct = process.env.DIRECT_URL;
-  if (direct) {
-    const sql = postgres(direct, { prepare: false, max: 1 });
+  const db = await loadRenderDbUrls();
+  if (db) {
+    const sql = postgres(db.directUrl, { prepare: false, max: 1 });
     for (const [kind, sig] of [
       ["place", placeSig],
       ["fill", first.sig],
@@ -383,6 +384,6 @@ async function main() {
 }
 
 main().catch((err: unknown) => {
-  console.error(err instanceof Error ? err.message : err);
+  console.error(err instanceof Error ? err.stack ?? err.message : err);
   process.exit(1);
 });

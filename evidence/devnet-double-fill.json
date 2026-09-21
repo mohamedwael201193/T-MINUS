@@ -3,12 +3,12 @@
   "notSpacex": true,
   "programId": "HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL",
   "race": {
-    "pda": "4jR97CfHbkcti1BqZJDFGBwLkAtBye2Kv3nEAAvMmQJC",
+    "pda": "GLYLAnxrUGPBdrjJozTfY4ksbgAS7PRd3spgGYzJAKBb",
     "remaining": "990000",
     "wins": 1,
     "fails": 1,
     "a": {
-      "sig": "3izkZKftK3gD8dci6ahszq5U41W1V18th8P1uwHFAmnWpVRunVXMZhkJ1BkDHPGf3dpSLRnSQB3MmBhgnA2XEizC",
+      "sig": "2yjVMmFgFaCajf8NQuxdDxUu2dEXgDbMkqTzkB71LwjCqjiheqXXZRQ8DrgWyjQfYSyZpmTQwh1BdqkPZPhqPmJ9",
       "err": null
     },
     "b": {
@@ -17,27 +17,20 @@
     }
   },
   "sequential": {
-    "pda": "BN27aHopay4xd8spymVXp6FePfFQCmAuSASRDnmHFHhC",
+    "pda": "F3zS71twg3ZVsfaNCwKUkWn3iefGi7fbJqQTifaikkQh",
     "first": {
-      "sig": "2FMcQp6wtVkHzLVvfdK6vQDpMCdBDQbRNQkK5zxsDgNgkYsodEND9F9NfC52zvRXFGrmhpSpsuBvSMtmBFULBjNw",
+      "sig": "2eXaKdhbrPX9dksNrJ7KXvefpPfFtnb1kNK7nyx7VA9AZbYMvKGacF3P3reiYeoF75MQ1KGxSPMBHJzqgU5HnRuY",
       "err": null
     },
     "second": {
-      "sig": "UKx5QSWmAckf8Gnd2FvZF9quh2r5zy3zL59tAAawSpA5czVVPE9atwwEeLZWmaanLCc19CNEAZevCy4yMtTCPHL",
-      "err": {
-        "InstructionError": [
-          1,
-          {
-            "Custom": 3012
-          }
-        ]
-      }
+      "sig": null,
+      "err": "send_fail"
     },
     "orderAccountAfter": "closed"
   },
   "explorer": {
-    "raceA": "https://explorer.solana.com/tx/3izkZKftK3gD8dci6ahszq5U41W1V18th8P1uwHFAmnWpVRunVXMZhkJ1BkDHPGf3dpSLRnSQB3MmBhgnA2XEizC?cluster=devnet",
+    "raceA": "https://explorer.solana.com/tx/2yjVMmFgFaCajf8NQuxdDxUu2dEXgDbMkqTzkB71LwjCqjiheqXXZRQ8DrgWyjQfYSyZpmTQwh1BdqkPZPhqPmJ9?cluster=devnet",
     "raceB": null,
-    "seqFirst": "https://explorer.solana.com/tx/2FMcQp6wtVkHzLVvfdK6vQDpMCdBDQbRNQkK5zxsDgNgkYsodEND9F9NfC52zvRXFGrmhpSpsuBvSMtmBFULBjNw?cluster=devnet"
+    "seqFirst": "https://explorer.solana.com/tx/2eXaKdhbrPX9dksNrJ7KXvefpPfFtnb1kNK7nyx7VA9AZbYMvKGacF3P3reiYeoF75MQ1KGxSPMBHJzqgU5HnRuY?cluster=devnet"
   }
 }

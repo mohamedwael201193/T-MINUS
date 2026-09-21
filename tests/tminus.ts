@@ -26,7 +26,11 @@ import {
 } from "@solana/web3.js";
 import assert from "node:assert/strict";
 
-process.env.ANCHOR_PROVIDER_URL ??= "http://127.0.0.1:8899";
+// Windows node.exe inherits the host env. Do not let a leftover DEVNET/MAINNET
+// ANCHOR_PROVIDER_URL leak into local validator tests (public RPC 429).
+if (!process.env.TMINUS_USE_LIVE_RPC) {
+  process.env.ANCHOR_PROVIDER_URL = "http://127.0.0.1:8899";
+}
 process.env.ANCHOR_WALLET ??= "C:\\Users\\LOQ\\.tminus\\keys\\deploy.json";
 
 function u64buf(n: bigint): Buffer {

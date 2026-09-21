@@ -419,5 +419,26 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T03:46Z — FULL CERTIFICATION PASS — local tests + real DEVNET txs
+
+- **action:** Re-executed DEVNET protocol against program `HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL` with user-fund `CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX`. Cross-checked signatures on-chain (`getTransaction` err=null), ingested 10 new rows into production receipts (18 total). Local `anchor test` was hitting public RPC 429 because Windows `node.exe` inherited `ANCHOR_PROVIDER_URL=devnet`; tests now force `http://127.0.0.1:8899` unless `TMINUS_USE_LIVE_RPC` is set. `typescript.ignoreBuildErrors` set **false**; frontend tsconfig excludes leftover `examples/` `tests/` `db`. Skip re-GET of closed last-proof PDAs (stops Chrome 404 spam). Copy-sig button shows **Copied**. Local dummy `DIRECT_URL=127.0.0.1:1` is skipped; ingest uses Render/Supabase without printing URLs. Did not spend extra time on responsive redesign.
+- **browser (system Chrome, wallet already connected, not disconnected):** https://tminusapp.vercel.app landing SPACEX exec **0.7671** / MAR 12 2027 / MAINNET data; `#/app` trusted wallet **CpTxsg…** live MAINNET **0.0091 SPACEX / 0.0324 SOL**; SET ORDER oversize rejected; MAINNET place toast **PLACE NOT SENT**; protocol MAINNET absent / DEVNET executable / keeper send **OFF**; derived PDA nonce 0 absent; `#/receipts` DEVNET only; explorer failsafe `5cZurXQR…` **Success Finalized** slot 501649888. Quote API `inAmount=200000000` `outAmount=76706836` matches UI 0.7671.
+- **DEVNET chain (this pass):**
+  - place `4ztDbdBsn2abTZ5g6qxcVGqaGfYAcYAQzPkCXkeE73e7QQ5dS9gpvyJrBwoSq3fgkbLnHoTms7zDQq3qK9MYkhht` slot 501706064
+  - cancel `w3SqKBAaAK3cMJi1x8j4fUVBNWQgWBs6oxyUd9Cw8XfLqP93eE1dUgrKWNf8TiFvNaf6Cjin7Pkty3NS3LiU9hh` slot 501706088
+  - fill `4LrwMGSgYF6EQSamovBspwHXdCJDs4mAgoTryWbaCHVLT6HbkrCaaCqmgTNWNkBnrjD23ZVZAn9A6ao8dmWaHRm5` slot 501706100
+  - expire `2CeJTtiiPay7Y237qLs5HQmAmuUSRtNR8q98KaiFu9Mjn8phf3iFMYP9iWaL2VVnksver8oZp7PDEfUknNipyc9z` slot 501706126
+  - partial remaining 590000 then close: `3pLVHydCh7KR9ZLrT8w8BEddcLwvT69HR94YdazH2EWdJXLE9NpNJC87MBBnDziHfLm7Y7d4WvyDgRoG83n9ZZ9J` / `6htT9vne6Pwn7EBxBCFhYan5k2FWBFeR3sXy8Xdv6R3An71HEufhWyC3wuKfPDy9w6N2VEhiSNNhveZHAXAT2Kj` PDA `3JRQQNuwyjWndt5SN7CY5iprbD29oj4Nu8NRkd5Da34s` closed
+  - failsafe fill `5GZVcUWZSnrhQYT4zqgyt5fJo1SLoPffRGTGccUx1UZgMpLLFdnD5z61nsdYiUJYXji2KjMeZN318ewdteDpZ1uM` slot 501709996; control 1:1 fill rejected `UnderDelivery` 6003
+  - race 1 win / 1 fail: winner `2yjVMmFgFaCajf8NQuxdDxUu2dEXgDbMkqTzkB71LwjCqjiheqXXZRQ8DrgWyjQfYSyZpmTQwh1BdqkPZPhqPmJ9` slot 501710423; sequential second fill `send_fail`; order closed
+- **test:** `pnpm test` sdk 6 + api 21 + keeper 14 + receiptMap 5; `pnpm typecheck` 0; `pnpm secret-scan` PASS files=429; `frontend npx tsc --noEmit` 0; `npx next build` PASS with types enforced; WSL `anchor test` **12 passing** (13s) including non-owner cancel and drained-escrow second fill
+- **live API:** `/health` `/ready` `/v1/program` (mainnet exists=false executable=false; devnet executable=true; keeperSendEnabled=false) `/v1/quote` `/v1/feed` (verification_state stale — Render RPC 413 data allowance) `/v1/prestocks` `/v1/receipts` 18 rows all `network=DEVNET`
+- **decision:** Option B unchanged. Do not deploy MAINNET program. Do not enable Render `KEEPER_SEND_ENABLED`.
+- **files changed:** frontend tsconfig/next.config/backendSource/ReceiptCard; scripts live-sql + e2e + ingest; tests/tminus.ts localhost pin; evidence JSON; IMPLEMENTATION_PLAN; PROJECT_HISTORY
+- **known risks:** Render feed can go STALE when public mainnet RPC returns 413; MAINNET place/fill remain blocked; first-time Phantom approve is still human-only if trust is lost
+- **next step:** commit + push + Vercel prod; Render has no API code change this commit — verify `/health` stays 200
+
+---
+
 
 

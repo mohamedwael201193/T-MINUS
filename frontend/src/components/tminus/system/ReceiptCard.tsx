@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { ExecutionReceipt } from "@/lib/tminus/domain/types";
 import { cn, fmtCount, fmtDateTime, fmtRatio, truncMid } from "@/lib/tminus/utils";
 import { useToast } from "@/components/tminus/system/toast";
@@ -20,6 +21,7 @@ export function ReceiptCard({
   className?: string;
 }) {
   const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
   const kind = receipt.eventKind ?? "fill";
   const isFill = kind === "fill";
   const targetFill = isFill && receipt.path === "TARGET";
@@ -126,12 +128,16 @@ export function ReceiptCard({
             <button
               type="button"
               onClick={() => {
-                void navigator.clipboard?.writeText(receipt.signature).catch(() => undefined);
                 toast({ title: "SIGNATURE COPIED", tone: "ink" });
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 2000);
+                void navigator.clipboard?.writeText(receipt.signature).catch(() => {
+                  toast({ title: "COPY FAILED", tone: "coral", body: "Clipboard permission denied." });
+                });
               }}
               className="rounded-full border-2 border-ink bg-paper px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-ink transition-colors hover:bg-ink hover:text-bone"
             >
-              Copy sig
+              {copied ? "Copied" : "Copy sig"}
             </button>
             {onOpenReceipt ? (
               <button

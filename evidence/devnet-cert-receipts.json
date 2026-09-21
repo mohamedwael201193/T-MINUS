@@ -1,0 +1,67 @@
+{
+  "inserted": [
+    {
+      "kind": "place",
+      "sig": "4ztDbdBsn2abTZ5g6qxcVGqaGfYAcYAQzPkCXkeE73e7QQ5dS9gpvyJrBwoSq3fgkbLnHoTms7zDQq3qK9MYkhht",
+      "slot": 501706064
+    },
+    {
+      "kind": "cancel",
+      "sig": "w3SqKBAaAK3cMJi1x8j4fUVBNWQgWBs6oxyUd9Cw8XfLqP93eE1dUgrKWNf8TiFvNaf6Cjin7Pkty3NS3LiU9hh",
+      "slot": 501706088
+    },
+    {
+      "kind": "fill",
+      "sig": "4LrwMGSgYF6EQSamovBspwHXdCJDs4mAgoTryWbaCHVLT6HbkrCaaCqmgTNWNkBnrjD23ZVZAn9A6ao8dmWaHRm5",
+      "slot": 501706100
+    },
+    {
+      "kind": "expire",
+      "sig": "2CeJTtiiPay7Y237qLs5HQmAmuUSRtNR8q98KaiFu9Mjn8phf3iFMYP9iWaL2VVnksver8oZp7PDEfUknNipyc9z",
+      "slot": 501706126
+    },
+    {
+      "kind": "place",
+      "sig": "vriKVQ46qskfgMgN9ncNNppjEDLKsgQSKccMpjSc5RpEiSV8SC3C4RdMm2964mEupyjbXMrFT9YWy43WNBc4U3S",
+      "slot": 501708777
+    },
+    {
+      "kind": "fill",
+      "sig": "3pLVHydCh7KR9ZLrT8w8BEddcLwvT69HR94YdazH2EWdJXLE9NpNJC87MBBnDziHfLm7Y7d4WvyDgRoG83n9ZZ9J",
+      "slot": 501708795
+    },
+    {
+      "kind": "fill",
+      "sig": "6htT9vne6Pwn7EBxBCFhYan5k2FWBFeR3sXy8Xdv6R3An71HEufhWyC3wuKfPDy9w6N2VEhiSNNhveZHAXAT2Kj",
+      "slot": 501708811
+    },
+    {
+      "kind": "fill",
+      "sig": "5GZVcUWZSnrhQYT4zqgyt5fJo1SLoPffRGTGccUx1UZgMpLLFdnD5z61nsdYiUJYXji2KjMeZN318ewdteDpZ1uM",
+      "slot": 501709996
+    },
+    {
+      "kind": "fill",
+      "sig": "2yjVMmFgFaCajf8NQuxdDxUu2dEXgDbMkqTzkB71LwjCqjiheqXXZRQ8DrgWyjQfYSyZpmTQwh1BdqkPZPhqPmJ9",
+      "slot": 501710423
+    },
+    {
+      "kind": "fill",
+      "sig": "2eXaKdhbrPX9dksNrJ7KXvefpPfFtnb1kNK7nyx7VA9AZbYMvKGacF3P3reiYeoF75MQ1KGxSPMBHJzqgU5HnRuY",
+      "slot": 501710441
+    }
+  ],
+  "receiptRows": 18,
+  "kinds": [
+    "place",
+    "cancel",
+    "fill",
+    "expire",
+    "place",
+    "fill",
+    "fill",
+    "fill",
+    "fill",
+    "fill"
+  ]
+}

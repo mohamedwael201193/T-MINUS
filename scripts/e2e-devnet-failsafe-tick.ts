@@ -304,6 +304,10 @@ async function main() {
   const fillerPath = join(tmp, "filler.json");
   writeFileSync(fillerPath, JSON.stringify(Array.from(filler.secretKey)));
 
+  const { loadRenderDbUrls } = await import("./live-sql.ts");
+  const db = await loadRenderDbUrls();
+  if (!db) throw new Error("missing_render_db_urls");
+
   const tickResult = await new Promise<{ code: number | null; out: string }>((resolve) => {
     const child = spawn(
       process.execPath,
@@ -312,6 +316,8 @@ async function main() {
         cwd: root,
         env: {
           ...process.env,
+          DATABASE_URL: db.databaseUrl,
+          DIRECT_URL: db.directUrl,
           SOLANA_RPC_URL: RPC,
           SOLANA_NETWORK: "devnet",
           PROGRAM_ID: PROGRAM_ID.toBase58(),
@@ -421,10 +427,9 @@ async function main() {
   mkdirSync(resolve(root, "evidence"), { recursive: true });
   writeFileSync(resolve(root, "evidence/devnet-failsafe-tick.json"), JSON.stringify(evidence, null, 2));
 
-  const direct = process.env.DIRECT_URL;
-  if (direct && parsedFill) {
+  if (db && parsedFill) {
     const postgres = (await import("postgres")).default;
-    const sql = postgres(direct, { prepare: false, max: 1 });
+    const sql = postgres(db.directUrl, { prepare: false, max: 1 });
     const payload = {
       orderPda: failsafe.pda.toBase58(),
       sig: fillSig,
@@ -463,6 +468,6 @@ async function main() {
 }
 
 main().catch((err: unknown) => {
-  console.error(err instanceof Error ? err.message : err);
+  console.error(err instanceof Error ? err.stack ?? err.message : err);
   process.exit(1);
 });

@@ -267,7 +267,16 @@ const out = {
   mockDstMint: dstMint.publicKey.toBase58(),
   payer: wallet.publicKey.toBase58(),
   filler: filler.publicKey.toBase58(),
+  orderPda: pda.toBase58(),
+  escrowAta: escrow.toBase58(),
+  cancelPda: cancelPda.toBase58(),
+  expirePda: expirePda.toBase58(),
   signatures: sigs,
+  explorer: Object.fromEntries(
+    Object.entries(sigs)
+      .filter(([, v]) => /^[1-9A-HJ-NP-Za-km-z]{32,88}$/.test(v))
+      .map(([k, v]) => [k, `https://explorer.solana.com/tx/${v}?cluster=devnet`])
+  ),
 };
 mkdirSync(resolve(root, "evidence"), { recursive: true });
 writeFileSync(resolve(root, "evidence/devnet-e2e.json"), JSON.stringify(out, null, 2));

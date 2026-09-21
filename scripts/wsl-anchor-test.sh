@@ -4,6 +4,7 @@ export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.cargo/b
 cd /mnt/d/route/sol/T-MINUS
 export ANCHOR_WALLET=/mnt/c/Users/LOQ/.tminus/keys/deploy.json
 export ANCHOR_PROVIDER_URL=http://127.0.0.1:8899
+unset TMINUS_USE_LIVE_RPC
 /mnt/d/Programs/nodejs/node.exe --version
 solana-test-validator --version
 pkill -f solana-test-validator || true

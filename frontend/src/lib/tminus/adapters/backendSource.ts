@@ -382,7 +382,7 @@ class BackendSource implements TMinusSource {
     const gen = ++this.inspectGen;
     const proofPda = this.receipts.find((r) => r.orderId)?.orderId;
     let lastProofPda = this.inspect.lastProofPda;
-    if (proofPda) {
+    if (proofPda && !(lastProofPda?.pda === proofPda && lastProofPda.account === "absent")) {
       const looked = await apiGetMaybe<{
         order?: { status?: string };
       }>(`/v1/orders/${proofPda}?cluster=devnet`);

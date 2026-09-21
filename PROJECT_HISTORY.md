@@ -344,4 +344,15 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-21T02:25Z — BROWSER QA START — live catalog on Render + console
+
+- **action:** Render `/v1/prestocks` is live after `48f272b`. Frontend on localhost:3001. Landing shows MAINNET + SPACEX $120.69 + MAR 12 2027. Console lists official Pre* assets; XAI EXPIRED; Jupiter executable ratio **0.7671** (display units, not raw). SET ORDER without wallet toasts connect. Receipts labeled DEVNET-SRC/DST with real explorer sig `5cZurXQR…`. Fixed OrderTicket syntax, SSR crash on empty feed, raw/display quote ratio.
+- **result:** Paths 1 (landing→app) and XAI lifecycle work. Place still honestly refused. Phantom connect not yet exercised in this Chrome session.
+- **test:** api 16/16 earlier; visual Chrome snapshot of `#/` and `#/app`
+- **decision:** Still Option B. Do not mark certification complete.
+- **next step:** wallet connect/reject, receipts explorer tab, mobile viewport, commit remaining frontend fixes, keep history
+
+---
+
+
 

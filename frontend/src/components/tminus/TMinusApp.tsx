@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { TMinusProvider, useTMinus } from "@/lib/tminus/adapters/context";
+import { TMinusProvider, useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
 import { useView, navigate } from "@/lib/tminus/router";
 import { ToastProvider, useToast } from "@/components/tminus/system/toast";
 import { Grain } from "@/components/tminus/system/Grain";
@@ -54,6 +54,10 @@ function NoticeBridge() {
 function ViewRouter() {
   const view = useView();
   const prev = useRef(view.name);
+  useTMinusVersion();
+  const src = useTMinus();
+  const env = src.getEnvironment();
+  const ready = env.dataCluster === "SIMULATION" || src.listAssets().length > 0;
 
   useEffect(() => {
     if (prev.current !== view.name) {
@@ -61,6 +65,17 @@ function ViewRouter() {
       window.scrollTo({ top: 0, behavior: "auto" });
     }
   }, [view.name]);
+
+  if (!ready) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bone font-sans text-ink">
+        <Grain />
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-fog">
+          Loading live PreStocks feed…
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bone font-sans text-ink">

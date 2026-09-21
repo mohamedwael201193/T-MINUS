@@ -53,7 +53,7 @@ function mapAsset(row: PrestocksCatalogResponse["assets"][number]): LifecycleAss
     tokenStandard: "TOKEN-2022",
     destinationSymbol: row.destinationSymbol ?? "TBD",
     destinationName: row.destinationName ?? (row.destinationSymbol ?? "Terms pending"),
-    destinationPrice: null,
+    destinationPrice: row.destinationSymbol === "SPCXx" ? row.markPrice : null,
     price: row.tokenPrice ?? 0,
     markPrice: row.markPrice ?? row.tokenPrice ?? 0,
     prescribedRatio: 1,
@@ -364,7 +364,11 @@ class BackendSource implements TMinusSource {
       if (quote?.quote?.inAmount && quote.quote.outAmount) {
         const inn = Number(quote.quote.inAmount);
         const out = Number(quote.quote.outAmount);
-        if (inn > 0) executableRatio = out / inn;
+        if (inn > 0) {
+          const SPACEX_DISPLAY_RAW = 200_000_000;
+          const SPCXX_DECIMALS = 1e8;
+          executableRatio = out / SPCXX_DECIMALS / (inn / SPACEX_DISPLAY_RAW);
+        }
       }
       if (executableRatio == null && spacex && spacex.markPrice > 0 && spacex.price > 0) {
         executableRatio = spacex.price / spacex.markPrice;

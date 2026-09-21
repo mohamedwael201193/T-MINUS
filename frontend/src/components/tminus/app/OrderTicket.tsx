@@ -67,7 +67,7 @@ export function OrderTicket() {
     }
     if (!failsafe) {
       errs.failsafe = "Pick your failsafe date.";
-    if (deadlineIso && failsafe > deadlineIso) {
+    } else if (deadlineIso && failsafe > deadlineIso) {
       errs.failsafe = `After the hard deadline — ${fmtDate(Date.parse(deadlineIso + "T23:59:00Z"))}.`;
     }
     return errs;

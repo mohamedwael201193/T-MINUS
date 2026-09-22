@@ -4,6 +4,13 @@ import { PROGRAM_ID, type ReceiptRow } from "./api";
 const SPACEX_DISPLAY_RAW = 200_000_000;
 const SPCXX_DISPLAY_RAW = 100_000_000;
 
+/** Real DEVNET order PDAs are base58. Conversion receipts use `conversion:asset:wallet`. */
+export function isOnChainOrderPda(id: string | undefined | null): boolean {
+  if (!id) return false;
+  if (id.includes(":")) return false;
+  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(id);
+}
+
 export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
   const payload = row.payload ?? {};
   const network = (payload.network === "MAINNET" || payload.network === "DEVNET"
@@ -37,7 +44,12 @@ export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
     signature: row.sig,
     slot: Number(row.slot ?? payload.slot ?? 0),
     route: `${network} · ${eventKind} · ${composition}`,
-    feeBps: 0,
+    feeBps:
+      typeof payload.transferFeeBps === "number"
+        ? payload.transferFeeBps
+        : isConversion
+          ? 100
+          : 0,
     settledAt: payload.timestamp ?? row.created_at,
     feedHash: payload.feedHash ?? "—",
     network,

@@ -104,9 +104,11 @@ export function LifecyclePanel() {
             markPrice={asset.markPrice}
             holdDisplay={wallet.connected ? wallet.balances?.SPACEX ?? 0 : null}
             statusLabel={
-              action?.stage === "CONVERSION_WINDOW" && action.refusals.length === 0
-                ? "READY"
-                : action?.refusals[0] ?? asset.executionAvailability ?? "WAITING"
+              wallet.connected && (wallet.balances?.SPACEX ?? 0) <= 0
+                ? "INSUFFICIENT_BALANCE"
+                : action?.stage === "CONVERSION_WINDOW" && action.refusals.length === 0
+                  ? "READY"
+                  : action?.refusals[0] ?? asset.executionAvailability ?? "WAITING"
             }
           />
         ) : asset.stage === "EXPIRED" ? (

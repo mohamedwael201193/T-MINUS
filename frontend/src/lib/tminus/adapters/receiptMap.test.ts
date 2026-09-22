@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mapReceipt } from "./receiptMap.ts";
+import { isOnChainOrderPda, mapReceipt } from "./receiptMap.ts";
 import type { ReceiptRow } from "./api.ts";
 
 function row(kind: string, extra: Partial<ReceiptRow["payload"]> = {}): ReceiptRow {
@@ -85,4 +85,11 @@ test("mainnet jupiter conversion is labeled conversion not protocol fill", () =>
   assert.ok(Math.abs(r.filled - 0.75722514) < 1e-9);
   assert.equal(r.programId, "jupiter-swap-v2");
   assert.doesNotMatch(r.explorerUrl ?? "", /cluster=devnet/);
+  assert.equal(r.feeBps, 100);
+});
+
+test("conversion: order ids are not on-chain PDAs", () => {
+  assert.equal(isOnChainOrderPda("conversion:spacex:CpTxsgPj"), false);
+  assert.equal(isOnChainOrderPda("EpMA1LWpJXU67WBTF2LhhTX6ucYRsbf7z7sAaC8fikgC"), true);
+  assert.equal(isOnChainOrderPda(""), false);
 });

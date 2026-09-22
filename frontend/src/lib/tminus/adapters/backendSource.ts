@@ -10,7 +10,7 @@ import type {
   WalletState,
 } from "../domain/types";
 import type { ConversionRequestInput, ConversionResult, CreateOrderInput, EngineNotice, TMinusSource } from "./sources";
-import { mapReceipt } from "./receiptMap";
+import { isOnChainOrderPda, mapReceipt } from "./receiptMap";
 import {
   PROGRAM_ID,
   TMINUS_API,
@@ -519,7 +519,9 @@ class BackendSource implements TMinusSource {
 
   private async inspectChainState() {
     const gen = ++this.inspectGen;
-    const proofPda = this.receipts.find((r) => r.orderId)?.orderId;
+    const proofPda = this.receipts.find(
+      (r) => r.network === "DEVNET" && isOnChainOrderPda(r.orderId),
+    )?.orderId;
     let lastProofPda = this.inspect.lastProofPda;
     if (proofPda && !(lastProofPda?.pda === proofPda && lastProofPda.account === "absent")) {
       const looked = await apiGetMaybe<{

@@ -528,6 +528,21 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-22T00:55Z — PRODUCTION VERIFY + ZERO-BALANCE / CONVERSION-PDA FIX
+
+- **phase:** 23–26 — production Chrome, then honesty fixes from that pass
+- **objective:** Prove the Mainnet receipt on https://tminusapp.vercel.app, open explorer from the product, certify XAI no-sign, then stop on Chrome bugs and fix them.
+- **action:** Reloaded production `#/receipts` (cache-bust). Ledger: **1 MAINNET · 18 PROTOCOL**. Card R-0001 MAINNET TRADE SPACEX→SPCXX size 0.009136, filled 0.0070, ratio 0.7685, slot 449,215,609, ✓ VERIFIED. Clicked VIEW ON EXPLORER → Solana explorer Status **Success**, Finalized, same signature and slot, fee payer `CpTxsg…`. Production `#/app` SPACEX YOU HOLD **0**, GOING PUBLIC, deadline MAR 12 2027, transfer fee 1%, latest proof is the same Mainnet receipt. XAI: EXPIRED / ACQUISITION / WINDOW CLOSED (button not interactive; no Phantom). `/v1/receipts` 19 rows; conversion `verifiedOnchain=true`. `/v1/actions/spacex/status` GOING_PUBLIC TRADE. `/v1/actions/xai/status` EXPIRED. Chrome console had HTTP 400 on `GET /v1/orders/conversion:spacex:…?cluster=devnet` because inspect used the synthetic conversion id as a DEVNET PDA. Sign conversion stayed enabled at 0 SPACEX (click would have failed the amount gate, but it still looked like a sign request). Fixed: inspect only real base58 DEVNET PDAs; status/desk/button overlay `INSUFFICIENT_BALANCE` when wallet SPACEX is 0; receipt fee 100 bps for SPACEX conversions.
+- **result:** Production already showed the real Mainnet conversion. The 400 and zero-balance Sign affordance are local fixes in this commit, not yet on Vercel until the next `--prod`.
+- **evidence:** explorer https://explorer.solana.com/tx/2RfXRieEW3HRZBVU4qHqnzRSvoV9KcEX5kYBzAjVW7VTkv2ig4u5frozAinumDnUApjWHLwcbsZEh3BSjsSWRNBW ; Render `/v1/receipts`; Vercel https://tminusapp.vercel.app
+- **tests:** sdk 6 PASS; api 46 PASS; keeper 14 PASS; receiptMap+safeAmount 9 PASS; secret-scan PASS files=466; api/sdk/keeper typecheck PASS; frontend `npx tsc --noEmit` PASS
+- **decision:** Do not spend 1.08473244 SOL. Do not fabricate a second Mainnet trade. Wallet dust is spent.
+- **files changed:** receiptMap `isOnChainOrderPda` + feeBps; backendSource inspect skip; OrderTicket/LifecyclePanel/ActionDesk zero-balance refuse; executable payload `transferFeeBps`; IMPLEMENTATION_PLAN G13b/G14; FRONTEND_NOTES
+- **known risks:** Vercel still CLI `--prod`; Render free cold start; public RPC 429; leftover 400s on production until this frontend ships
+- **next step:** commit + push origin/main; `vercel --prod` + alias tminusapp; confirm Render still live; production Chrome that Sign is disabled at 0 SPACEX and `/v1/orders/conversion:` is no longer called
+
+---
+
 
 
 

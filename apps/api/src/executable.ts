@@ -389,6 +389,7 @@ export async function executeSignedConversion(body: unknown): Promise<{ status: 
     wallet: taker,
     settlementKind: "TRADE",
     corporateActionId: `${assetId}:${gate.body.action.actionType}`,
+    transferFeeBps: gate.body.action.transferFeeBps,
   };
   const orderPda = `conversion:${assetId}:${taker}`;
   await sql`

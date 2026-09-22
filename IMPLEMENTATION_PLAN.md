@@ -4,7 +4,7 @@ Single source of truth. Verified-at **2026-09-22**. Live state wins over older r
 
 **Product (2026-09-22):** T-MINUS is the **PreStocks Asset Lifecycle & Action Engine**. The consumer surface is a conversion desk. Mainnet path is a user-signed Jupiter Swap V2 `/order` + `/execute` TRADE (not an automatic rollover, not T-MINUS escrow). Amount is wallet-balance-aware (never a hardcoded 0.01 SPACEX). DEVNET remains the trust-minimized protocol proof (place/cancel/fill/expire). Do **not** spend **1.08473244 SOL** on a Mainnet program for this product.
 
-**Frontend certification (2026-09-21):** production `frontend/` at https://tminusapp.vercel.app uses BackendSource. `npx tsc --noEmit` and `npx next build` pass with `typescript.ignoreBuildErrors=false`. DEVNET protocol place/fill/partial/failsafe/cancel/expire/double-fill re-executed on-chain this pass. MAINNET program remains absent; MAINNET **escrow place** is refused. MAINNET **conversion signatures** are a separate Jupiter path.
+**Frontend certification (2026-09-22):** production `frontend/` at https://tminusapp.vercel.app uses BackendSource. Chrome ledger shows **1 MAINNET** conversion vs **18 DEVNET** protocol proofs. Explorer `2RfXRieE…SWRNBW` is Success / slot 449215609. XAI is EXPIRED / WINDOW CLOSED (button not interactive). After the dust TRADE the connected wallet holds **0 SPACEX**; Sign conversion is refused (`INSUFFICIENT_BALANCE`). MAINNET program remains absent; MAINNET **escrow place** is refused.
 
 **Current architecture decision (Option B + corporate-action API):** full T-MINUS protocol on **DEVNET** + real PreStocks **MAINNET** lifecycle/corporate-action data + user-signed Jupiter execution + honest network labels. See `GET /v1/actions`.
 
@@ -99,8 +99,9 @@ Demo pair: **SPACEX → SPCXx**.
 | G10 compose swap+fill one tx | **ASSEMBLY PASS / SIM err AccountNotFound**: `/build` + **real `fill` ix** (not memo) serializes **636** bytes; mainnet program/taker missing | Atomic path kept; inventory fallback used on DEVNET |
 | G11 tx size/compute | **PASS size** 636 ≤ 1232; CU not measured (`unitsConsumed` 0 on AccountNotFound) | Phase 1 |
 | G12 ALTs | **PASS**: `/build` ALT `8CoUnad218pEqxme5jnn9CNu4BmaRAkP7Af8uT9ZBg29` loaded | Phase 1 |
-| G13 mainnet tiny SPACEX→SPCXx via T-MINUS | **NOT RUN** — program absent; proven min deploy **1.08473244 SOL** (old 2.14859112 was a double-count); dust SPACEX **1,827,211 raw** already held; keeper send off | Phase 8 |
-| G14 explorer receipts | **PASS DEVNET** — live `/v1/receipts` includes original e2e plus keeper `fillIx` partial+close sigs; not SPACEX/mainnet | Phase 5–8 |
+| G13 mainnet tiny SPACEX→SPCXx via T-MINUS **program** | **NOT RUN** — program absent; proven min deploy **1.08473244 SOL**; keeper send off | Phase 8 |
+| G13b mainnet tiny SPACEX→SPCXx via conversion desk | **PASS** user-signed Jupiter Swap V2 `/order`+`/execute` sig `2RfXRieEW3HRZBVU4qHqnzRSvoV9KcEX5kYBzAjVW7VTkv2ig4u5frozAinumDnUApjWHLwcbsZEh3BSjsSWRNBW` slot 449215609; 1,827,211 raw SPACEX → 702,134 raw SPCXx; wallet now ~0 SPACEX | 2026-09-22 |
+| G14 explorer receipts | **PASS DEVNET** protocol proofs + **PASS MAINNET** conversion on `/v1/receipts` (`verifiedOnchain=true`, explorer link without `cluster=devnet`) | Phase 5–8 |
 
 ---
 

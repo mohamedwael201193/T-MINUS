@@ -224,6 +224,7 @@ export type ReceiptRow = {
     destinationSymbol?: string;
     settlementKind?: string;
     assetId?: string;
+    transferFeeBps?: number | null;
   };
 };
 

@@ -99,6 +99,9 @@ export function OrderTicket() {
   }, [t, f, a, failsafe, maxRaw, wallet.connected, deadlineIso, isSpacex, asset?.symbol, conversionOpen, amount, sol]);
 
   const valid = Object.keys(errors).length === 0;
+  const signBlocked =
+    Boolean(lifecycleBlocked) ||
+    (conversionOpen && (!wallet.connected || maxRaw <= BigInt(0) || !valid));
 
   const onSubmit = async () => {
     if (!valid) {
@@ -396,7 +399,7 @@ export function OrderTicket() {
         size="lg"
         className="mt-5 w-full"
         onClick={onSubmit}
-        disabled={submitting || Boolean(lifecycleBlocked)}
+        disabled={submitting || signBlocked}
       >
         {submitting ? "Waiting for wallet…" : conversionOpen ? "Sign conversion" : "Window closed"}
         <span aria-hidden>→</span>
@@ -404,6 +407,10 @@ export function OrderTicket() {
       {lifecycleBlocked ? (
         <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.12em] text-coral-ink">
           {lifecycleBlocked}
+        </p>
+      ) : conversionOpen && wallet.connected && maxRaw <= BigInt(0) ? (
+        <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.12em] text-coral-ink">
+          This wallet has no SPACEX left to convert. No signature requested.
         </p>
       ) : !wallet.connected ? (
         <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.12em] text-fog">

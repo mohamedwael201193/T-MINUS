@@ -103,9 +103,11 @@ Rules the UI already follows — keep them:
 
 MAINNET **escrow place** is **refused** while program `HRLm…` is not executable on
 mainnet. MAINNET **conversion** is a user-signed Jupiter Swap V2 trade when the
-corporate-action safety gate allows it. Receipts from `/v1/receipts` with
+corporate-action safety gate allows it. A connected wallet with **0 SPACEX** does
+not get a Sign conversion request (`INSUFFICIENT_BALANCE`). Receipts from `/v1/receipts` with
 `network=DEVNET` are protocol proofs. `kind=mainnet_jupiter_conversion` rows are
-Mainnet Jupiter trades. Lifecycle catalog is `/v1/prestocks`. Corporate actions
+Mainnet Jupiter trades. Synthetic `conversion:asset:wallet` ids are **not** DEVNET
+order PDAs. Lifecycle catalog is `/v1/prestocks`. Corporate actions
 are `/v1/actions`.
 
 ---

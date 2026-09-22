@@ -22,6 +22,7 @@ export function ActionDesk() {
   const action = src.getAction(assetId);
   const asset = src.getAsset(assetId);
   const market = src.getMarket(assetId);
+  const wallet = src.getWallet();
 
   if (!asset) return null;
 
@@ -29,7 +30,11 @@ export function ActionDesk() {
   const chainOk = action?.onchainRpcOk ?? null;
   const marketOk = asset.price > 0;
   const jupiterOk = market.executableRatio != null;
-  const allow = action ? action.refusals.length === 0 && action.stage === "CONVERSION_WINDOW" : false;
+  const noSpacex =
+    assetId === "spacex" && wallet.connected && (wallet.balances?.SPACEX ?? 0) <= 0;
+  const allow = Boolean(
+    action && action.refusals.length === 0 && action.stage === "CONVERSION_WINDOW" && !noSpacex,
+  );
 
   return (
     <Panel tone="paper" as="section" aria-label="Corporate action" className="mt-8 overflow-hidden">
@@ -66,7 +71,13 @@ export function ActionDesk() {
           />
           <Layer
             label="T-MINUS"
-            value={allow ? "Can sign" : (action?.refusals[0] ?? asset.executionAvailability ?? "Halt")}
+            value={
+              allow
+                ? "Can sign"
+                : noSpacex
+                  ? "INSUFFICIENT_BALANCE"
+                  : (action?.refusals[0] ?? asset.executionAvailability ?? "Halt")
+            }
             ok={allow}
           />
         </div>

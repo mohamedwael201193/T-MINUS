@@ -149,6 +149,11 @@ function mapAction(row: ActionsListResponse["actions"][number]): CorporateAction
     holders: row.market?.holders ?? null,
     freezeAuthority: row.onchain.freezeAuthority ?? null,
     mintAuthority: row.onchain.mintAuthority ?? null,
+    fingerprint: row.fingerprint ?? null,
+    eventKind: row.eventChange?.kind ?? null,
+    eventDetectedAt: row.eventChange?.detectedAt ?? null,
+    previousActionType: row.eventChange?.previousEvent?.actionType ?? null,
+    previousDeadline: row.eventChange?.previousEvent?.deadlineIso ?? null,
   };
 }
 
@@ -329,6 +334,7 @@ class BackendSource implements TMinusSource {
       taker: this.walletState.address,
       amountRaw: amountRaw.toString(),
       floorRatio: input.floorRatio,
+      executionSnapshot: exec.executionSnapshot ?? null,
     });
     if (landed.status === 200 && landed.body.settled && landed.body.signature && landed.body.explorer) {
       await this.refresh();

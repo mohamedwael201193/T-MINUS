@@ -22,14 +22,14 @@ const jbmono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "T-MINUS — Your token has a clock.",
+  title: "T-MINUS — When the issuer changes the asset, T-MINUS re-verifies.",
   description:
-    "Corporate action layer for PreStocks. Issuer instruction, on-chain mint, fee-aware Jupiter route, safety gate, then your signature — or a refusal.",
+    "PreStocks Asset Lifecycle & Action Engine. Issuer event, chain, market, then a signature — or a halt. Real Mainnet SPACEX conversion verified.",
   keywords: [
     "T-MINUS",
     "PreStocks",
+    "asset lifecycle",
     "corporate actions",
-    "conversion desk",
     "SPACEX",
     "Token-2022",
     "Solana",
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
     icon: "/logo.svg",
   },
   openGraph: {
-    title: "T-MINUS — Your token has a clock.",
+    title: "T-MINUS — When the issuer changes the asset, T-MINUS re-verifies.",
     description:
-      "PreStocks tokens carry issuer events and deadlines. T-MINUS reads the corporate action, then asks you to sign a real trade — or refuses.",
+      "Lifecycle gate for PreStocks. Real Mainnet conversion. Signing halts when the issuer instruction changes.",
     siteName: "T-MINUS",
     type: "website",
   },

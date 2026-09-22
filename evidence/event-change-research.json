@@ -1,0 +1,101 @@
+{
+  "kind": "event_change_research",
+  "researchedAt": "2026-09-22T01:50:00.000Z",
+  "note": "Live official PreStocks + Jupiter sources. No secrets. Not injected into production UI.",
+  "prestocks": {
+    "home": {
+      "url": "https://prestocks.com/",
+      "claim": "Trade Pre-IPO Stocks Onchain. Tokens 1:1 backed by SPV exposure."
+    },
+    "products": {
+      "url": "https://prestocks.com/products",
+      "claim": "PreStocks track pre-IPO companies. Fully backed, tradable 24/7, no minimums. Live on Solana."
+    },
+    "ecosystem": {
+      "url": "https://prestocks.com/ecosystem",
+      "claim": "Trading, wallets, analytics, launchpads already exist. No public lifecycle/action engine listed as of this fetch.",
+      "counts": {
+        "all": 71,
+        "trading": 38,
+        "wallet": 16,
+        "analytics": 15
+      }
+    },
+    "faqMechanics": {
+      "url": "https://prestocks.com/faq?tab=mechanics",
+      "headings": [
+        "What happens if the company goes public?",
+        "What happens if the company gets acquired or merges with another company?"
+      ],
+      "note": "Accordion bodies did not expand in the text fetch. Do not invent mechanics beyond issuer page statements."
+    },
+    "faqLegal": {
+      "url": "https://prestocks.com/faq?tab=legal",
+      "headings": [
+        "How can I verify that PreStocks are fully backed?",
+        "Which entities provide the backing for PreStocks?"
+      ]
+    },
+    "catalog": {
+      "url": "https://prestocks.com/api/prestocks",
+      "symbols": [
+        "ANDURIL",
+        "ANTHROPIC",
+        "FIGUREAI",
+        "KALSHI",
+        "NEURALINK",
+        "OPENAI",
+        "POLYMARKET",
+        "SPACEX"
+      ],
+      "spacexMint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
+      "spacexTokenPrice": 119.44486564784589,
+      "spacexMarkPrice": 152.75589330494836
+    },
+    "metrics": {
+      "url": "https://prestocks.com/api/metrics",
+      "spacexHolders": 10092,
+      "xaiMint": "PreC1KtJ1sBPPqaeeqL6Qb15GTLCYVvyYEwxhdfTwfx",
+      "xaiStillListed": true,
+      "xaiTokenPrice": 85.58,
+      "xaiHolders": 1480
+    },
+    "spacexPage": {
+      "url": "https://prestocks.com/spacex",
+      "statement": "SpaceX has gone public! SpaceX PreStocks tokens must be swapped into $SPCXx or any other token before 11:59pm UTC on 12 March 2027, or they will expire worthless.",
+      "actionType": "GOING_PUBLIC",
+      "deadlineText": "11:59pm UTC on 12 March 2027",
+      "destination": "SPCXx",
+      "allowsAnyToken": true,
+      "statedRatio": null,
+      "expireWorthless": true
+    },
+    "xaiPage": {
+      "url": "https://prestocks.com/xai",
+      "statement": "xAI was acquired by SpaceX. Each XAI token must be swapped into 0.7165 SPACEX before 11:59pm UTC on 12 September 2026, or it will expire worthless.",
+      "actionType": "ACQUISITION",
+      "deadlineText": "11:59pm UTC on 12 September 2026",
+      "destination": "SPACEX",
+      "statedRatio": 0.7165,
+      "expireWorthless": true,
+      "window": "CLOSED as of research date 2026-09-22"
+    }
+  },
+  "jupiter": {
+    "docs": "https://developers.jup.ag/",
+    "docsFetchNote": "Homepage is client-rendered. Execution path is the live T-MINUS code, not a guessed endpoint.",
+    "tminusExecutionPath": {
+      "order": "GET {JUPITER_API_BASE}/swap/v2/order",
+      "execute": "POST {JUPITER_API_BASE}/swap/v2/execute",
+      "liteQuoteFallback": "GET {JUPITER_LITE_API_BASE}/swap/v1/quote"
+    },
+    "knownLimitation": "Jupiter Trigger rejects transfer-fee mints. SPACEX is Token-2022 with 100 bps. Conversion uses Swap V2 order+execute, not Trigger."
+  },
+  "implicationsForTminus": {
+    "issuerPagesAreMutable": true,
+    "spacexAndXaiUnchangedVsPriorParse": true,
+    "fingerprintMustIgnorePageChrome": true,
+    "actionableChangeMustHaltPriorSnapshots": true,
+    "doNotInventRolloverOrOnchainBurn": true
+  }
+}

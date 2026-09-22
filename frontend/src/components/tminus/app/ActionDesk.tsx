@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
 import { fmtDateTime, truncMid } from "@/lib/tminus/utils";
 import { Label, Panel, Stat } from "@/components/tminus/system/primitives";
+import type { CorporateActionView } from "@/lib/tminus/domain/types";
 
 function tone(ok: boolean | null | undefined) {
   if (ok === true) return "border-ink bg-lime text-ink";
@@ -126,11 +127,69 @@ export function ActionDesk() {
             <Stat label="Market price" value={action?.tokenPrice != null ? String(action.tokenPrice) : asset.price ? String(asset.price) : "—"} />
             <Stat label="Mark price" value={action?.markPrice != null ? String(action.markPrice) : asset.markPrice ? String(asset.markPrice) : "—"} />
             <Stat label="Jupiter ratio" value={jupiterOk && market.executableRatio != null ? String(market.executableRatio) : "No quote"} />
+            <Stat label="Action fingerprint" value={action?.fingerprint ? truncMid(action.fingerprint, 8, 6) : "—"} />
+            <Stat label="Event kind" value={action?.eventKind ?? "NO_CHANGE"} />
+            <Stat label="Last verified" value={action?.eventDetectedAt ? fmtDateTime(action.eventDetectedAt) : action?.fetchedAt ? fmtDateTime(action.fetchedAt) : "—"} />
             <Stat label="Final gate" value={allow ? "READY" : action?.refusals[0] ?? "BLOCKED"} />
           </dl>
         ) : null}
+        <EventHistory action={action} />
       </div>
     </Panel>
+  );
+}
+
+function EventHistory({ action }: { action: CorporateActionView | undefined }) {
+  if (!action) return null;
+  const kind = action.eventKind && action.eventKind !== "NO_CHANGE" ? action.eventKind : null;
+  const actionableKind =
+    kind &&
+    kind !== "TEXT_CHANGED_NON_ACTIONABLE" &&
+    (action.previousActionType !== action.actionType ||
+      action.previousDeadline !== action.deadline ||
+      kind === "DESTINATION_CHANGED" ||
+      kind === "RATIO_CHANGED" ||
+      kind === "SOURCE_UNAVAILABLE" ||
+      kind === "PARSE_CHANGED" ||
+      kind === "STATE_CHANGED" ||
+      kind === "ACTION_CHANGED" ||
+      kind === "DEADLINE_CHANGED");
+  const hasPrevious = Boolean(
+    actionableKind && (action.previousActionType || action.previousDeadline),
+  );
+  return (
+    <div className="rounded-xl border-2 border-ink/15 bg-bone/30 px-4 py-3">
+      <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-fog">Issuer event history</p>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div>
+          <p className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-fog">Current</p>
+          <p className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-ink">
+            {action.actionType} · {action.deadline ? fmtDateTime(action.deadline) : "—"}
+          </p>
+          <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-lime">
+            Verified{action.eventDetectedAt ? ` · ${fmtDateTime(action.eventDetectedAt)}` : ""}
+          </p>
+        </div>
+        {hasPrevious ? (
+          <div>
+            <p className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-fog">Previously</p>
+            <p className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-ink">
+              {action.previousActionType ?? "—"} · {action.previousDeadline ? fmtDateTime(action.previousDeadline) : "—"}
+            </p>
+            <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.12em] text-coral-ink">
+              Superseded{kind ? ` · ${kind}` : ""}
+            </p>
+          </div>
+        ) : (
+          <div>
+            <p className="font-mono text-[8.5px] uppercase tracking-[0.14em] text-fog">Transitions</p>
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.08em] text-fog">
+              None persisted. Fake history is not shown.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

@@ -10,6 +10,8 @@ import {
 } from "./issuer-instruction.ts";
 import { parseFeedIssuerPowers, readMintState, type OnchainMintState } from "./onchain-mint.ts";
 import type { CatalogStage } from "./lifecycle-classify.ts";
+import { observeIssuerEvent, loadIssuerEventHistory, type PersistedIssuerEvent } from "./event-change.ts";
+import { fingerprintActionable, eventFromInstruction } from "./event-fingerprint.ts";
 
 export type SettlementKind = "TRADE" | "NONE";
 
@@ -75,6 +77,8 @@ export type CorporateAction = {
   };
   truth: TruthLayer;
   fetchedAt: string;
+  fingerprint: string;
+  eventChange: PersistedIssuerEvent | null;
 };
 
 export type ActionsList = {
@@ -204,6 +208,10 @@ function toAction(asset: CatalogAsset, onchain: OnchainMintState): CorporateActi
     },
     truth,
     fetchedAt: asset.fetchedAt,
+    fingerprint: fingerprintActionable(
+      eventFromInstruction(instruction, asset.issuerPageUrl ?? asset.sourceUrl ?? ""),
+    ),
+    eventChange: null,
   };
 }
 
@@ -242,6 +250,24 @@ export async function listCorporateActions(opts?: { force?: boolean }): Promise<
       onchain = pendingMint(asset);
     }
     actions.push(toAction(asset, onchain));
+  }
+  for (const action of actions) {
+    try {
+      const observed = await observeIssuerEvent({
+        assetId: action.assetId,
+        instruction: action.issuer,
+        sourceUrl: action.evidence.issuerPageUrl ?? action.evidence.sourceUrl,
+        fetchedAt: action.evidence.fetchedAt,
+        sourceOk: Boolean(action.evidence.issuerPageUrl || action.issuer.statement),
+      });
+      action.eventChange = observed;
+      action.fingerprint = observed.fingerprint;
+      if (observed.kind === "SOURCE_UNAVAILABLE") {
+        action.truth.tminus.refusals = [...new Set([...action.truth.tminus.refusals, "EVIDENCE_MISSING"])];
+      }
+    } catch {
+      /* keep in-memory fingerprint */
+    }
   }
   return {
     network: "MAINNET",
@@ -293,6 +319,18 @@ export function actionEvidence(action: CorporateAction) {
     issuer: action.truth.issuer,
     onchain: action.onchain,
     market: action.market,
+    fingerprint: action.fingerprint,
+    eventChange: action.eventChange
+      ? {
+          kind: action.eventChange.kind,
+          kinds: action.eventChange.kinds,
+          actionable: action.eventChange.actionable,
+          fingerprint: action.eventChange.fingerprint,
+          previousFingerprint: action.eventChange.previousFingerprint,
+          detectedAt: action.eventChange.detectedAt,
+          lastVerified: action.eventChange.sourceFetchedAt,
+        }
+      : null,
   };
 }
 
@@ -311,5 +349,34 @@ export function actionStatus(action: CorporateAction) {
     allowSign: action.truth.tminus.allowSign,
     refusals: action.truth.tminus.refusals,
     inOfficialCatalog: action.inOfficialCatalog,
+    fingerprint: action.fingerprint,
+  };
+}
+
+export async function actionEvents(assetId: string) {
+  const history = await loadIssuerEventHistory(assetId);
+  const latest = await getCorporateAction(assetId);
+  return {
+    network: "MAINNET" as const,
+    assetId,
+    fingerprint: latest?.fingerprint ?? null,
+    current: latest?.eventChange
+      ? {
+          kind: latest.eventChange.kind,
+          actionType: latest.actionType,
+          deadline: latest.deadline,
+          destination: latest.destination?.symbol ?? null,
+          verifiedAt: latest.eventChange.sourceFetchedAt,
+        }
+      : null,
+    history: history.map((row) => ({
+      kind: row.kind,
+      fingerprint: row.fingerprint,
+      previousFingerprint: row.previousFingerprint,
+      previous: row.previousEvent,
+      current: row.currentEvent,
+      detectedAt: row.detectedAt,
+      sourceUrl: row.sourceUrl,
+    })),
   };
 }

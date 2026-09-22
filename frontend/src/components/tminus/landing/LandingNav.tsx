@@ -6,8 +6,9 @@ import { cn } from "@/lib/tminus/utils";
 
 const LINKS = [
   { label: "Product", href: "#product" },
-  { label: "How it works", href: "#how" },
+  { label: "Lifecycle", href: "#lifecycle" },
   { label: "Proof", href: "#proof" },
+  { label: "API", href: "#api" },
 ];
 
 export function LandingNav() {

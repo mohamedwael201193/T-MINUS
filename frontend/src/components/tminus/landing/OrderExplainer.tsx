@@ -5,170 +5,78 @@ import { navigate } from "@/lib/tminus/router";
 import { fmtDate, fmtRatio } from "@/lib/tminus/utils";
 import { SPACEX_ASSET_ID } from "@/lib/tminus/data/lifecycleData";
 import { Button, Eyebrow, Label } from "@/components/tminus/system/primitives";
-import { RatioBand } from "@/components/tminus/system/RatioBand";
 import { Reveal } from "@/components/tminus/system/Reveal";
 
-/**
- * "How the order works" — a static, annotated preview of the real
- * order ticket plus the two IF/THEN rules in plain English.
- */
 export function OrderExplainer() {
   useTMinusVersion();
   const src = useTMinus();
-  const asset = src.getAsset(SPACEX_ASSET_ID)!;
+  const asset = src.getAsset(SPACEX_ASSET_ID);
   const market = src.getMarket(SPACEX_ASSET_ID);
   const ratio = market.executableRatio;
 
   return (
-    <section id="how" aria-label="How the order works" className="scroll-mt-20 border-b-2 border-ink">
+    <section id="how" aria-label="The action desk" className="scroll-mt-20 border-b-2 border-ink">
       <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
         <Reveal>
-          <Eyebrow>The order</Eyebrow>
+          <Eyebrow>The desk</Eyebrow>
           <h2 className="mt-5 font-display text-[clamp(2.2rem,5.4vw,4.2rem)] uppercase leading-[0.95] text-ink">
-            A floor. A gate. A signature.
+            Safe → sign. Unsafe → refuse.
           </h2>
-          <p className="mt-5 max-w-2xl text-[16.5px] leading-relaxed text-fog">
-            Issuer instruction, on-chain mint state, a live Jupiter quote, and a
-            safety gate. You write a floor. If the window is open and the route
-            clears it, you sign a Mainnet trade. If XAI already expired, T-MINUS
-            refuses.
+          <p className="mt-5 max-w-xl text-[16.5px] leading-relaxed text-fog">
+            The Conversion Desk is the consumer. The engine decides. You stay present for the signature.
           </p>
         </Reveal>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          {/* ticket preview */}
-          <Reveal delay={80} className="relative">
-            <div className="relative rounded-2xl border-2 border-ink bg-paper p-6 shadow-[6px_6px_0_0_var(--color-ink)]">
+        <div className="mt-12 grid gap-6 lg:grid-cols-2">
+          <Reveal delay={80}>
+            <div className="rounded-2xl border-2 border-ink bg-paper p-6 shadow-[6px_6px_0_0_var(--color-ink)]">
               <div className="flex items-center justify-between">
-                <Label>Set your rule</Label>
-                <span className="rounded-full border-2 border-ink bg-ink px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-bone">
-                  {asset.symbol} → {asset.destinationSymbol}
+                <Label>SPACEX conversion</Label>
+                <span className="rounded-full border-2 border-ink bg-lime px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-ink">
+                  Window open
                 </span>
               </div>
-
               <div className="mt-4 flex items-center justify-between rounded-xl border-2 border-ink bg-ink px-4 py-3">
-                <span className="mlabel text-bone-dim">Executable now</span>
+                <span className="mlabel text-bone-dim">Live post-fee ratio</span>
                 <span className="font-mono text-lg font-bold tabular text-lime">
                   {ratio != null ? fmtRatio(ratio) : "—"}
                 </span>
               </div>
-
-              <div className="mt-5 grid grid-cols-2 gap-3.5">
-                <div className="rounded-xl border-2 border-ink bg-bone/60 p-3.5">
-                  <Label>Target</Label>
-                  <p className="mt-1.5 font-mono text-xl font-bold tabular text-ink">0.820</p>
-                </div>
-                <div className="rounded-xl border-2 border-ink bg-bone/60 p-3.5">
-                  <Label>Failsafe date</Label>
-                  <p className="mt-1.5 font-mono text-xl font-bold tabular text-ink">MAR 01 2027</p>
-                </div>
+              <dl className="mt-5 grid grid-cols-2 gap-3">
                 <div className="rounded-xl border-2 border-ink bg-bone/60 p-3.5">
                   <Label>Floor</Label>
-                  <p className="mt-1.5 font-mono text-xl font-bold tabular text-ink">0.700</p>
+                  <p className="mt-1.5 font-mono text-xl font-bold text-ink">0.700</p>
                 </div>
                 <div className="rounded-xl border-2 border-ink bg-bone/60 p-3.5">
-                  <Label>Amount</Label>
-                  <p className="mt-1.5 font-mono text-xl font-bold tabular text-ink">1.00 SPACEX</p>
+                  <Label>Deadline</Label>
+                  <p className="mt-1.5 font-mono text-xl font-bold text-ink">
+                    {asset?.windowClosesAt ? fmtDate(asset.windowClosesAt) : "—"}
+                  </p>
                 </div>
-              </div>
-
-              <div className="mt-5">
-                <RatioBand floor={0.7} target={0.82} current={ratio} compact />
-              </div>
-
-              <Button
-                variant="lime"
-                className="mt-5 w-full"
-                onClick={() => navigate("#/app")}
-              >
-                Try it live
+              </dl>
+              <Button variant="lime" className="mt-5 w-full" onClick={() => navigate("#/app")}>
+                Open the desk
                 <span aria-hidden>→</span>
               </Button>
             </div>
-
-            {/* callouts (xl) — leader lines tie chips to their fields */}
-            <div className="pointer-events-none absolute -right-4 top-4 hidden rotate-2 xl:block">
-              <span className="inline-block rounded-full border-2 border-ink bg-lime px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-ink shadow-[3px_3px_0_0_var(--color-ink)]">
-                Target — the ratio you want
-              </span>
-              <span aria-hidden className="absolute left-6 top-full h-4 w-[2px] border-l-2 border-dashed border-ink/40" />
-            </div>
-            <div className="pointer-events-none absolute -left-5 top-[42%] hidden -rotate-2 xl:block">
-              <span
-                aria-hidden
-                className="absolute right-6 top-1/2 h-[2px] w-5 border-t-2 border-dashed border-ink/40"
-              />
-              <span className="relative inline-block rounded-full border-2 border-ink bg-amber px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-ink shadow-[3px_3px_0_0_var(--color-ink)]">
-                Failsafe — your deadline
-              </span>
-            </div>
-            <div className="pointer-events-none absolute -right-4 bottom-24 hidden rotate-1 xl:block">
-              <span aria-hidden className="absolute left-8 bottom-full h-4 w-[2px] border-l-2 border-dashed border-ink/40" />
-              <span className="inline-block rounded-full border-2 border-coral bg-paper px-3.5 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-coral-ink shadow-[3px_3px_0_0_var(--color-ink)]">
-                Floor — the worst you accept
-              </span>
-            </div>
           </Reveal>
 
-          {/* the two rules */}
           <div className="flex flex-col gap-5">
-            <Reveal delay={140}>
-              <div className="h-full rounded-2xl border-2 border-ink bg-paper p-6 shadow-[4px_4px_0_0_var(--color-ink)]">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink bg-lime font-mono text-[10px] font-bold text-ink">
-                    1
-                  </span>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-fog">
-                    Rule 01 — the window
-                  </p>
-                </div>
-                <p className="mt-4 font-mono text-[15px] font-bold uppercase leading-snug tracking-[0.02em] text-ink">
-                  IF the issuer window is open and the quote is fresh
-                </p>
-                <p className="mt-2 flex items-center gap-2 text-[14px] text-fog">
-                  <span aria-hidden className="font-bold text-ink">→</span>
-                  You may sign a TRADE of SPACEX into {asset.destinationSymbol}.
-                  Not a 1:1 rollover.
+            <Reveal delay={120}>
+              <div className="rounded-2xl border-2 border-ink bg-paper p-6">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-fog">If gates pass</p>
+                <p className="mt-3 font-display text-[1.7rem] uppercase leading-none text-ink">Ask the holder to sign</p>
+                <p className="mt-3 text-[14px] text-fog">
+                  Jupiter Swap V2 builds the trade. Phantom authorizes it. Solana confirms. T-MINUS stores a receipt only after confirmation.
                 </p>
               </div>
             </Reveal>
-
-            <Reveal delay={200}>
-              <div className="h-full rounded-2xl border-2 border-ink bg-paper p-6 shadow-[4px_4px_0_0_var(--color-ink)]">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink bg-amber font-mono text-[10px] font-bold text-ink">
-                    2
-                  </span>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-fog">
-                    Rule 02 — the floor
-                  </p>
-                </div>
-                <p className="mt-4 font-mono text-[15px] font-bold uppercase leading-snug tracking-[0.02em] text-ink">
-                  IF the post-fee route is below{" "}
-                  <span className="rounded bg-amber px-1.5">0.700</span>
-                </p>
-                <p className="mt-2 flex items-center gap-2 text-[14px] text-fog">
-                  <span aria-hidden className="font-bold text-ink">→</span>
-                  T-MINUS refuses. Unattended failsafe lives on the DEVNET
-                  program, not this Mainnet trade.
-                </p>
-              </div>
-            </Reveal>
-
-            <Reveal delay={260}>
-              <div className="rounded-2xl border-2 border-dashed border-ink/40 bg-bone/50 p-5">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-ink">
-                  Executable = after fees
-                </p>
-                <p className="mt-2.5 text-[13.5px] leading-relaxed text-fog">
-                  The ratio on the desk is post-fee. The 1% Token-2022
-                  transfer fee is priced in before the gate ever asks you
-                  to sign.
-                </p>
-                <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.1em] text-fog">
-                  Hard issuer deadline{" "}
-                  {asset.windowClosesAt ? fmtDate(asset.windowClosesAt) : "—"}{" "}
-                  — after that, the desk refuses.
+            <Reveal delay={180}>
+              <div className="rounded-2xl border-2 border-ink bg-paper p-6">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-fog">If the issuer moved</p>
+                <p className="mt-3 font-display text-[1.7rem] uppercase leading-none text-ink">Old tx is stale</p>
+                <p className="mt-3 text-[14px] text-fog">
+                  Deadline, destination, ratio, or action type change invalidates the bound snapshot. Signing stays halted until a new fetch passes.
                 </p>
               </div>
             </Reveal>

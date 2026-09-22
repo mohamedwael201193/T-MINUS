@@ -72,7 +72,7 @@ export function MyOrders() {
           </p>
           {orders.length === 0 ? (
             <Button size="sm" className="mt-5" onClick={() => navigate("#/app")}>
-              Set an order
+              Open the desk
               <span aria-hidden>→</span>
             </Button>
           ) : null}

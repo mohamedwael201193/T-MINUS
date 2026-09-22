@@ -32,6 +32,10 @@ id.json
 keypair.json
 deploy-keypair.json
 
+# Public documentation is README.md only. Other Markdown stays local.
+*.md
+!README.md
+
 # OS / editor
 .DS_Store
 Thumbs.db

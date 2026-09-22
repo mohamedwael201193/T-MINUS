@@ -248,16 +248,20 @@ export function createServer() {
         return;
       }
       const actionMatch = url.pathname.match(
-        /^\/v1\/actions\/([a-z0-9]+)(?:\/(evidence|executable|status|position|chain|market|route))?$/,
+        /^\/v1\/actions\/([a-z0-9]+)(?:\/(evidence|executable|status|position|chain|market|route|events))?$/,
       );
       if (actionMatch) {
         const assetId = actionMatch[1];
         const rest = actionMatch[2] ?? "";
-        const { getCorporateAction, actionEvidence, actionStatus, actionChain, actionMarket } =
+        const { getCorporateAction, actionEvidence, actionStatus, actionChain, actionMarket, actionEvents } =
           await import("./corporate-action.ts");
         const action = await getCorporateAction(assetId);
         if (!action) {
           send(res, 404, { error: "unknown_asset" });
+          return;
+        }
+        if (rest === "events") {
+          send(res, 200, await actionEvents(assetId), { "cache-control": "no-store" });
           return;
         }
         if (rest === "evidence") {

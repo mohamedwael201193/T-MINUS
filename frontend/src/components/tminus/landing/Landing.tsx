@@ -9,6 +9,7 @@ import { OrderExplainer } from "./OrderExplainer";
 import { WhyToolsFail } from "./WhyToolsFail";
 import { ProofTeaser } from "./ProofTeaser";
 import { Safety } from "./Safety";
+import { ApiStrip } from "./ApiStrip";
 import { FinalCta } from "./FinalCta";
 import { LandingFooter } from "./LandingFooter";
 
@@ -25,6 +26,7 @@ export function Landing() {
         <WhyToolsFail />
         <ProofTeaser />
         <Safety />
+        <ApiStrip />
         <FinalCta />
       </main>
       <LandingFooter />

@@ -17,6 +17,8 @@ export const SAFETY_REFUSALS = [
   "AMOUNT_INVALID",
   "INSUFFICIENT_BALANCE",
   "INSUFFICIENT_SOL",
+  "ACTION_CHANGED_REVERIFY_REQUIRED",
+  "EXECUTION_SNAPSHOT_STALE",
 ] as const;
 
 export type SafetyRefusal = (typeof SAFETY_REFUSALS)[number];
@@ -49,6 +51,9 @@ export type SafetyInput = {
   walletRaw: string | null;
   solLamports: number | null;
   minSolLamports: number;
+  boundActionFingerprint?: string | null;
+  liveActionFingerprint?: string | null;
+  executionSnapshotStale?: boolean;
 };
 
 export type SafetyReport = {
@@ -126,6 +131,16 @@ export function evaluateSafety(input: SafetyInput): SafetyReport {
     }
     if (input.solLamports != null && input.solLamports < input.minSolLamports) {
       refusals.push("INSUFFICIENT_SOL");
+    }
+    if (
+      input.boundActionFingerprint &&
+      input.liveActionFingerprint &&
+      input.boundActionFingerprint !== input.liveActionFingerprint
+    ) {
+      refusals.push("ACTION_CHANGED_REVERIFY_REQUIRED");
+    }
+    if (input.executionSnapshotStale) {
+      refusals.push("EXECUTION_SNAPSHOT_STALE");
     }
   }
 

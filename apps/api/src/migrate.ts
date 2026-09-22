@@ -42,6 +42,21 @@ create table if not exists operational_history (
   payload jsonb not null,
   created_at timestamptz not null default now()
 );
+
+create table if not exists issuer_event_snapshots (
+  id bigserial primary key,
+  asset_id text not null,
+  fingerprint text not null,
+  statement_hash text,
+  kind text not null,
+  previous_fingerprint text,
+  previous_event jsonb,
+  current_event jsonb not null,
+  source_url text,
+  source_fetched_at timestamptz,
+  detected_at timestamptz not null default now()
+);
+create index if not exists issuer_event_snapshots_asset_idx on issuer_event_snapshots (asset_id, id desc);
 `;
 
 export async function migrate(): Promise<void> {

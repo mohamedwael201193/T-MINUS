@@ -101,3 +101,22 @@ test("dust SOL is INSUFFICIENT_SOL", () => {
   const r = evaluateSafety(base({ solLamports: 100_000, minSolLamports: 3_000_000 }));
   assert.ok(r.refusals.includes("INSUFFICIENT_SOL"));
 });
+
+test("issuer fingerprint mismatch blocks signing", () => {
+  const r = evaluateSafety(
+    base({ boundActionFingerprint: "old", liveActionFingerprint: "new" }),
+  );
+  assert.ok(r.refusals.includes("ACTION_CHANGED_REVERIFY_REQUIRED"));
+  assert.equal(r.allowed, false);
+});
+
+test("stale execution snapshot blocks signing", () => {
+  const r = evaluateSafety(base({ executionSnapshotStale: true }));
+  assert.ok(r.refusals.includes("EXECUTION_SNAPSHOT_STALE"));
+  assert.equal(r.allowed, false);
+});
+
+test("matching fingerprints still allow a clean window", () => {
+  const r = evaluateSafety(base({ boundActionFingerprint: "abc", liveActionFingerprint: "abc" }));
+  assert.equal(r.allowed, true);
+});

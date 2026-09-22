@@ -8,6 +8,11 @@ import { evaluateSafety, type SafetyRefusal } from "./safety-gate.ts";
 import { sql } from "./db.ts";
 import { readOwnerBalances } from "./balances.ts";
 import { maxSafeInputRaw, MIN_SOL_LAMPORTS, rawToDisplayString } from "./safe-amount.ts";
+import {
+  compareExecutionSnapshot,
+  readExecutionSnapshot,
+  type ExecutionSnapshot,
+} from "./execution-snapshot.ts";
 
 export const QUOTE_STALE_MS = 15_000;
 
@@ -51,6 +56,7 @@ export type ExecutableResponse = {
     issuerStatement: string | null;
   };
   evidence: CorporateAction["evidence"];
+  executionSnapshot: ExecutionSnapshot;
 };
 
 function ratioOf(inAmount: string | null, outAmount: string | null, srcMint: string, dstMint: string): number | null {
@@ -220,6 +226,16 @@ export async function buildExecutable(opts: {
         issuerStatement: action.issuer.statement,
       },
       evidence: action.evidence,
+      executionSnapshot: {
+        actionFingerprint: action.fingerprint,
+        quoteFetchedAt: quote?.fetchedAt ?? null,
+        taker: opts.taker,
+        amountRaw,
+        destinationMint: action.destination?.mint ?? null,
+        paused: mint.paused,
+        hookProgramId: mint.hookProgramId,
+        transferFeeBps: feeBps,
+      },
     },
   };
 }
@@ -304,6 +320,19 @@ export async function executeSignedConversion(body: unknown): Promise<{ status: 
     quoteStaleMs: 60_000,
   });
   if (gate.status !== 200 || !("allowed" in gate.body)) return gate;
+  const bound = readExecutionSnapshot(rec.executionSnapshot);
+  const live = gate.body.executionSnapshot;
+  const snap = compareExecutionSnapshot(bound, live);
+  if (!snap.ok) {
+    return {
+      status: 409,
+      body: {
+        error: "not_executable",
+        refusals: [snap.refusal],
+        network: "MAINNET",
+      },
+    };
+  }
   if (!gate.body.allowed) {
     return {
       status: 409,

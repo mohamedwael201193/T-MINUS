@@ -9,8 +9,8 @@ import { useToast } from "@/components/tminus/system/toast";
 import { displayToRaw, maxSafeInputRaw, MIN_SOL_FOR_TRADE, rawToDisplayString } from "@/lib/tminus/wallet/safeAmount";
 
 /**
- * SET YOUR RULE — the entire order surface. Four inputs, one plain-
- * English summary, one button. Validation is inline and human.
+ * Conversion ticket — floor, amount, live post-fee ratio, then Sign.
+ * Failsafe date is DEVNET protocol context only; Mainnet conversion is user-signed.
  */
 
 const TARGET_BOUNDS = { min: 0.6, max: 0.99 };

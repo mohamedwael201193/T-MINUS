@@ -7,24 +7,19 @@ import { Eyebrow, Label, Panel } from "@/components/tminus/system/primitives";
 import { Countdown, useElapsedFraction } from "@/components/tminus/system/Countdown";
 import { Reveal } from "@/components/tminus/system/Reveal";
 
-/**
- * The lifecycle transit map — SPACEX on a rail. Station positions:
- * ACQUIRED → WINDOW OPENS → (YOU ARE HERE) → DEADLINE → EXPIRY.
- * The "now" marker position is computed live from the window clock.
- */
 export function LifecycleMap() {
   useTMinusVersion();
   const src = useTMinus();
-  const asset = src.getAsset(SPACEX_ASSET_ID)!;
-  const elapsed = useElapsedFraction(asset.windowOpenedAt, asset.windowClosesAt);
-  const nowPos = elapsed == null ? 37 : 12 + elapsed * 74; // 12%..86%
+  const asset = src.getAsset(SPACEX_ASSET_ID);
+  const elapsed = useElapsedFraction(asset?.windowOpenedAt ?? null, asset?.windowClosesAt ?? null);
+  const nowPos = elapsed == null ? 37 : 12 + elapsed * 74;
 
   const stations = [
-    { pos: 0, label: "Acquired", sub: "2025", tone: "done" as const, up: true },
+    { pos: 0, label: "Terms pending", sub: "No window yet", tone: "done" as const, up: true },
     {
       pos: 12,
-      label: "Window opens",
-      sub: asset.windowOpenedAt ? fmtDate(asset.windowOpenedAt) : "—",
+      label: "Window open",
+      sub: asset?.windowOpenedAt ? fmtDate(asset.windowOpenedAt) : "Live",
       tone: "done" as const,
       up: false,
     },
@@ -32,39 +27,35 @@ export function LifecycleMap() {
     {
       pos: 88,
       label: "Deadline",
-      sub: asset.windowClosesAt ? fmtDate(asset.windowClosesAt) : "—",
+      sub: asset?.windowClosesAt ? fmtDate(asset.windowClosesAt) : "—",
       tone: "warn" as const,
       up: false,
     },
-    { pos: 100, label: "Expiry", sub: "WORTHLESS", tone: "dead" as const, up: true },
+    { pos: 100, label: "Expired", sub: "SIGNING HALTED", tone: "dead" as const, up: true },
   ];
 
   return (
-    <section id="lifecycle" aria-label="Lifecycle example" className="scroll-mt-20 border-b-2 border-ink">
+    <section id="lifecycle" aria-label="Lifecycle" className="scroll-mt-20 border-b-2 border-ink">
       <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
         <Reveal>
           <Eyebrow>Lifecycle</Eyebrow>
           <h2 className="mt-5 font-display text-[clamp(2.2rem,5.4vw,4.2rem)] uppercase leading-[0.95] text-ink">
-            Every asset is on a rail.
+            Terms. Window. Event. Halt.
           </h2>
-          <p className="mt-5 max-w-2xl text-[16.5px] leading-relaxed text-fog">
-            Where {asset.symbol} is, right now — between the window that
-            opened and the deadline that ends it.
+          <p className="mt-5 max-w-xl text-[16.5px] leading-relaxed text-fog">
+            Stages T-MINUS actually uses: TERMS PENDING, CONVERSION WINDOW, EXPIRED.
+            SPACEX is in the window. XAI is expired.
           </p>
         </Reveal>
 
         <Reveal delay={120}>
           <Panel tone="paper" shadow="lg" className="mt-12 p-6 md:p-9">
-            {/* the rail */}
             <div className="relative mt-14 mb-24 h-1 md:mt-10" aria-hidden>
-              {/* base track */}
               <div className="absolute inset-x-0 top-0 h-[3px] -translate-y-1/2 rounded-full bg-ink/20" />
-              {/* traveled segment */}
               <div
                 className="absolute top-0 h-[3px] -translate-y-1/2 rounded-full bg-ink transition-all duration-1000"
                 style={{ width: `${nowPos}%` }}
               />
-              {/* remaining segment — flowing dashes */}
               <div
                 className="absolute top-0 h-0 -translate-y-1/2"
                 style={{ left: `${nowPos}%`, right: "0%" }}
@@ -83,7 +74,6 @@ export function LifecycleMap() {
                   />
                 </svg>
               </div>
-              {/* stations */}
               {stations.map((s) => (
                 <div
                   key={s.label}
@@ -102,7 +92,6 @@ export function LifecycleMap() {
                   ) : (
                     <span className="absolute -top-[7px] left-1/2 h-3.5 w-3.5 -translate-x-1/2 rounded-full border-[3px] border-coral bg-bone" />
                   )}
-                  {/* labels */}
                   <span
                     className={`absolute w-24 text-center ${
                       s.up ? "bottom-5" : "top-6"
@@ -135,44 +124,19 @@ export function LifecycleMap() {
               ))}
             </div>
 
-            {/* rail stats */}
             <div className="grid gap-6 border-t-2 border-dashed border-ink/15 pt-6 sm:grid-cols-3">
               <div>
                 <Label>Time to deadline</Label>
-                <Countdown
-                  to={asset.windowClosesAt ?? ""}
-                  className="mt-2 block text-[19px] text-ink"
-                />
+                <Countdown to={asset?.windowClosesAt ?? ""} className="mt-2 block text-[19px] text-ink" />
               </div>
               <div>
-                <Label>Upcoming tranches</Label>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {asset.tranches.length === 0 ? (
-                    <span className="rounded-full border-2 border-ink/25 bg-bone px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-fog">
-                      None verified in the live feed
-                    </span>
-                  ) : (
-                    asset.tranches.slice(0, 3).map((t) => (
-                      <span
-                        key={t.label}
-                        title={t.detail}
-                        className="rounded-full border-2 border-ink/25 bg-bone px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-fog"
-                      >
-                        {t.label}
-                      </span>
-                    ))
-                  )}
-                </div>
+                <Label>Issuer event</Label>
+                <p className="mt-2 font-mono text-[13px] font-bold uppercase text-ink">Going public</p>
               </div>
               <div>
-                <Label>What the issuer promises</Label>
+                <Label>If the instruction moves</Label>
                 <p className="mt-2 text-[12.5px] leading-relaxed text-fog">
-                  Convert into {asset.destinationSymbol} at the market ratio
-                  before{" "}
-                  <span className="font-semibold text-ink">
-                    {asset.windowClosesAt ? fmtDate(asset.windowClosesAt) : "—"}
-                  </span>
-                  . After the deadline, tokens expire worthless.
+                  Old fingerprint dies. Old Jupiter transaction cannot sign. The desk re-fetches issuer, chain, and market first.
                 </p>
               </div>
             </div>

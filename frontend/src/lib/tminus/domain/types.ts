@@ -191,6 +191,11 @@ export type CorporateActionView = {
   holders?: number | null;
   freezeAuthority?: string | null;
   mintAuthority?: string | null;
+  fingerprint?: string | null;
+  eventKind?: string | null;
+  eventDetectedAt?: string | null;
+  previousActionType?: string | null;
+  previousDeadline?: string | null;
 };
 
 /* --------------------------------- wallet ------------------------------- */

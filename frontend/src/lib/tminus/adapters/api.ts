@@ -160,6 +160,24 @@ export type ActionsListResponse = {
     fetchedAt?: string;
     truth: { tminus: { allowSign: boolean; refusals: string[] } };
     evidence: { issuerPageUrl: string | null; sourceHash: string | null; sourceUrl?: string; fetchedAt?: string };
+    fingerprint?: string;
+    eventChange?: {
+      kind: string;
+      fingerprint: string;
+      previousFingerprint: string | null;
+      detectedAt: string;
+      actionable: boolean;
+      previousEvent?: {
+        actionType?: string;
+        deadlineIso?: string | null;
+        destinationTicker?: string | null;
+      } | null;
+      currentEvent?: {
+        actionType?: string;
+        deadlineIso?: string | null;
+        destinationTicker?: string | null;
+      } | null;
+    } | null;
   }>;
 };
 
@@ -180,6 +198,16 @@ export type ExecutableResponse = {
     symbol: string;
     destinationSymbol: string | null;
     destinationMint: string | null;
+    transferFeeBps: number | null;
+  };
+  executionSnapshot?: {
+    actionFingerprint: string;
+    quoteFetchedAt: string | null;
+    taker: string | null;
+    amountRaw: string | null;
+    destinationMint: string | null;
+    paused: boolean | null;
+    hookProgramId: string | null;
     transferFeeBps: number | null;
   };
 };

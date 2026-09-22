@@ -181,7 +181,11 @@ export function ReceiptCard({
         >
           <span className="font-display text-lg uppercase leading-none text-ink">{stamp}</span>
           <span className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-ink">
-            {isFill ? "✓ verified" : receipt.network ?? "on-chain"}
+            {isConversion
+              ? receipt.verifiedOnchain
+                ? "✓ verified"
+                : "unverified"
+              : receipt.network ?? "on-chain"}
           </span>
         </div>
       </div>

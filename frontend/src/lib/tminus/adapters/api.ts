@@ -253,6 +253,11 @@ export type ReceiptRow = {
     settlementKind?: string;
     assetId?: string;
     transferFeeBps?: number | null;
+    taker?: string;
+    wallet?: string;
+    verifiedOnchain?: boolean;
+    sourceDisplay?: number;
+    destinationDisplay?: number;
   };
 };
 

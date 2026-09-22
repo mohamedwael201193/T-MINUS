@@ -74,6 +74,8 @@ test("mainnet jupiter conversion is labeled conversion not protocol fill", () =>
         ratio: "757225140",
         destinationSymbol: "SPCXx",
         assetId: "spacex",
+        taker: "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
+        verifiedOnchain: true,
         explorer: "https://explorer.solana.com/tx/1111111111111111111111111111111111111111111111111111111111111111",
       },
     },
@@ -86,6 +88,31 @@ test("mainnet jupiter conversion is labeled conversion not protocol fill", () =>
   assert.equal(r.programId, "jupiter-swap-v2");
   assert.doesNotMatch(r.explorerUrl ?? "", /cluster=devnet/);
   assert.equal(r.feeBps, 100);
+  assert.equal(r.verifiedOnchain, true);
+  assert.equal(r.taker, "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX");
+});
+
+test("unverified conversion does not set verifiedOnchain", () => {
+  const r = mapReceipt(
+    {
+      order_pda: "conversion:spacex:CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
+      sig: "1111111111111111111111111111111111111111111111111111111111111111",
+      slot: 9,
+      created_at: "2026-09-22T00:00:00.000Z",
+      payload: {
+        kind: "mainnet_jupiter_conversion",
+        network: "MAINNET",
+        sourceAmount: "1827211",
+        destinationAmount: "702134",
+        sourceDisplay: 0.009136055,
+        destinationDisplay: 0.00702134,
+        verifiedOnchain: false,
+      },
+    },
+    6,
+  );
+  assert.equal(r.eventKind, "conversion");
+  assert.equal(r.verifiedOnchain, false);
 });
 
 test("conversion: order ids are not on-chain PDAs", () => {

@@ -22,6 +22,8 @@ create table if not exists receipts (
   created_at timestamptz not null default now()
 );
 create index if not exists receipts_order_pda_idx on receipts (order_pda);
+create index if not exists receipts_payload_taker_idx on receipts ((payload->>'taker'));
+create index if not exists receipts_payload_wallet_idx on receipts ((payload->>'wallet'));
 
 create table if not exists keeper_leases (
   order_pda text primary key,

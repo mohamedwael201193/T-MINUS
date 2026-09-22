@@ -12,7 +12,7 @@ import { ReceiptCard } from "@/components/tminus/system/ReceiptCard";
 
 /**
  * The execution console — one screen, four beats:
- * lifecycle → rule → orders → latest proof.
+ * lifecycle → rule → activity → latest proof.
  */
 export function ConsoleView() {
   useTMinusVersion();

@@ -96,6 +96,54 @@ test("OPTIONS is allowed for CORS preflight", async () => {
   });
 });
 
+test("activity without a valid owner is 400", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/v1/activity`);
+    assert.equal(res.status, 400);
+  });
+});
+
+test("activity rejects a non-pubkey owner", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/v1/activity?owner=not-a-key`);
+    assert.equal(res.status, 400);
+  });
+});
+
+test("activity owner filter never returns another wallet", async () => {
+  await withServer(async (base) => {
+    const owner = "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX";
+    const res = await fetch(`${base}/v1/activity?owner=${owner}`, {
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (res.status === 503) return;
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      owner: string;
+      activity: Array<{
+        owner: string | null;
+        kind: string;
+        network: string;
+        pda: string | null;
+        explorerUrl: string;
+        signature: string;
+      }>;
+    };
+    assert.equal(body.owner, owner);
+    for (const item of body.activity) {
+      if (item.owner) assert.equal(item.owner, owner);
+      if (item.kind === "CONVERSION") {
+        assert.equal(item.network, "MAINNET");
+        assert.equal(item.pda, null);
+        assert.doesNotMatch(item.explorerUrl, /cluster=devnet/);
+      }
+      if (item.kind === "PROTOCOL_ORDER") {
+        assert.equal(item.network, "DEVNET");
+      }
+    }
+  });
+});
+
 test("conversion execute without body is 400", async () => {
   await withServer(async (base) => {
     const res = await fetch(`${base}/v1/conversions/execute`, {

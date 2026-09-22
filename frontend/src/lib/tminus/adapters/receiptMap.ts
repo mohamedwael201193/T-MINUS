@@ -22,7 +22,7 @@ export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
   const composition =
     typeof payload.route === "string" ? payload.route : payload.route?.composition ?? "unknown";
   const kindRaw = typeof payload.kind === "string" ? payload.kind.toLowerCase() : "";
-  const isConversion = kindRaw === "mainnet_jupiter_conversion" || kindRaw === "conversion";
+    const isConversion = kindRaw === "mainnet_jupiter_conversion" || kindRaw === "conversion";
   const eventKind: ExecutionReceipt["eventKind"] = isConversion
     ? "conversion"
     : kindRaw === "fill" || kindRaw === "cancel" || kindRaw === "expire" || kindRaw === "place"
@@ -31,6 +31,18 @@ export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
         ? "fill"
         : "place";
   const isDevnet = network === "DEVNET";
+  const srcDisplay =
+    typeof payload.sourceDisplay === "number"
+      ? payload.sourceDisplay
+      : isConversion
+        ? srcRaw / SPACEX_DISPLAY_RAW
+        : srcRaw / 1e6;
+  const dstDisplay =
+    typeof payload.destinationDisplay === "number"
+      ? payload.destinationDisplay
+      : isConversion
+        ? dstRaw / SPCXX_DISPLAY_RAW
+        : dstRaw / 1e6;
   return {
     id: `R-${String(index + 1).padStart(4, "0")}`,
     orderId: row.order_pda,
@@ -39,8 +51,8 @@ export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
     targetRatio: ratioE9 ? ratioE9 / 1e9 : 0,
     floorRatio: ratioE9 ? ratioE9 / 1e9 : 0,
     executedRatio: ratioE9 ? ratioE9 / 1e9 : 0,
-    size: isConversion ? srcRaw / SPACEX_DISPLAY_RAW : srcRaw / 1e6,
-    filled: isConversion ? dstRaw / SPCXX_DISPLAY_RAW : dstRaw / 1e6,
+    size: srcDisplay,
+    filled: dstDisplay,
     signature: row.sig,
     slot: Number(row.slot ?? payload.slot ?? 0),
     route: `${network} · ${eventKind} · ${composition}`,
@@ -66,5 +78,7 @@ export function mapReceipt(row: ReceiptRow, index: number): ExecutionReceipt {
         ? "DEVNET-DST"
         : "SPCXx",
     eventKind,
+    verifiedOnchain: payload.verifiedOnchain === true,
+    taker: typeof payload.taker === "string" ? payload.taker : typeof payload.wallet === "string" ? payload.wallet : null,
   };
 }

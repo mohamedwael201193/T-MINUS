@@ -6,6 +6,7 @@ import type {
   MarketSnapshot,
   NetworkEnvironment,
   ProtocolInspect,
+  WalletActivityItem,
   WalletState,
 } from "../domain/types";
 
@@ -79,6 +80,9 @@ export interface TMinusSource {
   /* receipts */
   listReceipts(): ExecutionReceipt[];
   getReceipt(id: string): ExecutionReceipt | undefined;
+
+  /** Wallet-filtered Mainnet conversions + matching Devnet protocol rows. */
+  listActivity(): WalletActivityItem[];
 
   getAction(assetId: string): CorporateActionView | undefined;
   requestConversion(input: ConversionRequestInput): Promise<ConversionResult>;

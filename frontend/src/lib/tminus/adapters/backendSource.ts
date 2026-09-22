@@ -7,6 +7,7 @@ import type {
   NetworkEnvironment,
   ProtocolInspect,
   RatioPoint,
+  WalletActivityItem,
   WalletState,
 } from "../domain/types";
 import type { ConversionRequestInput, ConversionResult, CreateOrderInput, EngineNotice, TMinusSource } from "./sources";
@@ -205,6 +206,7 @@ class BackendSource implements TMinusSource {
   private actions: CorporateActionView[] = [];
   private markets = new Map<string, MarketSnapshot>();
   private receipts: ExecutionReceipt[] = [];
+  private activity: WalletActivityItem[] = [];
   private notices: EngineNotice[] = [];
   private historyT = 0;
   private selectedAssetId = "spacex";
@@ -270,6 +272,10 @@ class BackendSource implements TMinusSource {
 
   getReceipt(id: string): ExecutionReceipt | undefined {
     return this.receipts.find((r) => r.id === id);
+  }
+
+  listActivity(): WalletActivityItem[] {
+    return this.activity;
   }
 
   getAction(assetId: string): CorporateActionView | undefined {
@@ -413,6 +419,7 @@ class BackendSource implements TMinusSource {
       balances,
     };
     this.emit();
+    void this.loadActivity(address);
     void this.inspectChainState();
   }
 
@@ -478,6 +485,7 @@ class BackendSource implements TMinusSource {
       address: null,
       balances: null,
     };
+    this.activity = [];
     this.inspect = {
       ...this.inspect,
       derivedPda: {
@@ -522,6 +530,21 @@ class BackendSource implements TMinusSource {
   };
 
   readonly getVersion = () => this.version;
+
+  private async loadActivity(owner: string | null, signal?: AbortSignal) {
+    if (!owner) {
+      this.activity = [];
+      this.emit();
+      return;
+    }
+    const looked = await apiGetMaybe<{ activity: WalletActivityItem[] }>(
+      `/v1/activity?owner=${encodeURIComponent(owner)}`,
+      signal,
+    );
+    if (signal?.aborted) return;
+    this.activity = looked.status === 200 && looked.body?.activity ? looked.body.activity : [];
+    this.emit();
+  }
 
   private async inspectChainState() {
     const gen = ++this.inspectGen;
@@ -638,6 +661,8 @@ class BackendSource implements TMinusSource {
           : [];
       this.actions = actions?.actions?.map(mapAction) ?? [];
       this.receipts = (receipts.receipts ?? []).map(mapReceipt);
+      await this.loadActivity(this.walletState.address, abort.signal);
+      if (abort.signal.aborted) return;
       this.env = {
         dataCluster: "MAINNET",
         programCluster: program?.clusters.mainnet.executable

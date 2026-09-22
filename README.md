@@ -474,8 +474,11 @@ Base: `https://tminus-api-k2d2.onrender.com`
 | `GET /v1/actions/:asset/position?owner=` | Holder SPACEX / SOL |
 | `GET /v1/actions/:asset/chain` | Mint inspection |
 | `GET /v1/actions/:asset/market` | Token / mark / holders |
+| `GET /v1/activity?owner=` | Wallet-filtered Mainnet conversions and matching Devnet protocol rows |
 
 Support: `GET /health`, `GET /v1/receipts`, `GET /v1/program`, `GET /v1/pda`, `GET /v1/prestocks`, `GET /v1/balances`.
+
+`GET /v1/receipts` is the public proof ledger. `GET /v1/activity?owner=` is the same receipt table, filtered to one wallet. Mainnet conversions are user-signed Jupiter trades. Devnet rows are protocol proofs. The API does not invent escrow PDAs for Mainnet trades.
 
 Trading, wallets, and analytics already exist. This surface is the **lifecycle state machine**.
 
@@ -611,9 +614,9 @@ Verified locally on the current tree:
 | Suite | Count | What it proves |
 |---|---|---|
 | `@tminus/sdk` | 6 | Ratio ceil, display raw (`200_000_000`), PDA stability |
-| `@tminus/api` | 69 | Issuer parse, fingerprint, change kinds, snapshot mismatch, safety refusals, catalog, cluster labels, HTTP contract |
+| `@tminus/api` | 83 | Issuer parse, fingerprint, change kinds, snapshot mismatch, safety refusals, catalog, cluster labels, HTTP contract, wallet-filtered activity |
 | `@tminus/keeper` | 14 | Floor / failsafe, pause+hook halt, fee-change halt, spend cap, pair filter |
-| Frontend unit | 9 | MAINNET conversion vs DEVNET protocol mapping; wallet dust is the default amount, not `0.01` |
+| Frontend unit | 10 | MAINNET conversion vs DEVNET protocol mapping; verifiedOnchain; wallet dust is the default amount, not `0.01` |
 | `cargo test -p tminus --lib` | 10 | `ceil_ratio`; pause/hook mint TLV |
 | Typecheck | api + keeper + sdk + frontend `tsc` | No ignored TS errors (`ignoreBuildErrors: false`) |
 | `next build` | frontend | Production bundle |
@@ -695,9 +698,9 @@ Evidence, not slogans:
 Path:
 
 1. Landing — issuer-event hero, SPACEX live vs XAI expired, Mainnet proof card.
-2. Console **SPACEX** — window open, destination SPCXx, Sign disabled at 0 balance.
+2. Console **SPACEX** — window open, destination SPCXx, Sign disabled at 0 balance. **My activity** lists this wallet’s verified Mainnet trades (not escrow orders).
 3. Console **XAI** — `EXPIRED`, destination SPACEX, Sign not requested.
-4. Ledger — 1 MAINNET conversion, DEVNET rows labeled protocol proofs.
+4. Ledger — Mainnet conversions first, then DEVNET protocol proofs.
 
 ---
 
@@ -728,6 +731,7 @@ Program e2e: WSL (`scripts/wsl-anchor-test.sh`). Anchor is not native Windows.
 - Event History is empty until a real issuer change is recorded.
 - Render free tier can cold-start. Vercel production deploys are CLI `--prod`.
 - `/ready` checks RPC + Postgres; `/health` does not.
+- Console **My activity** is wallet-filtered receipts (`GET /v1/activity?owner=`). The ledger is the unfiltered proof log. Mainnet conversions are Jupiter trades, not T-MINUS escrow orders.
 
 ---
 

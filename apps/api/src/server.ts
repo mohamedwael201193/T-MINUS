@@ -215,6 +215,21 @@ export function createServer() {
         });
         return;
       }
+      if (url.pathname === "/v1/activity") {
+        const owner = url.searchParams.get("owner") ?? "";
+        if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(owner)) {
+          send(res, 400, { error: "invalid_owner" });
+          return;
+        }
+        try {
+          const { listOwnerActivity } = await import("./activity.ts");
+          const activity = await listOwnerActivity(owner);
+          send(res, 200, { owner, activity }, { "cache-control": "no-store" });
+        } catch {
+          send(res, 503, { error: "store_unavailable" });
+        }
+        return;
+      }
       if (url.pathname === "/v1/receipts") {
         const pda = url.searchParams.get("pda");
         const rows = pda

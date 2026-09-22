@@ -7,6 +7,7 @@ import type {
   NetworkEnvironment,
   OrderStatus,
   ProtocolInspect,
+  WalletActivityItem,
   WalletState,
 } from "../domain/types";
 import { LIFECYCLE_ASSETS } from "../data/lifecycleData";
@@ -300,6 +301,10 @@ export class LocalDesignSource implements TMinusSource {
 
   getReceipt(id: string): ExecutionReceipt | undefined {
     return this.receipts.find((r) => r.id === id);
+  }
+
+  listActivity(): WalletActivityItem[] {
+    return [];
   }
 
   getAction(assetId: string): CorporateActionView | undefined {

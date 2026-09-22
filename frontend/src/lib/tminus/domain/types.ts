@@ -157,7 +157,9 @@ export interface ExecutionReceipt {
   programId?: string;
   sourceSymbol?: string;
   destinationSymbol?: string;
-  eventKind?: "fill" | "cancel" | "expire" | "place" | "conversion";
+    eventKind?: "fill" | "cancel" | "expire" | "place" | "conversion";
+  verifiedOnchain?: boolean;
+  taker?: string | null;
 }
 
 export type ActionType = "GOING_PUBLIC" | "ACQUISITION" | "EXPIRY" | "NONE";
@@ -267,3 +269,26 @@ export interface WalletState {
   address: string | null;
   balances: WalletBalance | null;
 }
+
+/** Wallet-filtered activity derived from verified receipts. Not an escrow order. */
+export type WalletActivityItem = {
+  network: "MAINNET" | "DEVNET";
+  kind: "CONVERSION" | "PROTOCOL_ORDER";
+  owner: string | null;
+  assetId: string | null;
+  sourceSymbol: string;
+  destinationSymbol: string;
+  sourceAmount: number | null;
+  destinationAmount: number | null;
+  ratio: number | null;
+  route: string | null;
+  timestamp: string;
+  slot: number;
+  signature: string;
+  explorerUrl: string;
+  verifiedOnchain: boolean;
+  corporateAction: string | null;
+  fingerprint: string | null;
+  pda: string | null;
+  event: string | null;
+};

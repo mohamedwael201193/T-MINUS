@@ -543,6 +543,20 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-22T00:40Z — PRODUCTION RECERTIFY — Render live 0ef55cb, Vercel aliased tminusapp
+
+- **phase:** 23–26 — push, Render, Vercel, production Chrome after the zero-balance fix
+- **objective:** Prove production matches the honesty fixes. Do not spend Mainnet program SOL. Do not fabricate a second trade.
+- **action:** Pushed `0ef55cb` to origin/main. Render deploy `dep-daosrj0473hc739nq69g` status **live** on that commit. Vercel `dpl_2W2qhA5n4qx8DrZiDnkDFutem9v8` READY, aliased **https://tminusapp.vercel.app**. Chrome production `#/app` SPACEX: YOU HOLD 0, STATUS **INSUFFICIENT_BALANCE**, SIGN CONVERSION **disabled**, copy "This wallet has no SPACEX left to convert. No signature requested." T-MINUS layer **INSUFFICIENT_BALANCE**. Last proof PDA is real DEVNET `F3zS71tw…` (closed/absent), not `conversion:spacex:…`. Network: no `/v1/orders/conversion:` 400. One expected 404 on the closed DEVNET PDA. XAI: EXPIRED / ACQUISITION / WINDOW CLOSED disabled / NO SIGNATURE REQUESTED. `#/receipts` still **1 MAINNET · 18 PROTOCOL**, size 0.009136, fee model **1% priced in**, explorer link unchanged, survives reload.
+- **result:** Production conversion desk is honest after the dust TRADE. Mainnet program still absent.
+- **evidence:** https://github.com/mohamedwael201193/T-MINUS/commit/0ef55cba041ff7ad4c26964e8d10cd431175ef49 ; Render https://tminus-api-k2d2.onrender.com/health 200; Vercel inspect https://vercel.com/mohamedwael201193s-projects/t-minus/2W2qhA5n4qx8DrZiDnkDFutem9v8 ; explorer https://explorer.solana.com/tx/2RfXRieEW3HRZBVU4qHqnzRSvoV9KcEX5kYBzAjVW7VTkv2ig4u5frozAinumDnUApjWHLwcbsZEh3BSjsSWRNBW
+- **tests:** production `/health` 200; `/v1/actions/xai/status` EXPIRED; Chrome production console + receipts
+- **decision:** Goal complete on evidence. Do not spend 1.08473244 SOL. A second Mainnet TRADE needs more SPACEX in the wallet.
+- **known risks:** Vercel production deploys remain CLI (`vercel --prod`), not GitHub auto; Render free cold start; public RPC 429; inspect still 404s closed DEVNET PDAs once (account gone is expected)
+- **next step:** none for this goal
+
+---
+
 
 
 

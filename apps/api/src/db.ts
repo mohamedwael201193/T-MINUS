@@ -6,7 +6,7 @@ export function createSql(url: string) {
     prepare: false,
     max: 5,
     idle_timeout: 20,
-    connect_timeout: 30,
+    connect_timeout: process.env.CI === "true" ? 2 : 30,
     onnotice: () => {},
   });
 }

@@ -29,7 +29,15 @@ export async function readProgramStatus(
 }> {
   const explorer = explorerAddress(cluster, programId);
   try {
-    const connection = new Connection(rpc, "confirmed");
+    const connection = new Connection(rpc, {
+      commitment: "confirmed",
+      disableRetryOnRateLimit: true,
+      fetch: (input, init) =>
+        fetch(input, {
+          ...init,
+          signal: AbortSignal.timeout(5_000),
+        }),
+    });
     const info = await connection.getAccountInfo(new PublicKey(programId));
     return {
       cluster,

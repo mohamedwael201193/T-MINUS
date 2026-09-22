@@ -1,15 +1,25 @@
 name: ci
+
 on:
   push:
     branches: [main]
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   node:
+    name: node
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
+      CI: "true"
       DATABASE_URL: postgres://tminus:tminus@127.0.0.1:1/tminus
       DIRECT_URL: postgres://tminus:tminus@127.0.0.1:1/tminus
-      SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+      SOLANA_RPC_URL: http://127.0.0.1:1
+      DEVNET_RPC_URL: http://127.0.0.1:1
       PROGRAM_ID: HRLmVcuk6PRcVwB3UVpcbEC3LVVMhdLZfPvHtmL2PUdL
       SPACEX_MINT: PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh
       SPCXX_MINT: Xs3oZwbHvqis4NYcf4YKWmEia2eC84wSiVrcYcTqpH8
@@ -24,22 +34,45 @@ jobs:
         with:
           node-version: "24"
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @tminus/sdk test
-      - run: pnpm --filter @tminus/api test
-      - run: pnpm --filter @tminus/keeper test
-      - run: pnpm --filter @tminus/sdk typecheck
-      - run: pnpm --filter @tminus/api typecheck
-      - run: pnpm --filter @tminus/keeper typecheck
-      - run: node scripts/secret-scan.mjs
-      - run: node scripts/mock-guard.mjs
-  rust:
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+      - name: SDK, API, keeper, and frontend unit tests
+        run: pnpm test
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Secret scan
+        run: pnpm secret-scan
+      - name: Frontend mock-import guard
+        run: node scripts/mock-guard.mjs
+
+  frontend:
+    name: frontend
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
-        working-directory: .
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install frontend
+        run: npm install
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Production build
+        run: npx next build
+        env:
+          NEXT_PUBLIC_TMINUS_API: https://tminus-api-k2d2.onrender.com
+
+  rust:
+    name: rust
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - run: cargo test -p tminus --lib
+      - name: Anchor program lib tests
+        run: cargo test -p tminus --lib

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
-import { cn, fmtDate, fmtRatio } from "@/lib/tminus/utils";
+import { cn, displayDestination, fmtDate, fmtRatio } from "@/lib/tminus/utils";
 import { Button, Label, Panel } from "@/components/tminus/system/primitives";
 import { RatioBand } from "@/components/tminus/system/RatioBand";
 import { useToast } from "@/components/tminus/system/toast";
@@ -24,6 +24,8 @@ export function OrderTicket() {
   const assetId =
     typeof src.getSelectedAssetId === "function" ? src.getSelectedAssetId() : "spacex";
   const asset = src.getAsset(assetId) ?? src.listAssets()[0];
+  const action = src.getAction(asset?.id ?? assetId);
+  const destSymbol = displayDestination(action?.destinationSymbol, asset?.destinationSymbol, "TBD");
   const market = src.getMarket(asset?.id ?? assetId);
   const ratio = market.executableRatio;
   const wallet = src.getWallet();
@@ -205,7 +207,7 @@ export function OrderTicket() {
           {conversionOpen ? "Authorize conversion" : "Window closed"}
         </h2>
         <span className="rounded-full border-2 border-ink bg-ink px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-bone">
-          {asset?.symbol ?? "PRESTOCK"} → {asset?.destinationSymbol ?? "TBD"}
+          {asset?.symbol ?? "PRESTOCK"} → {destSymbol}
         </span>
       </div>
 
@@ -241,7 +243,7 @@ export function OrderTicket() {
               className={fieldCls(touched && !!errors.target)}
             />
             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[9px] uppercase tracking-[0.1em] text-fog-2">
-              {asset?.destinationSymbol ?? "DST"}/{asset?.symbol ?? "SRC"}
+              {destSymbol}/{asset?.symbol ?? "SRC"}
             </span>
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -369,14 +371,14 @@ export function OrderTicket() {
 
       {/* plain-english summary */}
       <div className="mt-5 rounded-xl border-2 border-ink bg-bone-deep/70 p-4">
-        <p className="mlabel text-fog">{conversionOpen ? "What this signature means" : "What this order means"}</p>
+        <p className="mlabel text-fog">{conversionOpen ? "What this signature means" : "Why signing is refused"}</p>
         <div className="mt-3 space-y-2.5">
           <p className="flex items-start gap-2.5">
             <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-lime" aria-hidden />
             <span className="font-mono text-[11px] leading-relaxed tracking-[0.02em] text-ink">
               {conversionOpen
-                ? `TRADE ${amount || "—"} ${asset?.symbol ?? "SPACEX"} into ${asset?.destinationSymbol ?? "SPCXx"} if the live post-fee ratio is at least ${!Number.isNaN(f) ? fmtRatio(f) : "—"} and every safety gate passes.`
-                : `IF the executable ratio reaches ${!Number.isNaN(t) ? fmtRatio(t) : "—"} → convert ${!Number.isNaN(a) ? a.toFixed(4) : "—"} ${asset?.symbol ?? "SPACEX"} at ${!Number.isNaN(t) ? fmtRatio(t) : "—"} or better.`}
+                ? `TRADE ${amount || "—"} ${asset?.symbol ?? "SPACEX"} into ${destSymbol} if the live post-fee ratio is at least ${!Number.isNaN(f) ? fmtRatio(f) : "—"} and every safety gate passes.`
+                : `${asset?.symbol ?? "This PreStock"} conversion is halted. Issuer destination ${destSymbol} is recorded from the page — it is not offered as a live TRADE.`}
             </span>
           </p>
           <p className="flex items-start gap-2.5">
@@ -384,14 +386,14 @@ export function OrderTicket() {
             <span className="font-mono text-[11px] leading-relaxed tracking-[0.02em] text-ink">
               {conversionOpen
                 ? "You must be present to sign. Unattended escrow/failsafe is the DEVNET protocol proof, not this Mainnet trade."
-                : `IF ${failsafe ? fmtDate(Date.parse(`${failsafe}T00:00:00Z`)) : "—"} arrives first → attempt at ${!Number.isNaN(f) ? fmtRatio(f) : "—"} or better. No worse.`}
+                : "No Phantom signature is requested. Unattended escrow/failsafe is DEVNET protocol proof only."}
             </span>
           </p>
         </div>
         <p className="mt-3.5 border-t-2 border-dashed border-ink/15 pt-3 font-mono text-[9px] uppercase leading-relaxed tracking-[0.08em] text-fog">
           {conversionOpen
             ? "Not a 1:1 rollover · transfer fee priced by the router · destination is the issuer-named mint · T-MINUS never holds these tokens"
-            : "1% transfer fee priced in · escrow returns on cancel (fee applies on the way out) · cancel anytime before execution"}
+            : "WINDOW CLOSED · no escrow place · leftover tokens are not claimed burned or frozen"}
         </p>
       </div>
 

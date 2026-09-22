@@ -109,3 +109,16 @@ export function fmtCountdownDays(p: CountdownParts): string {
   const sign = p.past ? "+" : "–";
   return `T${sign}${String(p.days).padStart(3, "0")}D`;
 }
+
+/** Issuer-named destination. Never treat catalog TBD/null as a live dest. */
+export function displayDestination(
+  actionSymbol?: string | null,
+  assetSymbol?: string | null,
+  empty = "—",
+): string {
+  for (const raw of [actionSymbol, assetSymbol]) {
+    const s = raw?.trim();
+    if (s && s !== "TBD") return s;
+  }
+  return empty;
+}

@@ -40,7 +40,13 @@ export function ActionDesk() {
   return (
     <Panel tone="paper" as="section" aria-label="Corporate action" className="mt-8 overflow-hidden">
       <div className="border-b-2 border-ink/10 px-5 py-3 md:px-6">
-        <Label>Why this action is active</Label>
+        <Label>
+          {asset.stage === "EXPIRED"
+            ? "Why signing is refused"
+            : asset.stage === "TERMS_PENDING"
+              ? "Why this action is watching"
+              : "Why this action is active"}
+        </Label>
         <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-fog">
           Issuer instruction · on-chain mint · market · Jupiter · T-MINUS gate
         </p>

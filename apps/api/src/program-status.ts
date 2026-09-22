@@ -27,18 +27,32 @@ export async function readProgramStatus(
   lamports: number;
   explorer: string;
 }> {
-  const connection = new Connection(rpc, "confirmed");
-  const info = await connection.getAccountInfo(new PublicKey(programId));
-  return {
-    cluster,
-    programId,
-    exists: Boolean(info),
-    executable: Boolean(info?.executable),
-    owner: info?.owner.toBase58() ?? null,
-    dataLen: info?.data.length ?? 0,
-    lamports: info?.lamports ?? 0,
-    explorer: explorerAddress(cluster, programId),
-  };
+  const explorer = explorerAddress(cluster, programId);
+  try {
+    const connection = new Connection(rpc, "confirmed");
+    const info = await connection.getAccountInfo(new PublicKey(programId));
+    return {
+      cluster,
+      programId,
+      exists: Boolean(info),
+      executable: Boolean(info?.executable),
+      owner: info?.owner.toBase58() ?? null,
+      dataLen: info?.data.length ?? 0,
+      lamports: info?.lamports ?? 0,
+      explorer,
+    };
+  } catch {
+    return {
+      cluster,
+      programId,
+      exists: false,
+      executable: false,
+      owner: null,
+      dataLen: 0,
+      lamports: 0,
+      explorer,
+    };
+  }
 }
 
 export function declaredProgramId(envProgramId?: string): string {

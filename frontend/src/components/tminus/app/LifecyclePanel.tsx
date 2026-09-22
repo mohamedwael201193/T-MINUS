@@ -1,7 +1,7 @@
 "use client";
 
 import { useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
-import { fmtCount, fmtDate, fmtRatio, fmtUsd, truncMid } from "@/lib/tminus/utils";
+import { displayDestination, fmtCount, fmtDate, fmtRatio, fmtUsd, truncMid } from "@/lib/tminus/utils";
 import { SPACEX_ASSET_ID } from "@/lib/tminus/data/lifecycleData";
 import { Label, Panel, Stat } from "@/components/tminus/system/primitives";
 import { Countdown, useElapsedFraction } from "@/components/tminus/system/Countdown";
@@ -102,7 +102,7 @@ export function LifecyclePanel() {
             inOfficialCatalog={asset.inOfficialCatalog}
             sourceHash={asset.sourceHash}
             markPrice={asset.markPrice}
-            holdDisplay={wallet.connected ? wallet.balances?.SPACEX ?? 0 : null}
+            holdDisplay={wallet.connected ? wallet.balances?.SPACEX ?? 0 : undefined}
             statusLabel={
               wallet.connected && (wallet.balances?.SPACEX ?? 0) <= 0
                 ? "INSUFFICIENT_BALANCE"
@@ -124,7 +124,15 @@ export function LifecyclePanel() {
             issuerPageUrl={asset.issuerPageUrl}
             inOfficialCatalog={asset.inOfficialCatalog}
             actionType={action?.actionType ?? "ACQUISITION"}
-            holdDisplay={wallet.connected ? wallet.balances?.SPACEX ?? 0 : null}
+            destinationSymbol={displayDestination(action?.destinationSymbol, asset.destinationSymbol)}
+            transferFeeBps={action?.transferFeeBps ?? asset.transferFeeBps}
+            holdDisplay={
+              wallet.connected
+                ? asset.symbol === "SPACEX"
+                  ? wallet.balances?.SPACEX ?? 0
+                  : null
+                : undefined
+            }
           />
         ) : (
           <OpenaiLifecycle
@@ -423,6 +431,8 @@ function ExpiredLifecycle(props: {
   issuerPageUrl?: string;
   inOfficialCatalog?: boolean;
   actionType?: string;
+  destinationSymbol?: string;
+  transferFeeBps?: number | null;
   holdDisplay?: number | null;
 }) {
   return (
@@ -431,9 +441,9 @@ function ExpiredLifecycle(props: {
         hold={props.holdDisplay}
         action={props.actionType ?? "ACQUISITION"}
         deadline={props.deadline}
-        destination="—"
+        destination={props.destinationSymbol ?? "—"}
         executable={null}
-        feeBps={0}
+        feeBps={props.transferFeeBps ?? 0}
         status="EXPIRED"
       />
       <div className="flex items-baseline gap-3">
@@ -477,9 +487,17 @@ function PositionStrip({
   feeBps: number;
   status: string;
 }) {
+  const holdValue =
+    hold === undefined
+      ? "Connect"
+      : hold == null
+        ? "—"
+        : hold > 0
+          ? hold.toFixed(6).replace(/0+$/, "").replace(/\.$/, "")
+          : "0";
   return (
     <div className="mb-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-ink bg-ink px-3 py-3 sm:grid-cols-4 lg:grid-cols-7">
-      <PosCell label="You hold" value={hold == null ? "Connect" : hold > 0 ? hold.toFixed(6).replace(/0+$/, "").replace(/\.$/, "") : "0"} />
+      <PosCell label="You hold" value={holdValue} />
       <PosCell label="Corporate action" value={action} />
       <PosCell label="Deadline" value={deadline ? fmtDate(deadline) : "—"} />
       <PosCell label="Default exit" value={destination} />

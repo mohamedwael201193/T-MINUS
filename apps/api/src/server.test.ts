@@ -73,8 +73,8 @@ test("pda rejects bad keys", async () => {
 
 test("unknown corporate action is 404", async () => {
   await withServer(async (base) => {
-    const res = await fetch(`${base}/v1/actions/notanasset/status`, {
-      signal: AbortSignal.timeout(45_000),
+        const res = await fetch(`${base}/v1/actions/notanasset/status`, {
+      signal: AbortSignal.timeout(90_000),
     });
     assert.equal(res.status, 404);
   });

@@ -95,7 +95,16 @@ export async function readMintState(mint: string, force = false): Promise<Onchai
   const hit = cache.get(mint);
   if (!force && hit && now - hit.at < CACHE_MS) return hit.state;
   try {
-    const connection = new Connection(env.solanaRpc, "confirmed");
+    const rpcTimeoutMs = process.env.CI === "true" ? 2_000 : 5_000;
+    const connection = new Connection(env.solanaRpc, {
+      commitment: "confirmed",
+      disableRetryOnRateLimit: true,
+      fetch: (input, init) =>
+        fetch(input, {
+          ...init,
+          signal: AbortSignal.timeout(rpcTimeoutMs),
+        }),
+    });
     const info = await connection.getParsedAccountInfo(new PublicKey(mint));
     if (!info.value || !("parsed" in info.value.data)) {
       const state = emptyMintState(mint, "mint_unparsed");

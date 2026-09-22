@@ -103,16 +103,20 @@ export async function refreshFeed(): Promise<FeedRecord> {
 }
 
 export async function latestFeed(): Promise<FeedRecord | null> {
-  const rows = await sql<{ payload: FeedRecord; fetched_at: Date }[]>`
-    select payload, fetched_at from feed_snapshots
-    order by fetched_at desc
-    limit 1
-  `;
-  if (!rows[0]) return null;
-  const rec = rows[0].payload;
-  const age = Date.now() - new Date(rows[0].fetched_at).getTime();
-  if (age > env.feedStaleMs) {
-    return { ...rec, verification_state: "stale" };
+  try {
+    const rows = await sql<{ payload: FeedRecord; fetched_at: Date }[]>`
+      select payload, fetched_at from feed_snapshots
+      order by fetched_at desc
+      limit 1
+    `;
+    if (!rows[0]) return null;
+    const rec = rows[0].payload;
+    const age = Date.now() - new Date(rows[0].fetched_at).getTime();
+    if (age > env.feedStaleMs) {
+      return { ...rec, verification_state: "stale" };
+    }
+    return rec;
+  } catch {
+    return null;
   }
-  return rec;
 }

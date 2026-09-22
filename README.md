@@ -129,6 +129,12 @@ Entities that exist in code:
 
 Settlement is a **TRADE**, not a 1:1 rollover and not an automatic mint mutation.
 
+---
+
+## State Machine
+
+`CONVERTED` is reserved in the type. The classifier does not assign it. Conversion on Mainnet is a TRADE, not an on-chain mint mutation that would mark the source `CONVERTED`.
+
 ```mermaid
 stateDiagram-v2
   [*] --> TERMS_PENDING: no deadline extracted
@@ -541,6 +547,49 @@ Trust boundary: the API decides eligibility. The wallet signs. The ledger confir
 
 ---
 
+## Data Flow
+
+Mainnet conversion — who talks to whom, and what is trusted.
+
+```mermaid
+sequenceDiagram
+  actor Holder
+  participant Desk as Conversion Desk
+  participant Engine as Lifecycle API
+  participant Issuer as PreStocks issuer + catalog
+  participant Chain as Solana RPC
+  participant Book as Jupiter Swap V2
+  participant Wallet as Phantom
+  participant Ledger as Solana
+  participant Store as Postgres
+
+  Holder->>Desk: Select PreStock + size
+  Desk->>Engine: GET /v1/actions/:asset/executable
+  Engine->>Issuer: Fetch page + catalog
+  Engine->>Engine: Parse instruction, SHA-256 fingerprint
+  Engine->>Store: Compare previous issuer snapshot
+  Engine->>Chain: Token-2022 inspect
+  Engine->>Book: GET /swap/v2/order
+  Engine->>Engine: evaluateSafety + bind execution snapshot
+  alt refusal set non-empty
+    Engine-->>Desk: allowed=false
+    Desk-->>Holder: No signature requested
+  else allowed
+    Engine-->>Desk: snapshot + unsigned tx
+    Holder->>Wallet: signTransaction
+    Wallet-->>Desk: signed tx
+    Desk->>Engine: POST /v1/conversions/execute
+    Engine->>Engine: Rebuild live snapshot; refuse if stale/changed
+    Engine->>Book: POST /swap/v2/execute
+    Book->>Ledger: Submit
+    Ledger-->>Engine: Confirmed signature + slot
+    Engine->>Store: Receipt after confirmation
+    Engine-->>Desk: Verified MAINNET receipt
+  end
+```
+
+---
+
 ## Evidence
 
 | Artifact | What it proves |
@@ -586,7 +635,7 @@ GitHub Actions (`.github/workflows/ci.yml`):
 | **frontend** | `tsc --noEmit` · `next build` (same path Vercel uses) |
 | **rust** | `cargo test -p tminus --lib` |
 
-Node CI does **not** call public Solana RPC. `SOLANA_RPC_URL` / `DEVNET_RPC_URL` point at a closed local port; cluster labels still assert. Live PreStocks fetches used by catalog tests have an 8s abort. Jobs have a 15-minute timeout so a hung socket cannot occupy the runner for hours.
+Node CI does **not** call public Solana RPC. `SOLANA_RPC_URL` / `DEVNET_RPC_URL` point at a closed local port; cluster labels still assert. `DATABASE_URL` points at a closed local port so GitHub does not need production Postgres. Snapshot reads (`latestFeed`, issuer-event history) return empty on connection failure — listing still builds from the live PreStocks catalog. Catalog fetches abort at 8s. Mint inspect and program-status RPC abort at 5s and do not retry 429s. Jobs have a 15-minute timeout so a hung socket cannot occupy the runner for hours.
 
 ---
 

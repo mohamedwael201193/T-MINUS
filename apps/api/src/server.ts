@@ -253,6 +253,13 @@ export function createServer() {
       if (actionMatch) {
         const assetId = actionMatch[1];
         const rest = actionMatch[2] ?? "";
+        if (rest === "position") {
+          const owner = url.searchParams.get("owner");
+          if (!owner || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(owner)) {
+            send(res, 400, { error: "invalid_owner" });
+            return;
+          }
+        }
         const { getCorporateAction, actionEvidence, actionStatus, actionChain, actionMarket, actionEvents } =
           await import("./corporate-action.ts");
         const action = await getCorporateAction(assetId);
@@ -281,11 +288,7 @@ export function createServer() {
           return;
         }
         if (rest === "position") {
-          const owner = url.searchParams.get("owner");
-          if (!owner || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(owner)) {
-            send(res, 400, { error: "invalid_owner" });
-            return;
-          }
+          const owner = url.searchParams.get("owner")!;
           const { buildExecutable } = await import("./executable.ts");
           const result = await buildExecutable({
             assetId,

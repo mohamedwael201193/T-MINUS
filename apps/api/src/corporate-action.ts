@@ -240,35 +240,38 @@ export async function listCorporateActions(opts?: { force?: boolean }): Promise<
     "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
     feed?.issuer_powers,
   );
-  const actions: CorporateAction[] = [];
-  for (const asset of catalog.assets) {
-    let onchain: OnchainMintState;
-    if (asset.id === "spacex" && spacexOnchain) onchain = spacexOnchain;
-    else if (asset.stage === "CONVERSION_WINDOW" || asset.stage === "EXPIRED") {
-      onchain = await readMintState(asset.mint);
-    } else {
-      onchain = pendingMint(asset);
-    }
-    actions.push(toAction(asset, onchain));
-  }
-  for (const action of actions) {
-    try {
-      const observed = await observeIssuerEvent({
-        assetId: action.assetId,
-        instruction: action.issuer,
-        sourceUrl: action.evidence.issuerPageUrl ?? action.evidence.sourceUrl,
-        fetchedAt: action.evidence.fetchedAt,
-        sourceOk: Boolean(action.evidence.issuerPageUrl || action.issuer.statement),
-      });
-      action.eventChange = observed;
-      action.fingerprint = observed.fingerprint;
-      if (observed.kind === "SOURCE_UNAVAILABLE") {
-        action.truth.tminus.refusals = [...new Set([...action.truth.tminus.refusals, "EVIDENCE_MISSING"])];
+  const actions: CorporateAction[] = await Promise.all(
+    catalog.assets.map(async (asset) => {
+      let onchain: OnchainMintState;
+      if (asset.id === "spacex" && spacexOnchain) onchain = spacexOnchain;
+      else if (asset.stage === "CONVERSION_WINDOW" || asset.stage === "EXPIRED") {
+        onchain = await readMintState(asset.mint);
+      } else {
+        onchain = pendingMint(asset);
       }
-    } catch {
-      /* keep in-memory fingerprint */
-    }
-  }
+      return toAction(asset, onchain);
+    }),
+  );
+  await Promise.all(
+    actions.map(async (action) => {
+      try {
+        const observed = await observeIssuerEvent({
+          assetId: action.assetId,
+          instruction: action.issuer,
+          sourceUrl: action.evidence.issuerPageUrl ?? action.evidence.sourceUrl,
+          fetchedAt: action.evidence.fetchedAt,
+          sourceOk: Boolean(action.evidence.issuerPageUrl || action.issuer.statement),
+        });
+        action.eventChange = observed;
+        action.fingerprint = observed.fingerprint;
+        if (observed.kind === "SOURCE_UNAVAILABLE") {
+          action.truth.tminus.refusals = [...new Set([...action.truth.tminus.refusals, "EVIDENCE_MISSING"])];
+        }
+      } catch {
+        /* keep in-memory fingerprint */
+      }
+    }),
+  );
   return {
     network: "MAINNET",
     layer: "lifecycle_action_engine",

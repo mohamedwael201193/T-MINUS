@@ -86,6 +86,16 @@ test("unknown corporate action is 404", async () => {
   server.close();
 });
 
+test("position without a valid owner is 400", async () => {
+  const server = createServer();
+  await new Promise<void>((resolve) => server.listen(0, resolve));
+  const addr = server.address();
+  assert.ok(addr && typeof addr === "object");
+  const res = await fetch(`http://127.0.0.1:${addr.port}/v1/actions/spacex/position`);
+  assert.equal(res.status, 400);
+  server.close();
+});
+
 test("OPTIONS is allowed for CORS preflight", async () => {
   const server = createServer();
   await new Promise<void>((resolve) => server.listen(0, resolve));

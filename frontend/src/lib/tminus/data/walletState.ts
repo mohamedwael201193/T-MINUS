@@ -15,6 +15,8 @@ export const DESIGN_WALLET_BALANCES: WalletBalance = {
   SPACEX: 12.5,
   SPCXx: 0,
   USDC: 2_450.12,
+  SOL: 1.5,
+  spacexRaw: String(12.5 * 200_000_000),
 };
 
 export const WALLET_PROVIDERS: WalletProviderOption[] = [

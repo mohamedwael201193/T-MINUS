@@ -15,6 +15,8 @@ export const SAFETY_REFUSALS = [
   "WALLET_MISMATCH",
   "EVIDENCE_MISSING",
   "AMOUNT_INVALID",
+  "INSUFFICIENT_BALANCE",
+  "INSUFFICIENT_SOL",
 ] as const;
 
 export type SafetyRefusal = (typeof SAFETY_REFUSALS)[number];
@@ -44,6 +46,9 @@ export type SafetyInput = {
   taker: string | null;
   txTaker: string | null;
   transferFeeModeled: boolean;
+  walletRaw: string | null;
+  solLamports: number | null;
+  minSolLamports: number;
 };
 
 export type SafetyReport = {
@@ -110,6 +115,17 @@ export function evaluateSafety(input: SafetyInput): SafetyReport {
       (input.executableRatio == null || input.executableRatio < input.floorRatio)
     ) {
       refusals.push("BELOW_FLOOR");
+    }
+    if (
+      input.amountRaw &&
+      input.walletRaw &&
+      /^[0-9]+$/.test(input.walletRaw) &&
+      BigInt(input.amountRaw) > BigInt(input.walletRaw)
+    ) {
+      refusals.push("INSUFFICIENT_BALANCE");
+    }
+    if (input.solLamports != null && input.solLamports < input.minSolLamports) {
+      refusals.push("INSUFFICIENT_SOL");
     }
   }
 

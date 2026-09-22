@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
 import { fmtDateTime, truncMid } from "@/lib/tminus/utils";
 import { Label, Panel, Stat } from "@/components/tminus/system/primitives";
@@ -16,6 +17,7 @@ function tone(ok: boolean | null | undefined) {
 export function ActionDesk() {
   useTMinusVersion();
   const src = useTMinus();
+  const [open, setOpen] = useState(false);
   const assetId = src.getSelectedAssetId();
   const action = src.getAction(assetId);
   const asset = src.getAsset(assetId);
@@ -32,7 +34,7 @@ export function ActionDesk() {
   return (
     <Panel tone="paper" as="section" aria-label="Corporate action" className="mt-8 overflow-hidden">
       <div className="border-b-2 border-ink/10 px-5 py-3 md:px-6">
-        <Label>Corporate action</Label>
+        <Label>Why this action is active</Label>
         <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.12em] text-fog">
           Issuer instruction · on-chain mint · market · Jupiter · T-MINUS gate
         </p>
@@ -92,6 +94,29 @@ export function ActionDesk() {
           <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-coral-ink">
             Gate · {action.refusals.join(" · ")}
           </p>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-fog hover:text-ink"
+        >
+          {open ? "Hide provenance" : "Show provenance"}
+        </button>
+        {open ? (
+          <dl className="grid grid-cols-1 gap-3 rounded-xl border-2 border-ink/15 bg-bone/40 px-4 py-3 sm:grid-cols-2">
+            <Stat label="Issuer source" value={action?.issuerPageUrl ?? asset.issuerPageUrl ?? "—"} />
+            <Stat label="Fetched at" value={action?.fetchedAt ? fmtDateTime(action.fetchedAt) : asset.fetchedAt ? fmtDateTime(asset.fetchedAt) : "—"} />
+            <Stat label="Source hash" value={action?.sourceHash ? truncMid(action.sourceHash, 8, 6) : "—"} />
+            <Stat label="Deadline" value={action?.deadline ? fmtDateTime(action.deadline) : "—"} />
+            <Stat label="Destination mint" value={action?.destinationMint ? truncMid(action.destinationMint, 6, 4) : "Unverified"} />
+            <Stat label="Token program" value={action?.tokenProgram ? truncMid(action.tokenProgram, 6, 4) : "—"} />
+            <Stat label="Paused" value={action?.paused == null ? "Unknown" : action.paused ? "Yes" : "No"} />
+            <Stat label="Hook" value={action?.hookProgramId ? truncMid(action.hookProgramId, 6, 4) : "None"} />
+            <Stat label="Market price" value={action?.tokenPrice != null ? String(action.tokenPrice) : asset.price ? String(asset.price) : "—"} />
+            <Stat label="Mark price" value={action?.markPrice != null ? String(action.markPrice) : asset.markPrice ? String(asset.markPrice) : "—"} />
+            <Stat label="Jupiter ratio" value={jupiterOk && market.executableRatio != null ? String(market.executableRatio) : "No quote"} />
+            <Stat label="Final gate" value={allow ? "READY" : action?.refusals[0] ?? "BLOCKED"} />
+          </dl>
         ) : null}
       </div>
     </Panel>

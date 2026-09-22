@@ -131,6 +131,8 @@ export type PdaResponse = {
 
 export type ActionsListResponse = {
   network: "MAINNET";
+  layer?: string;
+  product?: string;
   actions: Array<{
     assetId: string;
     symbol: string;
@@ -151,9 +153,13 @@ export type ActionsListResponse = {
       hookProgramId: string | null;
       tokenProgram: string | null;
       rpcOk: boolean;
+      freezeAuthority?: string | null;
+      mintAuthority?: string | null;
     };
+    market?: { tokenPrice?: number | null; markPrice?: number | null; holders?: number | null };
+    fetchedAt?: string;
     truth: { tminus: { allowSign: boolean; refusals: string[] } };
-    evidence: { issuerPageUrl: string | null; sourceHash: string | null };
+    evidence: { issuerPageUrl: string | null; sourceHash: string | null; sourceUrl?: string; fetchedAt?: string };
   }>;
 };
 

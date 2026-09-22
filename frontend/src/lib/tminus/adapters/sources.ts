@@ -52,6 +52,7 @@ export interface EngineNotice {
 export interface ConversionRequestInput {
   assetId: string;
   amountDisplay: number;
+  amountRaw?: string;
   floorRatio: number;
 }
 

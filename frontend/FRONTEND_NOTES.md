@@ -30,13 +30,13 @@ src/
       WhyToolsFail, ProofTeaser, Safety, FinalCta, LandingFooter
     app/                        ← application surfaces
       AppShell.tsx              ← top chrome, tabs, wallet button + modal, mobile bottom nav
-      ConsoleView.tsx           ← lifecycle + corporate action + ticket + protocol + orders
-      LifecyclePanel.tsx        ← asset switcher (SPACEX live / OPENAI terms-pending / XAI expired)
-      ActionDesk.tsx            ← five-layer truth: issuer / chain / market / Jupiter / T-MINUS
-      OrderTicket.tsx           ← conversion signature (Mainnet Jupiter) or design-mode order
+      ConsoleView.tsx           ← lifecycle + action engine + ticket + protocol + orders
+      LifecyclePanel.tsx        ← position strip + asset switcher (SPACEX live / OPENAI terms-pending / XAI expired)
+      ActionDesk.tsx            ← five-layer truth + provenance panel
+      OrderTicket.tsx           ← wallet-balance-aware conversion signature (Mainnet Jupiter)
       MyOrders.tsx              ← order cards, filters, cancel dialog
       OrderDetail.tsx           ← state machine + rule + activity + advanced panel
-      ReceiptsView.tsx          ← the proof ledger
+      ReceiptsView.tsx          ← Mainnet conversions first, DEVNET protocol proofs second
       ProtocolPanel.tsx         ← DEVNET program inspect
   lib/tminus/
     domain/types.ts             ← THE product vocabulary (LifecycleAsset,

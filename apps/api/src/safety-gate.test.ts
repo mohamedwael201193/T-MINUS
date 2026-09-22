@@ -26,6 +26,9 @@ function base(over: Partial<SafetyInput> = {}): SafetyInput {
     taker: "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
     txTaker: "CpTxsgPjvaaPSaBKkijvB1h3hzgJmPiTsWNhuS7tRkgX",
     transferFeeModeled: true,
+    walletRaw: "200000000",
+    solLamports: 32_000_000,
+    minSolLamports: 3_000_000,
     ...over,
   };
 }
@@ -87,4 +90,14 @@ test("missing wallet", () => {
 test("listing (not signing) does not require a wallet", () => {
   const r = evaluateSafety(base({ forSigning: false, taker: null, quoteFetchedAtMs: null, routeOk: false }));
   assert.equal(r.allowed, true);
+});
+
+test("amount above wallet is INSUFFICIENT_BALANCE", () => {
+  const r = evaluateSafety(base({ amountRaw: "2000001", walletRaw: "2000000" }));
+  assert.ok(r.refusals.includes("INSUFFICIENT_BALANCE"));
+});
+
+test("dust SOL is INSUFFICIENT_SOL", () => {
+  const r = evaluateSafety(base({ solLamports: 100_000, minSolLamports: 3_000_000 }));
+  assert.ok(r.refusals.includes("INSUFFICIENT_SOL"));
 });

@@ -184,6 +184,13 @@ export type CorporateActionView = {
   refusals: string[];
   allowSign: boolean;
   onchainRpcOk: boolean;
+  fetchedAt?: string | null;
+  sourceUrl?: string | null;
+  tokenPrice?: number | null;
+  markPrice?: number | null;
+  holders?: number | null;
+  freezeAuthority?: string | null;
+  mintAuthority?: string | null;
 };
 
 /* --------------------------------- wallet ------------------------------- */
@@ -239,6 +246,8 @@ export interface WalletBalance {
   SPCXx: number;
   USDC: number;
   SOL?: number;
+  /** Exact Token-2022 raw. Display SPACEX is derived from this. */
+  spacexRaw?: string;
 }
 
 export interface WalletProviderOption {

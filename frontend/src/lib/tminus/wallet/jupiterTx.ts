@@ -7,9 +7,17 @@ export function txFromBase64(b64: string): VersionedTransaction {
   return VersionedTransaction.deserialize(bytes);
 }
 
-export function txToBase64(tx: { serialize: () => Uint8Array | number[] }): string {
-  const bytes = Uint8Array.from(tx.serialize());
-  let s = "";
-  for (const b of bytes) s += String.fromCharCode(b);
-  return btoa(s);
+export function txToBase64(tx: { serialize: (opts?: { requireAllSignatures?: boolean }) => Uint8Array | number[] }): string {
+  let bytes: Uint8Array;
+  try {
+    bytes = Uint8Array.from(tx.serialize());
+  } catch {
+    bytes = Uint8Array.from(tx.serialize({ requireAllSignatures: false }));
+  }
+  const chunks: string[] = [];
+  const size = 0x8000;
+  for (let i = 0; i < bytes.length; i += size) {
+    chunks.push(String.fromCharCode(...bytes.subarray(i, i + size)));
+  }
+  return btoa(chunks.join(""));
 }

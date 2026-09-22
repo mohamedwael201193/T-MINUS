@@ -29,8 +29,7 @@ import {
   type ReceiptRow,
 } from "./api";
 import { txFromBase64, txToBase64 } from "../wallet/jupiterTx";
-
-const SPACEX_DISPLAY_RAW = 200_000_000;
+import { displayToRaw, isWalletRejected, maxSafeInputRaw } from "../wallet/safeAmount";
 
 type PhantomLike = {
   isPhantom?: boolean;
@@ -143,6 +142,13 @@ function mapAction(row: ActionsListResponse["actions"][number]): CorporateAction
     refusals: row.truth.tminus.refusals,
     allowSign: row.truth.tminus.allowSign,
     onchainRpcOk: row.onchain.rpcOk,
+    fetchedAt: row.evidence.fetchedAt ?? row.fetchedAt ?? null,
+    sourceUrl: row.evidence.sourceUrl ?? row.evidence.issuerPageUrl,
+    tokenPrice: row.market?.tokenPrice ?? null,
+    markPrice: row.market?.markPrice ?? null,
+    holders: row.market?.holders ?? null,
+    freezeAuthority: row.onchain.freezeAuthority ?? null,
+    mintAuthority: row.onchain.mintAuthority ?? null,
   };
 }
 
@@ -276,12 +282,20 @@ class BackendSource implements TMinusSource {
         message: "Live conversion signing is wired for SPACEX while it is the open issuer window.",
       };
     }
-    const amountRaw = String(Math.round(input.amountDisplay * SPACEX_DISPLAY_RAW));
-    if (!/^[1-9][0-9]*$/.test(amountRaw)) {
-      return { status: "refused", refusals: ["AMOUNT_INVALID"], message: "Amount is too small." };
+    const walletRaw = BigInt(this.walletState.balances?.spacexRaw ?? "0");
+    const requested = input.amountRaw && /^[1-9][0-9]*$/.test(input.amountRaw)
+      ? BigInt(input.amountRaw)
+      : displayToRaw(String(input.amountDisplay));
+    const safe = maxSafeInputRaw(walletRaw);
+    const amountRaw = requested > safe ? safe : requested;
+    if (amountRaw <= BigInt(0)) {
+      return { status: "refused", refusals: ["INSUFFICIENT_BALANCE"], message: "This wallet has no executable SPACEX." };
+    }
+    if ((this.walletState.balances?.SOL ?? 0) < 0.003) {
+      return { status: "refused", refusals: ["INSUFFICIENT_SOL"], message: "Not enough SOL to pay the network fee." };
     }
     const q = new URLSearchParams({
-      amount: amountRaw,
+      amount: amountRaw.toString(),
       taker: this.walletState.address,
       floorRatio: String(input.floorRatio),
     });
@@ -297,18 +311,30 @@ class BackendSource implements TMinusSource {
     if (!provider?.signTransaction) {
       return { status: "error", message: "Wallet cannot sign a VersionedTransaction." };
     }
-    const tx = txFromBase64(exec.transaction);
-    const signed = await provider.signTransaction(tx);
+    let signed: unknown;
+    try {
+      const tx = txFromBase64(exec.transaction);
+      signed = await provider.signTransaction(tx);
+    } catch (err) {
+      if (isWalletRejected(err)) {
+        return { status: "refused", refusals: ["WALLET_REJECTED"], message: "Phantom rejected the signature." };
+      }
+      return { status: "error", message: err instanceof Error ? err.message : "signTransaction failed" };
+    }
     const signedB64 = txToBase64(signed as Parameters<typeof txToBase64>[0]);
     const landed = await apiPost<ExecuteConversionResponse>("/v1/conversions/execute", {
       signedTransaction: signedB64,
       requestId: exec.requestId,
       assetId: "spacex",
       taker: this.walletState.address,
-      amountRaw,
+      amountRaw: amountRaw.toString(),
       floorRatio: input.floorRatio,
     });
     if (landed.status === 200 && landed.body.settled && landed.body.signature && landed.body.explorer) {
+      await this.refresh();
+      if (this.walletState.providerId && this.walletState.address) {
+        await this.applyConnectedWallet(this.walletState.providerId, this.walletState.address);
+      }
       return {
         status: "settled",
         signature: landed.body.signature,
@@ -321,7 +347,7 @@ class BackendSource implements TMinusSource {
         status: "submitted",
         signature: landed.body.signature,
         explorer: landed.body.explorer,
-        message: landed.body.note ?? "Submitted but not yet confirmed — no receipt stored.",
+        message: landed.body.note ?? "PENDING — submitted but not yet confirmed. No receipt stored.",
       };
     }
     if (landed.status === 409) {
@@ -360,7 +386,7 @@ class BackendSource implements TMinusSource {
   }
 
   private async applyConnectedWallet(providerId: string, address: string): Promise<void> {
-    let balances = { SPACEX: 0, SPCXx: 0, USDC: 0, SOL: 0 };
+    let balances: WalletState["balances"] = { SPACEX: 0, SPCXx: 0, USDC: 0, SOL: 0, spacexRaw: "0" };
     try {
       const live = await apiGet<BalancesResponse>(`/v1/balances?owner=${address}`);
       balances = {
@@ -368,6 +394,7 @@ class BackendSource implements TMinusSource {
         SPCXx: live.SPCXx.uiAmount ?? 0,
         USDC: live.USDC,
         SOL: live.sol,
+        spacexRaw: live.SPACEX.raw,
       };
     } catch {
       /* address is still real; balances stay 0 rather than invented */

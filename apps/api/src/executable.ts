@@ -2,12 +2,22 @@ import { Connection } from "@solana/web3.js";
 import { env } from "./config.ts";
 import { getCorporateAction, type CorporateAction } from "./corporate-action.ts";
 import { displayRawForMint } from "./issuer-instruction.ts";
-import { jupiterExecute, jupiterOrder, type JupiterOrderResult } from "./jupiter-swap.ts";
+import { jupiterExecute, jupiterOrder, jupiterQuoteLite, type JupiterOrderResult } from "./jupiter-swap.ts";
 import { readMintState } from "./onchain-mint.ts";
 import { evaluateSafety, type SafetyRefusal } from "./safety-gate.ts";
 import { sql } from "./db.ts";
+import { readOwnerBalances } from "./balances.ts";
+import { maxSafeInputRaw, MIN_SOL_LAMPORTS, rawToDisplayString } from "./safe-amount.ts";
 
 export const QUOTE_STALE_MS = 15_000;
+
+export type HolderPosition = {
+  owner: string | null;
+  spacexRaw: string | null;
+  spacexDisplay: string | null;
+  solLamports: number | null;
+  maxSafeRaw: string | null;
+};
 
 export type ExecutableResponse = {
   network: "MAINNET";
@@ -18,6 +28,7 @@ export type ExecutableResponse = {
   transaction: string | null;
   requestId: string | null;
   taker: string | null;
+  position: HolderPosition;
   quote: {
     inAmount: string | null;
     outAmount: string | null;
@@ -52,19 +63,47 @@ function ratioOf(inAmount: string | null, outAmount: string | null, srcMint: str
   return out / outDiv / (inn / inDiv);
 }
 
+async function holderPosition(taker: string | null): Promise<HolderPosition> {
+  const empty: HolderPosition = {
+    owner: taker,
+    spacexRaw: null,
+    spacexDisplay: null,
+    solLamports: null,
+    maxSafeRaw: null,
+  };
+  if (!taker) return empty;
+  try {
+    const bal = await readOwnerBalances(env.solanaRpc, taker);
+    const walletRaw = BigInt(bal.SPACEX.raw);
+    const maxSafe = maxSafeInputRaw({ walletRaw });
+    return {
+      owner: taker,
+      spacexRaw: walletRaw.toString(),
+      spacexDisplay: rawToDisplayString(walletRaw),
+      solLamports: bal.solLamports,
+      maxSafeRaw: maxSafe.toString(),
+    };
+  } catch {
+    return empty;
+  }
+}
+
 export async function buildExecutable(opts: {
   assetId: string;
   amountRaw: string | null;
   taker: string | null;
   floorRatio: number | null;
+  assembleTx?: boolean;
+  quoteStaleMs?: number;
 }): Promise<{ status: number; body: ExecutableResponse | { error: string } }> {
   const action = await getCorporateAction(opts.assetId);
   if (!action) return { status: 404, body: { error: "unknown_asset" } };
 
   const amountRaw = opts.amountRaw && /^[1-9][0-9]*$/.test(opts.amountRaw) ? opts.amountRaw : null;
-  const forSigning = true;
+  const assembleTx = opts.assembleTx !== false;
   const now = Date.now();
   const deadlineMs = action.deadline ? Date.parse(action.deadline) : null;
+  const position = await holderPosition(opts.taker);
 
   const needsRoute =
     action.stage === "CONVERSION_WINDOW" && action.destinationVerified && action.destination != null;
@@ -74,12 +113,20 @@ export async function buildExecutable(opts: {
 
   let quote: JupiterOrderResult | null = null;
   if (needsRoute && amountRaw && action.destination) {
-    quote = await jupiterOrder({
-      inputMint: action.sourceMint,
-      outputMint: action.destination.mint,
-      amount: amountRaw,
-      taker: opts.taker ?? undefined,
-    });
+    if (assembleTx) {
+      quote = await jupiterOrder({
+        inputMint: action.sourceMint,
+        outputMint: action.destination.mint,
+        amount: amountRaw,
+        taker: opts.taker ?? undefined,
+      });
+    } else {
+      quote = await jupiterQuoteLite({
+        inputMint: action.sourceMint,
+        outputMint: action.destination.mint,
+        amount: amountRaw,
+      });
+    }
   }
 
   const executableRatio = quote
@@ -89,12 +136,12 @@ export async function buildExecutable(opts: {
   const feeBps = mint.transferFeeBps ?? action.transferFeeBps;
   const safety = evaluateSafety({
     stage: action.stage,
-    forSigning,
+    forSigning: true,
     nowMs: now,
     deadlineMs: Number.isFinite(deadlineMs) ? deadlineMs : null,
     evidencePresent: Boolean(action.evidence.issuerPageUrl || action.evidence.sourceHash),
     quoteFetchedAtMs: quote?.fetchedAt ? Date.parse(quote.fetchedAt) : null,
-    quoteStaleMs: QUOTE_STALE_MS,
+    quoteStaleMs: opts.quoteStaleMs ?? QUOTE_STALE_MS,
     mintPaused: mint.paused,
     hookProgramId: mint.hookProgramId,
     tokenProgram: mint.tokenProgram,
@@ -110,10 +157,13 @@ export async function buildExecutable(opts: {
     taker: opts.taker,
     txTaker: opts.taker,
     transferFeeModeled: Boolean(quote?.ok),
+    walletRaw: position.spacexRaw,
+    solLamports: position.solLamports,
+    minSolLamports: Number(MIN_SOL_LAMPORTS),
   });
 
   const refusals = [...safety.refusals];
-  if (safety.allowed && !quote?.transaction) refusals.push("NO_ROUTE");
+  if (assembleTx && safety.allowed && !quote?.transaction) refusals.push("NO_ROUTE");
 
   action.truth.jupiter = {
     available: quote ? quote.ok : null,
@@ -130,7 +180,10 @@ export async function buildExecutable(opts: {
   };
 
   const unique = [...new Set(refusals)];
-  const canSign = unique.length === 0 && Boolean(quote?.transaction) && Boolean(quote?.requestId);
+  const canSign =
+    unique.length === 0 &&
+    Boolean(quote?.ok) &&
+    (!assembleTx || (Boolean(quote?.transaction) && Boolean(quote?.requestId)));
   action.truth.tminus.allowSign = canSign;
 
   return {
@@ -140,17 +193,18 @@ export async function buildExecutable(opts: {
       assetId: action.assetId,
       allowed: canSign,
       refusals: unique,
-      path: canSign ? "order_execute" : "none",
-      transaction: canSign ? quote?.transaction ?? null : null,
-      requestId: canSign ? quote?.requestId ?? null : null,
+      path: canSign && assembleTx ? "order_execute" : canSign ? "order_execute" : "none",
+      transaction: assembleTx && canSign ? quote?.transaction ?? null : null,
+      requestId: assembleTx && canSign ? quote?.requestId ?? null : null,
       taker: opts.taker,
+      position,
       quote: {
         inAmount: quote?.inAmount ?? null,
         outAmount: quote?.outAmount ?? null,
         executableRatio,
         router: quote?.router ?? null,
         fetchedAt: quote?.fetchedAt ?? null,
-        staleMs: QUOTE_STALE_MS,
+        staleMs: opts.quoteStaleMs ?? QUOTE_STALE_MS,
         error: quote?.error ?? null,
       },
       action: {
@@ -170,15 +224,57 @@ export async function buildExecutable(opts: {
   };
 }
 
-async function confirmSignature(signature: string): Promise<{ slot: number; err: unknown } | null> {
+type TokenBal = {
+  mint: string;
+  owner?: string;
+  uiTokenAmount?: { amount?: string };
+};
+
+function tokenDelta(
+  pre: TokenBal[] | undefined,
+  post: TokenBal[] | undefined,
+  owner: string,
+  mint: string,
+): bigint | null {
+  if (!pre || !post) return null;
+  const a = pre.find((r) => r.mint === mint && r.owner === owner);
+  const b = post.find((r) => r.mint === mint && r.owner === owner);
+  if (!a && !b) return null;
+  const before = BigInt(a?.uiTokenAmount?.amount ?? "0");
+  const after = BigInt(b?.uiTokenAmount?.amount ?? "0");
+  return after - before;
+}
+
+async function confirmAndMeasure(
+  signature: string,
+  taker: string,
+  sourceMint: string,
+  destMint: string | null,
+): Promise<{
+  slot: number;
+  err: unknown;
+  inSpent: string | null;
+  outReceived: string | null;
+} | null> {
   const connection = new Connection(env.solanaRpc, "confirmed");
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 24; i++) {
     const tx = await connection.getTransaction(signature, {
       maxSupportedTransactionVersion: 0,
       commitment: "confirmed",
     });
-    if (tx) return { slot: tx.slot, err: tx.meta?.err ?? null };
-    await new Promise((r) => setTimeout(r, 400));
+    if (tx) {
+      const pre = tx.meta?.preTokenBalances as TokenBal[] | undefined;
+      const post = tx.meta?.postTokenBalances as TokenBal[] | undefined;
+      const inDelta = tokenDelta(pre, post, taker, sourceMint);
+      const outDelta = destMint ? tokenDelta(pre, post, taker, destMint) : null;
+      return {
+        slot: tx.slot,
+        err: tx.meta?.err ?? null,
+        inSpent: inDelta != null && inDelta < 0n ? (-inDelta).toString() : null,
+        outReceived: outDelta != null && outDelta > 0n ? outDelta.toString() : null,
+      };
+    }
+    await new Promise((r) => setTimeout(r, 1_250));
   }
   return null;
 }
@@ -204,6 +300,8 @@ export async function executeSignedConversion(body: unknown): Promise<{ status: 
     amountRaw,
     taker,
     floorRatio: Number.isFinite(floorRatio) ? floorRatio : null,
+    assembleTx: false,
+    quoteStaleMs: 60_000,
   });
   if (gate.status !== 200 || !("allowed" in gate.body)) return gate;
   if (!gate.body.allowed) {
@@ -226,12 +324,17 @@ export async function executeSignedConversion(body: unknown): Promise<{ status: 
     };
   }
 
-  const confirmed = await confirmSignature(executed.signature);
+  const confirmed = await confirmAndMeasure(
+    executed.signature,
+    taker,
+    gate.body.action.sourceMint,
+    gate.body.action.destinationMint,
+  );
   if (!confirmed) {
     return {
       status: 202,
       body: {
-        status: "submitted",
+        status: "PENDING",
         settled: false,
         signature: executed.signature,
         explorer: `https://explorer.solana.com/tx/${executed.signature}`,
@@ -243,7 +346,7 @@ export async function executeSignedConversion(body: unknown): Promise<{ status: 
     return {
       status: 502,
       body: {
-        error: "onchain_err",
+        error: "FAILED_ONCHAIN",
         signature: executed.signature,
         explorer: `https://explorer.solana.com/tx/${executed.signature}`,
         settled: false,
@@ -251,28 +354,41 @@ export async function executeSignedConversion(body: unknown): Promise<{ status: 
     };
   }
 
-  const inAmount = executed.inAmount ?? gate.body.quote.inAmount ?? amountRaw ?? "0";
-  const outAmount = executed.outAmount ?? gate.body.quote.outAmount ?? "0";
-  const ratio = gate.body.quote.executableRatio;
+  const inAmount = confirmed.inSpent ?? executed.inAmount ?? gate.body.quote.inAmount ?? amountRaw ?? "0";
+  const outAmount = confirmed.outReceived ?? executed.outAmount ?? gate.body.quote.outAmount ?? "0";
+  const srcMint = gate.body.action.sourceMint;
+  const dstMint = gate.body.action.destinationMint ?? "";
+  const ratio = ratioOf(inAmount, outAmount, srcMint, dstMint) ?? gate.body.quote.executableRatio;
   const ratioE9 = ratio != null ? String(Math.round(ratio * 1e9)) : "0";
+  const inDisplay = displayRawForMint(srcMint);
+  const outDisplay = displayRawForMint(dstMint);
   const payload = {
     kind: "mainnet_jupiter_conversion",
     network: "MAINNET",
+    cluster: "MAINNET",
+    status: "SETTLED",
+    verifiedOnchain: true,
     assetId,
-    sourceMint: gate.body.action.sourceMint,
+    sourceMint: srcMint,
     destinationMint: gate.body.action.destinationMint,
     destinationSymbol: gate.body.action.destinationSymbol,
     sourceAmount: inAmount,
     destinationAmount: outAmount,
+    sourceDisplay: inDisplay ? Number(inAmount) / inDisplay : null,
+    destinationDisplay: outDisplay ? Number(outAmount) / outDisplay : null,
     ratio: ratioE9,
     route: { composition: gate.body.quote.router ?? "jupiter_swap_v2", path: "order_execute" },
     explorer: `https://explorer.solana.com/tx/${executed.signature}`,
     feedHash: gate.body.evidence.sourceHash,
+    issuerPageUrl: gate.body.evidence.issuerPageUrl,
+    quoteTimestamp: gate.body.quote.fetchedAt,
     timestamp: new Date().toISOString(),
     programId: null,
     jupiterRequestId: requestId,
     taker,
+    wallet: taker,
     settlementKind: "TRADE",
+    corporateActionId: `${assetId}:${gate.body.action.actionType}`,
   };
   const orderPda = `conversion:${assetId}:${taker}`;
   await sql`
@@ -292,6 +408,7 @@ export async function executeSignedConversion(body: unknown): Promise<{ status: 
       outAmount,
       executableRatio: ratio,
       kind: "mainnet_jupiter_conversion",
+      verifiedOnchain: true,
     },
   };
 }

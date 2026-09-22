@@ -22,6 +22,8 @@ export function LifecyclePanel() {
     typeof src.getSelectedAssetId === "function" ? src.getSelectedAssetId() : "spacex";
   const asset = src.getAsset(assetId) ?? src.getAsset(SPACEX_ASSET_ID) ?? assets[0];
   const market = src.getMarket(asset?.id ?? SPACEX_ASSET_ID);
+  const wallet = src.getWallet();
+  const action = src.getAction(asset?.id ?? SPACEX_ASSET_ID);
 
   if (!asset) {
     return (
@@ -99,6 +101,13 @@ export function LifecyclePanel() {
             issuerPageUrl={asset.issuerPageUrl}
             inOfficialCatalog={asset.inOfficialCatalog}
             sourceHash={asset.sourceHash}
+            markPrice={asset.markPrice}
+            holdDisplay={wallet.connected ? wallet.balances?.SPACEX ?? 0 : null}
+            statusLabel={
+              action?.stage === "CONVERSION_WINDOW" && action.refusals.length === 0
+                ? "READY"
+                : action?.refusals[0] ?? asset.executionAvailability ?? "WAITING"
+            }
           />
         ) : asset.stage === "EXPIRED" ? (
           <ExpiredLifecycle
@@ -112,6 +121,8 @@ export function LifecyclePanel() {
             mint={asset.mint}
             issuerPageUrl={asset.issuerPageUrl}
             inOfficialCatalog={asset.inOfficialCatalog}
+            actionType={action?.actionType ?? "ACQUISITION"}
+            holdDisplay={wallet.connected ? wallet.balances?.SPACEX ?? 0 : null}
           />
         ) : (
           <OpenaiLifecycle
@@ -153,13 +164,29 @@ function SpacexLifecycle(props: {
   issuerPageUrl?: string;
   inOfficialCatalog?: boolean;
   sourceHash?: string | null;
+  markPrice?: number;
+  holdDisplay?: number | null;
+  statusLabel?: string;
 }) {
   const elapsed = useElapsedFraction(props.windowOpenedAt, props.windowClosesAt);
   const ratio = props.market.executableRatio;
   const discount = ratio != null ? (1 - ratio) * 100 : null;
+  const markPremium =
+    props.markPrice && props.markPrice > 0 && props.price > 0
+      ? ((props.price - props.markPrice) / props.markPrice) * 100
+      : null;
 
   return (
     <div>
+      <PositionStrip
+        hold={props.holdDisplay}
+        action="GOING PUBLIC"
+        deadline={props.windowClosesAt}
+        destination={props.destinationSymbol}
+        executable={ratio}
+        feeBps={props.transferFeeBps}
+        status={props.statusLabel ?? "WAITING"}
+      />
       {/* identity row */}
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
@@ -220,6 +247,15 @@ function SpacexLifecycle(props: {
       {/* stats */}
       <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-6 border-t-2 border-dashed border-ink/15 pt-6 sm:grid-cols-3">
         <Stat label="PreStock price" value={fmtUsd(props.price)} />
+        <Stat
+          label="Mark price"
+          value={props.markPrice && props.markPrice > 0 ? fmtUsd(props.markPrice) : "—"}
+        />
+        <Stat
+          label="Vs mark"
+          value={markPremium != null ? `${markPremium.toFixed(1)}%` : "—"}
+          valueClassName={markPremium != null && markPremium < 0 ? "text-coral-ink" : undefined}
+        />
         <Stat
           label={`Destination · ${props.destinationSymbol}`}
           value={props.destinationPrice != null ? fmtUsd(props.destinationPrice) : "—"}
@@ -384,9 +420,20 @@ function ExpiredLifecycle(props: {
   mint?: string;
   issuerPageUrl?: string;
   inOfficialCatalog?: boolean;
+  actionType?: string;
+  holdDisplay?: number | null;
 }) {
   return (
     <div>
+      <PositionStrip
+        hold={props.holdDisplay}
+        action={props.actionType ?? "ACQUISITION"}
+        deadline={props.deadline}
+        destination="—"
+        executable={null}
+        feeBps={0}
+        status="EXPIRED"
+      />
       <div className="flex items-baseline gap-3">
         <h2 className="font-display text-[2.6rem] uppercase leading-none text-ink">
           {props.symbol}
@@ -405,7 +452,48 @@ function ExpiredLifecycle(props: {
         <Stat label="Issuer page" value={props.issuerPageUrl ? "Linked" : "Unknown"} />
       </div>
       <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-fog">
-        Execution halted · {props.issuerPageUrl ?? props.sourceUrl ?? "PreStocks issuer page"}
+        No signature requested · {props.issuerPageUrl ?? props.sourceUrl ?? "PreStocks issuer page"}
+      </p>
+    </div>
+  );
+}
+
+function PositionStrip({
+  hold,
+  action,
+  deadline,
+  destination,
+  executable,
+  feeBps,
+  status,
+}: {
+  hold: number | null | undefined;
+  action: string;
+  deadline: string | null | undefined;
+  destination: string;
+  executable: number | null;
+  feeBps: number;
+  status: string;
+}) {
+  return (
+    <div className="mb-5 grid grid-cols-2 gap-2 rounded-xl border-2 border-ink bg-ink px-3 py-3 sm:grid-cols-4 lg:grid-cols-7">
+      <PosCell label="You hold" value={hold == null ? "Connect" : hold > 0 ? hold.toFixed(6).replace(/0+$/, "").replace(/\.$/, "") : "0"} />
+      <PosCell label="Corporate action" value={action} />
+      <PosCell label="Deadline" value={deadline ? fmtDate(deadline) : "—"} />
+      <PosCell label="Default exit" value={destination} />
+      <PosCell label="Executable" value={executable != null ? fmtRatio(executable) : "—"} />
+      <PosCell label="Transfer fee" value={feeBps > 0 ? `${feeBps / 100}%` : "—"} />
+      <PosCell label="Status" value={status} accent />
+    </div>
+  );
+}
+
+function PosCell({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div>
+      <p className="font-mono text-[8px] font-bold uppercase tracking-[0.14em] text-bone-dim">{label}</p>
+      <p className={`mt-1 truncate font-mono text-[10px] font-bold uppercase tracking-[0.06em] ${accent ? "text-lime" : "text-bone"}`}>
+        {value}
       </p>
     </div>
   );

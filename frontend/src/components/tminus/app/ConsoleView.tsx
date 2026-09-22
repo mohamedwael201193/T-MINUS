@@ -18,7 +18,10 @@ export function ConsoleView() {
   useTMinusVersion();
   const src = useTMinus();
   const receipts = src.listReceipts();
-  const latest = receipts.find((r) => (r.eventKind ?? "fill") === "fill") ?? receipts[0];
+  const latest =
+    receipts.find((r) => r.network === "MAINNET" && r.eventKind === "conversion") ??
+    receipts.find((r) => (r.eventKind ?? "fill") === "fill") ??
+    receipts[0];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 md:px-6 md:py-10">

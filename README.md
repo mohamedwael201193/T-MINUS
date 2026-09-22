@@ -1,6 +1,6 @@
 # T-MINUS
 
-Corporate action layer for PreStocks Token-2022 mints. T-MINUS reads the issuer instruction, compares it to on-chain mint state and a live Jupiter route, then either asks the holder to sign a Mainnet **TRADE** or refuses. Unattended escrow (place/cancel/fill/expire) is proven on **DEVNET**, not on Mainnet.
+**PreStocks Asset Lifecycle & Action Engine.** T-MINUS reads an issuer instruction, compares it to on-chain mint state and a live Jupiter route, then either asks the holder to sign a Mainnet **TRADE** or refuses. The consumer surface is the Conversion Desk. Unattended escrow (place/cancel/fill/expire) is proven on **DEVNET**, not on Mainnet.
 
 Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS API (`BackendSource`). Design simulation is `NEXT_PUBLIC_TMINUS_SOURCE=design` only.
 
@@ -9,12 +9,12 @@ Frontend is in `frontend/` (Next.js). Default data source is the live T-MINUS AP
 | Piece | Status | Evidence |
 |---|---|---|
 | Corporate action API `/v1/actions` | **MAINNET data** | Live issuer pages + official catalog/metrics + mint extensions |
-| Conversion desk (user-signed Jupiter Swap V2 `/order`+`/execute`) | **MAINNET execution path** | Safety gates; no fake signatures; T-MINUS never holds tokens |
+| Conversion desk (user-signed Jupiter Swap V2 `/order`+`/execute`) | **MAINNET execution proven** | Sig `2RfXRieE…SWRNBW` slot 449215609; 1,827,211 raw SPACEX → 702,134 raw SPCXx |
 | Anchor program `place` / `cancel` / `fill` / `expire` | Built, tested on LOCALNET, **deployed DEVNET** | `evidence/program-build.json`, `evidence/devnet-e2e.json` |
 | Token-2022 post-fee escrow + harvest-before-close | **LOCALNET** PASS | 100 bps fee mint fixture (not SPACEX) |
 | Pause / transfer-hook rejection | **UNIT + LOCALNET** | rust TLV tests; mocha paused/hook mint fixtures |
 | Jupiter Swap V2 `/build` + extra ix composition | **SIMULATION** | `evidence/phase1-sim.json` — keeper path, not the conversion desk |
-| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/pda` `/v1/program` `/v1/prestocks` `/v1/balances` `/v1/actions` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` |
+| API `/health` `/ready` `/v1/feed` `/v1/quote` `/v1/keeper` `/v1/receipts` `/v1/orders/:pda` `/v1/pda` `/v1/program` `/v1/prestocks` `/v1/balances` `/v1/actions` `/v1/actions/:asset/{evidence,executable,status,position,chain,market,route}` | **LIVE FREE Render** | `https://tminus-api-k2d2.onrender.com` |
 | Keeper worker | Embedded in the free web service, **send disabled** | `KEEPER_SEND_ENABLED=false`; `/v1/keeper` `halted: false` |
 | Devnet deploy | **LIVE** (254,768-byte ELF `978c80e5…`) | Program executable; IDL `FMSPeg37…`; sigs in `evidence/devnet-e2e.json`. Local optimized `.so` is now **209,256** bytes (`838ebc5c…`) |
 | Mainnet program deploy / fills | **NOT DEPLOYED** | Proven minimum safe balance **1.08473244 SOL**. Not required for the conversion desk |

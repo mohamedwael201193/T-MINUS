@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTMinus, useTMinusVersion } from "@/lib/tminus/adapters/context";
-import { cn, fmtDate, fmtRatio, round } from "@/lib/tminus/utils";
+import { cn, fmtDate, fmtRatio } from "@/lib/tminus/utils";
 import { Button, Label, Panel } from "@/components/tminus/system/primitives";
 import { RatioBand } from "@/components/tminus/system/RatioBand";
 import { useToast } from "@/components/tminus/system/toast";
+import { displayToRaw, maxSafeInputRaw, MIN_SOL_FOR_TRADE, rawToDisplayString } from "@/lib/tminus/wallet/safeAmount";
 
 /**
  * SET YOUR RULE — the entire order surface. Four inputs, one plain-
@@ -27,8 +28,9 @@ export function OrderTicket() {
   const ratio = market.executableRatio;
   const wallet = src.getWallet();
   const isSpacex = asset?.id === "spacex";
-  const maxAmount =
-    isSpacex && wallet.balances?.SPACEX && wallet.balances.SPACEX > 0 ? wallet.balances.SPACEX : 0;
+  const walletRaw = wallet.balances?.spacexRaw ? BigInt(wallet.balances.spacexRaw) : BigInt(0);
+  const maxRaw = isSpacex ? maxSafeInputRaw(walletRaw) : BigInt(0);
+  const sol = wallet.balances?.SOL ?? 0;
   const deadlineIso = asset?.windowClosesAt?.slice(0, 10) ?? "";
   const lifecycleBlocked =
     !asset
@@ -42,10 +44,16 @@ export function OrderTicket() {
 
   const [target, setTarget] = useState("0.820");
   const [floor, setFloor] = useState("0.700");
-  const [amount, setAmount] = useState("0.01");
+  const [amount, setAmount] = useState("");
   const [failsafe, setFailsafe] = useState("");
   const [touched, setTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [amountTouched, setAmountTouched] = useState(false);
+
+  useEffect(() => {
+    if (amountTouched) return;
+    if (maxRaw > BigInt(0)) setAmount(rawToDisplayString(maxRaw));
+  }, [maxRaw, amountTouched]);
 
   useEffect(() => {
     if (!deadlineIso) {
@@ -73,12 +81,14 @@ export function OrderTicket() {
     if (Number.isNaN(f) || f < FLOOR_BOUNDS.min || f > FLOOR_BOUNDS.max) {
       errs.floor = `Between ${FLOOR_BOUNDS.min.toFixed(2)} and ${FLOOR_BOUNDS.max.toFixed(2)}`;
     }
-    if (Number.isNaN(a) || a < 0.0001) {
-      errs.amount = `At least 0.0001 ${asset?.symbol ?? "SPACEX"}.`;
-    } else if (wallet.connected && isSpacex && maxAmount > 0 && a > maxAmount) {
-      errs.amount = `Exceeds wallet — you hold ${maxAmount.toFixed(4)} SPACEX.`;
-    } else if (wallet.connected && isSpacex && maxAmount <= 0) {
+    if (Number.isNaN(a) || a <= 0) {
+      errs.amount = `Enter an amount in ${asset?.symbol ?? "SPACEX"}.`;
+    } else if (wallet.connected && isSpacex && maxRaw <= BigInt(0)) {
       errs.amount = "This wallet has no SPACEX on MAINNET.";
+    } else if (wallet.connected && isSpacex && displayToRaw(amount) > maxRaw) {
+      errs.amount = `Exceeds wallet — you hold ${rawToDisplayString(maxRaw)} SPACEX.`;
+    } else if (wallet.connected && isSpacex && sol < MIN_SOL_FOR_TRADE) {
+      errs.amount = "Not enough SOL for the network fee.";
     } else if (wallet.connected && !isSpacex) {
       errs.amount = `Live balances are wired for SPACEX only. ${asset?.symbol ?? "This mint"} cannot be sized from this wallet yet.`;
     }
@@ -86,7 +96,7 @@ export function OrderTicket() {
       errs.failsafe = `After the hard deadline — ${fmtDate(Date.parse(deadlineIso + "T23:59:00Z"))}.`;
     }
     return errs;
-  }, [t, f, a, failsafe, maxAmount, wallet.connected, deadlineIso, isSpacex, asset?.symbol, conversionOpen]);
+  }, [t, f, a, failsafe, maxRaw, wallet.connected, deadlineIso, isSpacex, asset?.symbol, conversionOpen, amount, sol]);
 
   const valid = Object.keys(errors).length === 0;
 
@@ -119,9 +129,9 @@ export function OrderTicket() {
         const order = await Promise.resolve(
           src.createOrder({
             assetId: asset.id,
-            amount: round(a, 4),
-            targetRatio: round(t, 4),
-            floorRatio: round(f, 4),
+            amount: Number.isFinite(a) ? a : 0,
+            targetRatio: Number.isFinite(t) ? t : 0,
+            floorRatio: Number.isFinite(f) ? f : 0,
             failsafeAt: failsafeIso,
           }),
         );
@@ -133,10 +143,13 @@ export function OrderTicket() {
         setTouched(false);
         return;
       }
+      const requested = displayToRaw(amount);
+      const capped = requested > maxRaw ? maxRaw : requested;
       const result = await src.requestConversion({
         assetId: asset.id,
-        amountDisplay: round(a, 4),
-        floorRatio: round(f, 4),
+        amountDisplay: a,
+        amountRaw: capped.toString(),
+        floorRatio: f,
       });
       if (result.status === "settled") {
         toast({
@@ -183,10 +196,10 @@ export function OrderTicket() {
     );
 
   return (
-    <Panel tone="paper" shadow="lg" className="p-5 md:p-6" as="section" aria-label="Set your rule">
+    <Panel tone="paper" shadow="lg" className="p-5 md:p-6" as="section" aria-label="Authorize conversion">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-2xl uppercase leading-none text-ink">
-          {conversionOpen ? "Sign conversion" : "Set your rule"}
+          {conversionOpen ? "Authorize conversion" : "Window closed"}
         </h2>
         <span className="rounded-full border-2 border-ink bg-ink px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-bone">
           {asset?.symbol ?? "PRESTOCK"} → {asset?.destinationSymbol ?? "TBD"}
@@ -307,9 +320,12 @@ export function OrderTicket() {
               name="amount"
               type="number"
               inputMode="decimal"
-              step="0.01"
+              step="any"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                setAmountTouched(true);
+                setAmount(e.target.value);
+              }}
               onBlur={() => setTouched(true)}
               aria-label={`Amount in ${asset?.symbol ?? "token"}`}
               className={fieldCls(touched && !!errors.amount)}
@@ -321,10 +337,13 @@ export function OrderTicket() {
           <div className="mt-2 flex gap-1.5">
             <button
               type="button"
-              onClick={() => setAmount(maxAmount > 0 ? maxAmount.toFixed(4) : "0.01")}
+              onClick={() => {
+                setAmountTouched(true);
+                setAmount(maxRaw > BigInt(0) ? rawToDisplayString(maxRaw) : "");
+              }}
               className="rounded-full border-2 border-ink/25 bg-bone px-2.5 py-1 font-mono text-[9.5px] font-bold uppercase tracking-[0.1em] text-fog transition-colors hover:border-ink hover:text-ink"
             >
-              Max {wallet.connected ? maxAmount.toFixed(4) : "—"}
+              Max {wallet.connected && maxRaw > BigInt(0) ? rawToDisplayString(maxRaw) : "—"}
             </button>
           </div>
           {touched && errors.amount ? <FieldError>{errors.amount}</FieldError> : null}
@@ -353,7 +372,7 @@ export function OrderTicket() {
             <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-lime" aria-hidden />
             <span className="font-mono text-[11px] leading-relaxed tracking-[0.02em] text-ink">
               {conversionOpen
-                ? `TRADE ${!Number.isNaN(a) ? a.toFixed(4) : "—"} ${asset?.symbol ?? "SPACEX"} into ${asset?.destinationSymbol ?? "SPCXx"} if the live post-fee ratio is at least ${!Number.isNaN(f) ? fmtRatio(f) : "—"} and every safety gate passes.`
+                ? `TRADE ${amount || "—"} ${asset?.symbol ?? "SPACEX"} into ${asset?.destinationSymbol ?? "SPCXx"} if the live post-fee ratio is at least ${!Number.isNaN(f) ? fmtRatio(f) : "—"} and every safety gate passes.`
                 : `IF the executable ratio reaches ${!Number.isNaN(t) ? fmtRatio(t) : "—"} → convert ${!Number.isNaN(a) ? a.toFixed(4) : "—"} ${asset?.symbol ?? "SPACEX"} at ${!Number.isNaN(t) ? fmtRatio(t) : "—"} or better.`}
             </span>
           </p>
@@ -379,7 +398,7 @@ export function OrderTicket() {
         onClick={onSubmit}
         disabled={submitting || Boolean(lifecycleBlocked)}
       >
-        {submitting ? "Signing…" : conversionOpen ? "Sign conversion" : "Window closed"}
+        {submitting ? "Waiting for wallet…" : conversionOpen ? "Sign conversion" : "Window closed"}
         <span aria-hidden>→</span>
       </Button>
       {lifecycleBlocked ? (

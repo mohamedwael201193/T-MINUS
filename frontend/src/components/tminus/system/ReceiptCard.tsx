@@ -106,7 +106,10 @@ export function ReceiptCard({
           <Row label="Floor" value={fmtRatio(receipt.floorRatio)} />
           {!compact ? (
             <>
-              <Row label="Size" value={`${receipt.size.toFixed(2)} ${receipt.sourceSymbol ?? "SPACEX"}`} />
+              <Row
+                label="Size"
+                value={`${receipt.size < 0.1 ? receipt.size.toFixed(6).replace(/0+$/, "").replace(/\.$/, "") : receipt.size.toFixed(2)} ${receipt.sourceSymbol ?? "SPACEX"}`}
+              />
               <Row
                 label="Filled"
                 value={`${receipt.filled.toFixed(4)} ${receipt.destinationSymbol ?? "SPCXx"}`}

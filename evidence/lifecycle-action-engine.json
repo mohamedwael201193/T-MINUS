@@ -1,0 +1,45 @@
+{
+  "researchedAt": "2026-09-22T00:10:00.000Z",
+  "product": "PreStocks Asset Lifecycle & Action Engine",
+  "surface": "Conversion Desk",
+  "sources": [
+    "https://prestocks.com/",
+    "https://prestocks.com/products",
+    "https://prestocks.com/ecosystem",
+    "https://prestocks.com/faq?tab=mechanics",
+    "https://prestocks.com/faq?tab=legal",
+    "https://prestocks.com/spacex",
+    "https://prestocks.com/xai",
+    "https://developers.jup.ag/docs/swap/order-and-execute",
+    "https://developers.jup.ag/docs/api-reference/swap/order",
+    "https://developers.jup.ag/docs/api-reference/swap/execute"
+  ],
+  "prestockDefinition": "A PreStock is tokenized economic exposure to a private company. It confers no ownership, voting, dividend, or information rights. Issuer pages describe holder-facing conversion windows when the company IPOs, is acquired, or otherwise changes state. Missed deadlines expire tokens worthless.",
+  "spacex": {
+    "event": "GOING_PUBLIC",
+    "statement": "SpaceX has gone public. Tokens must be swapped into $SPCXx or any other token before 11:59pm UTC on 12 March 2027 or they expire worthless.",
+    "defaultDestination": "SPCXx",
+    "allowsAnyToken": true,
+    "settlement": "TRADE via Jupiter Swap V2 /order + /execute, not a 1:1 rollover, not T-MINUS escrow"
+  },
+  "xai": {
+    "event": "ACQUISITION",
+    "statement": "xAI was acquired by SpaceX. Each XAI token must be swapped into 0.7165 SPACEX before 11:59pm UTC on 12 September 2026 or expire worthless.",
+    "deadlinePassed": true,
+    "tminus": "EXPIRED — no signature, no transaction request"
+  },
+  "jupiterPath": {
+    "chosen": "Swap API V2 GET /swap/v2/order then user signTransaction then POST /swap/v2/execute",
+    "why": "Documented user-signed happy path with managed landing. /order with taker returns an assembled transaction. /execute lands it. Trigger V2 excludes transfer-fee mints. Ultra /ultra/v1/order+execute is the same signing model; T-MINUS already uses swap/v2 which is the documented Meta-Aggregator path.",
+    "notUsed": ["Trigger V2", "custom Mainnet T-MINUS program", "server-side key impersonation"]
+  },
+  "whitespace": "The PreStocks ecosystem has trading, routing, wallets, and mark data. It does not operationalize issuer events into a machine-readable holder action with chain + market + execution gates. That is T-MINUS.",
+  "architecture": {
+    "name": "PreStocks Asset Lifecycle & Action Engine",
+    "consumer": "Conversion Desk",
+    "api": "/v1/actions*",
+    "mainnet": "user-signed Jupiter TRADE",
+    "devnet": "T-MINUS escrow protocol proof",
+    "mainnetProgram": "not required; do not spend ~1.08473244 SOL"
+  }
+}

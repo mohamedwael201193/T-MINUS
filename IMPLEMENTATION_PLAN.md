@@ -2,7 +2,7 @@
 
 Single source of truth. Verified-at **2026-09-22**. Live state wins over older rows.
 
-**Product (2026-09-22):** T-MINUS is the **corporate action layer for PreStocks**. The consumer surface is a conversion desk. Mainnet path is a user-signed Jupiter Swap V2 `/order` + `/execute` TRADE (not an automatic rollover, not T-MINUS escrow). DEVNET remains the trust-minimized protocol proof (place/cancel/fill/expire). Do **not** spend **1.08473244 SOL** on a Mainnet program for this product.
+**Product (2026-09-22):** T-MINUS is the **PreStocks Asset Lifecycle & Action Engine**. The consumer surface is a conversion desk. Mainnet path is a user-signed Jupiter Swap V2 `/order` + `/execute` TRADE (not an automatic rollover, not T-MINUS escrow). Amount is wallet-balance-aware (never a hardcoded 0.01 SPACEX). DEVNET remains the trust-minimized protocol proof (place/cancel/fill/expire). Do **not** spend **1.08473244 SOL** on a Mainnet program for this product.
 
 **Frontend certification (2026-09-21):** production `frontend/` at https://tminusapp.vercel.app uses BackendSource. `npx tsc --noEmit` and `npx next build` pass with `typescript.ignoreBuildErrors=false`. DEVNET protocol place/fill/partial/failsafe/cancel/expire/double-fill re-executed on-chain this pass. MAINNET program remains absent; MAINNET **escrow place** is refused. MAINNET **conversion signatures** are a separate Jupiter path.
 
@@ -14,7 +14,7 @@ Frontend exists at `frontend/` (Next.js), live at **https://tminusapp.vercel.app
 
 ## 0. Executive Summary
 
-T-MINUS is the **corporate action layer for PreStocks**. The consumer desk reads an issuer instruction, compares it to on-chain mint state and a live Jupiter route, then either asks the holder to sign a Mainnet TRADE or refuses. A public machine-readable API (`GET /v1/actions`) exposes the same object. Unattended escrow (`place` / `cancel` / `fill` / `expire`) remains the **DEVNET** protocol proof. The Mainnet program is **not** required for the desk and is not deployed.
+T-MINUS is the **PreStocks Asset Lifecycle & Action Engine**. The consumer desk reads an issuer instruction, compares it to on-chain mint state and a live Jupiter route, then either asks the holder to sign a Mainnet TRADE or refuses. A public machine-readable API (`GET /v1/actions`) exposes the same object. Unattended escrow (`place` / `cancel` / `fill` / `expire`) remains the **DEVNET** protocol proof. The Mainnet program is **not** required for the desk and is not deployed.
 
 **Chosen architecture (one):** Corporate-action domain + conversion desk on Mainnet data/execution, plus the existing Anchor program on DEVNET. Conversion desk uses Jupiter **Swap API V2 `/order` + `/execute`** (user-signed). DEVNET keeper still uses **`GET /swap/v2/build`** so it can compose `fill`. Trigger V1/V2 reject transfer-fee mints. Pyth is out of the money path.
 

@@ -248,12 +248,13 @@ export function createServer() {
         return;
       }
       const actionMatch = url.pathname.match(
-        /^\/v1\/actions\/([a-z0-9]+)(?:\/(evidence|executable|status))?$/,
+        /^\/v1\/actions\/([a-z0-9]+)(?:\/(evidence|executable|status|position|chain|market|route))?$/,
       );
       if (actionMatch) {
         const assetId = actionMatch[1];
         const rest = actionMatch[2] ?? "";
-        const { getCorporateAction, actionEvidence, actionStatus } = await import("./corporate-action.ts");
+        const { getCorporateAction, actionEvidence, actionStatus, actionChain, actionMarket } =
+          await import("./corporate-action.ts");
         const action = await getCorporateAction(assetId);
         if (!action) {
           send(res, 404, { error: "unknown_asset" });
@@ -267,7 +268,47 @@ export function createServer() {
           send(res, 200, actionStatus(action), { "cache-control": "public, max-age=15" });
           return;
         }
-        if (rest === "executable") {
+        if (rest === "chain") {
+          send(res, 200, actionChain(action), { "cache-control": "public, max-age=15" });
+          return;
+        }
+        if (rest === "market") {
+          send(res, 200, actionMarket(action), { "cache-control": "public, max-age=15" });
+          return;
+        }
+        if (rest === "position") {
+          const owner = url.searchParams.get("owner");
+          if (!owner || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(owner)) {
+            send(res, 400, { error: "invalid_owner" });
+            return;
+          }
+          const { buildExecutable } = await import("./executable.ts");
+          const result = await buildExecutable({
+            assetId,
+            amountRaw: null,
+            taker: owner,
+            floorRatio: null,
+            assembleTx: false,
+          });
+          if (result.status !== 200 || !("position" in result.body)) {
+            send(res, result.status, result.body);
+            return;
+          }
+          send(
+            res,
+            200,
+            {
+              network: "MAINNET",
+              assetId,
+              position: result.body.position,
+              stage: result.body.action.stage,
+              refusals: result.body.refusals,
+            },
+            { "cache-control": "no-store" },
+          );
+          return;
+        }
+        if (rest === "route" || rest === "executable") {
           const { buildExecutable } = await import("./executable.ts");
           const amount = url.searchParams.get("amount");
           const taker = url.searchParams.get("taker");
@@ -278,6 +319,7 @@ export function createServer() {
             amountRaw: amount && /^[0-9]+$/.test(amount) ? amount : null,
             taker: taker && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(taker) ? taker : null,
             floorRatio: floorRatio != null && Number.isFinite(floorRatio) ? floorRatio : null,
+            assembleTx: rest !== "route",
           });
           send(res, result.status, result.body, { "cache-control": "no-store" });
           return;

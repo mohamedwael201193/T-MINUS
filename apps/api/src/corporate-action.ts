@@ -79,7 +79,9 @@ export type CorporateAction = {
 
 export type ActionsList = {
   network: "MAINNET";
-  layer: "corporate_action";
+  layer: "lifecycle_action_engine";
+  product: "PreStocks Asset Lifecycle & Action Engine";
+  surface: "conversion_desk";
   fetchedAt: string;
   actions: CorporateAction[];
 };
@@ -243,9 +245,38 @@ export async function listCorporateActions(opts?: { force?: boolean }): Promise<
   }
   return {
     network: "MAINNET",
-    layer: "corporate_action",
+    layer: "lifecycle_action_engine",
+    product: "PreStocks Asset Lifecycle & Action Engine",
+    surface: "conversion_desk",
     fetchedAt: catalog.fetchedAt,
     actions,
+  };
+}
+
+export function actionChain(action: CorporateAction) {
+  return {
+    network: "MAINNET" as const,
+    assetId: action.assetId,
+    mint: action.sourceMint,
+    onchain: action.onchain,
+    destination: action.destination,
+    destinationVerified: action.destinationVerified,
+  };
+}
+
+export function actionMarket(action: CorporateAction) {
+  const token = action.market.tokenPrice;
+  const mark = action.market.markPrice;
+  const premiumToMark =
+    token != null && mark != null && mark > 0 ? (token - mark) / mark : null;
+  return {
+    network: "MAINNET" as const,
+    assetId: action.assetId,
+    tokenPrice: token,
+    markPrice: mark,
+    holders: action.market.holders,
+    premiumToMark,
+    note: "Market context around the corporate action — not investment advice.",
   };
 }
 

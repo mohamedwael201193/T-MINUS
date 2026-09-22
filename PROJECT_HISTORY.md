@@ -513,6 +513,21 @@ Append-only execution ledger. No secrets.
 
 ---
 
+## 2026-09-22T00:25Z — LIFECYCLE ENGINE + REAL MAINNET SPACEX CONVERSION
+
+- **phase:** PreStocks deepening + wallet sign → Jupiter execute → verified Mainnet receipt
+- **objective:** Turn the conversion desk into a position-centered Asset Lifecycle & Action Engine, size from the real wallet (never 0.01), complete Phantom signTransaction, land Jupiter `/execute`, store a receipt only after Solana confirmation.
+- **action:** Fresh PreStocks + Jupiter docs (`developers.jup.ag/docs/swap/order-and-execute`). Kept Swap V2 `/order`+`/execute`. Did not deploy the Mainnet program. Chrome localhost:3001: SPACEX YOU HOLD 0.009136 / GOING PUBLIC / READY / amount MAX 0.009136055; XAI ACQUISITION EXPIRED WINDOW CLOSED no sign; clicked SIGN CONVERSION → WAITING FOR WALLET → Phantom approved → Jupiter execute → RPC confirmed slot 449215609.
+- **result:** Real Mainnet conversion stored. 1,827,211 raw SPACEX → 702,134 raw SPCXx (ratio 0.7685) via Meteora DLMM. Signature `2RfXRieE…SWRNBW`. Ledger now splits 1 MAINNET conversion vs 18 DEVNET protocol proofs. Mainnet program still absent.
+- **evidence:** `evidence/mainnet-spacex-conversion.json`; `evidence/lifecycle-action-engine.json`; explorer https://explorer.solana.com/tx/2RfXRieEW3HRZBVU4qHqnzRSvoV9KcEX5kYBzAjVW7VTkv2ig4u5frozAinumDnUApjWHLwcbsZEh3BSjsSWRNBW ; local `/v1/receipts` 19 rows, 1 MAINNET `verifiedOnchain=true`
+- **tests:** sdk 6 PASS; api 46 PASS; keeper 14 PASS; receiptMap+safeAmount 8 PASS; secret-scan PASS files=465; api/sdk/keeper typecheck PASS; frontend `npx tsc --noEmit` PASS
+- **decision:** Architecture name is PreStocks Asset Lifecycle & Action Engine; Conversion Desk is the consumer. Do not spend 1.08473244 SOL. Do not call this an unattended order.
+- **files changed:** safe-amount + safety INSUFFICIENT_*; executable confirm+measure; `/v1/actions/:asset/{position,chain,market,route}`; OrderTicket wallet-sized amount; ActionDesk provenance; LifecyclePanel position strip; ReceiptsView Mainnet/DEVNET split; backendSource sign + WALLET_REJECTED; README/IMPLEMENTATION_PLAN/FRONTEND_NOTES
+- **known risks:** dust wallet now has ~0 SPACEX after this proof; Render free cold start; Vercel still CLI `--prod` not GitHub auto; public RPC 429; Phantom must be unlocked for a repeat
+- **next step:** commit + push origin/main with repo token from local env (not printed); monitor Render + Vercel; production Chrome smoke of the persisted Mainnet receipt
+
+---
+
 
 
 

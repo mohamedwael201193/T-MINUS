@@ -10,7 +10,7 @@
     "test:program": "anchor test",
     "typecheck": "tsc -p apps/api/tsconfig.json --noEmit && tsc -p apps/keeper/tsconfig.json --noEmit && tsc -p packages/sdk/tsconfig.json --noEmit",
     "lint": "node scripts/secret-scan.mjs",
-    "test": "pnpm --filter @tminus/sdk test && pnpm --filter @tminus/api test && pnpm --filter @tminus/keeper test && node --import tsx --test frontend/src/lib/tminus/adapters/receiptMap.test.ts",
+    "test": "pnpm --filter @tminus/sdk test && pnpm --filter @tminus/api test && pnpm --filter @tminus/keeper test && node --import tsx --test frontend/src/lib/tminus/adapters/receiptMap.test.ts frontend/src/lib/tminus/wallet/safeAmount.test.ts",
     "secret-scan": "node scripts/secret-scan.mjs",
     "inspect:mint": "tsx scripts/inspect-mint.ts",
     "phase7": "node --import tsx scripts/phase7-live.ts",

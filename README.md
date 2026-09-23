@@ -582,7 +582,7 @@ sequenceDiagram
     Holder->>Wallet: signTransaction
     Wallet-->>Desk: signed tx
     Desk->>Engine: POST /v1/conversions/execute
-    Engine->>Engine: Rebuild live snapshot; refuse if stale/changed
+    Engine->>Engine: Rebuild live snapshot, refuse if stale or changed
     Engine->>Book: POST /swap/v2/execute
     Book->>Ledger: Submit
     Ledger-->>Engine: Confirmed signature + slot
